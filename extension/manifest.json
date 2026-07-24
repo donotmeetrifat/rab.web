@@ -1,0 +1,73 @@
+{
+  "manifest_version": 3,
+  "name": "Memlace — A place for your AI memory",
+  "short_name": "Memlace",
+  "version": "0.1.0",
+  "description": "A private, local-first workspace for your AI conversations across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Memlace",
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "options_page": "src/options/index.html",
+  "side_panel": {
+    "default_path": "src/sidepanel/index.html"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://aistudio.google.com/*",
+    "https://perplexity.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://chat.deepseek.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://aistudio.google.com/*",
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://chat.deepseek.com/*"
+      ],
+      "js": ["src/content/index.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "src/assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
