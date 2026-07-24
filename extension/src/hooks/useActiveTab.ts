@@ -28,7 +28,7 @@ export function useActiveTab(): ActiveTabInfo {
     };
     query();
     const onActivated = () => query();
-    const onUpdated = (_id: number, changeInfo: chrome.tabs.TabChangeInfo) => {
+    const onUpdated = (_id: number, changeInfo: chrome.tabs.OnUpdatedInfo) => {
       if (changeInfo.url || changeInfo.title || changeInfo.status === "complete") query();
     };
     chrome.tabs.onActivated.addListener(onActivated);
