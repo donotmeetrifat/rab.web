@@ -303,6 +303,8 @@ function BackupStat({ label, value }: { label: string; value: number | string })
       <div className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">{value}</div>
     </div>
   );
+}
+
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
