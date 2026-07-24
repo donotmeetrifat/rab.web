@@ -70,7 +70,7 @@ function LandingPage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
           <Mark />
-          <span className="text-[15px] font-semibold tracking-tight">Universal AI Workspace</span>
+          <span className="text-[15px] font-semibold tracking-tight">Memlace</span>
         </div>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
@@ -91,16 +91,17 @@ function LandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--surface)] px-3 py-1 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Local-first. Free forever.
+              A place for your AI memory.
             </div>
             <h1 className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-              One brain.
+              Your AI memory,
               <br />
-              <span className="text-primary">Every AI.</span>
+              <span className="text-primary">all in one place.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-              A browser extension that gives you a permanent workspace across every AI assistant.
-              Your projects, memory, and context stay with you — not with any single provider.
+              Memlace is a private, local-first workspace that keeps your AI conversations,
+              projects, and context organized across ChatGPT, Claude, Gemini, DeepSeek, Perplexity,
+              Copilot, and future AI assistants.
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -115,14 +116,12 @@ function LandingPage() {
               >
                 <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
-                <span className="ml-2 text-primary-foreground/60">·</span>
-                <span className="ml-1 text-primary-foreground/80">.zip</span>
               </button>
               <a
                 href="#install"
                 className="inline-flex h-11 items-center justify-center rounded-[10px] border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-[color:var(--surface)]"
               >
-                Install guide
+                Installation Guide
               </a>
             </div>
 
@@ -218,9 +217,12 @@ function LandingPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Mark />
-            <span>Universal AI Workspace</span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-foreground font-semibold tracking-tight">Memlace</span>
+              <span className="text-xs">A place for your AI memory.</span>
+            </div>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
             Local · Private · Free
@@ -233,8 +235,11 @@ function LandingPage() {
 
 function Mark() {
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground">
-      <div className="h-2.5 w-2.5 rounded-[3px] bg-primary" />
+    <div
+      aria-label="Memlace"
+      className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary font-semibold text-primary-foreground text-[13px] leading-none tracking-tight"
+    >
+      M
     </div>
   );
 }
@@ -304,7 +309,7 @@ function PreviewFrame() {
   return (
     <div
       role="region"
-      aria-label="Universal AI Workspace popup preview"
+      aria-label="Memlace popup preview"
       className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
     >
 
@@ -332,10 +337,10 @@ function PreviewFrame() {
         {/* Sidebar */}
         <aside className="bg-background p-4" aria-label="Workspace sidebar">
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-300 hover:rotate-6">
-              <div className="h-2 w-2 rounded-[3px] bg-primary" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-primary text-primary-foreground text-[11px] font-semibold leading-none tracking-tight transition-transform duration-300 hover:rotate-6">
+              M
             </div>
-            <span className="text-xs font-medium">Workspace</span>
+            <span className="text-xs font-medium">Memlace</span>
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
               <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
