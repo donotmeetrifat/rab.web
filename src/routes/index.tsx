@@ -667,3 +667,11 @@ function ProviderChip({ name }: { name: string }) {
     </span>
   );
 }
+
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex min-w-[1.25rem] items-center justify-center rounded border border-border bg-[color:var(--surface)] px-1 py-0.5 font-mono text-[10px] normal-case text-foreground">
+      {children}
+    </kbd>
+  );
+}
