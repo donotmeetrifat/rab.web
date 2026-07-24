@@ -54,7 +54,7 @@ function LandingPage() {
   const download = () => {
     setState("loading");
     setError(null);
-    fetch("/universal-ai-workspace.zip")
+    fetch("/memlace-extension.zip")
       .then((res) => {
         if (!res.ok) throw new Error(`Download failed (${res.status})`);
         return res.blob();
@@ -62,7 +62,8 @@ function LandingPage() {
       .then((blob) => {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "universal-ai-workspace.zip";
+        a.download = "memlace-extension.zip";
+
         a.click();
         URL.revokeObjectURL(a.href);
         setState("idle");
