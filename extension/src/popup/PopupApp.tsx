@@ -150,17 +150,16 @@ export function PopupApp() {
     );
   }, [recent, query]);
 
-  const filteredConversations = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    const base = conversations.slice(0, 8);
-    if (!q) return base;
-    return conversations.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.model ?? "").toLowerCase().includes(q) ||
-        c.provider.toLowerCase().includes(q),
-    );
-  }, [conversations, query]);
+  const displayedConversations = useMemo(() => {
+    const list = convHits.map((h) => h.conversation);
+    return debouncedQuery.trim() ? list : list.slice(0, 8);
+  }, [convHits, debouncedQuery]);
+
+  const conversationSnippets = useMemo(() => {
+    const map = new Map<string, ConvSnippet | null>();
+    for (const h of convHits) map.set(h.conversation.id, h.snippet);
+    return map;
+  }, [convHits]);
 
   const openSidePanel = async () => {
     try {
