@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
+import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
+
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
@@ -229,16 +231,19 @@ function LandingPage() {
   );
 }
 
-function Mark() {
+function Mark({ size = 28 }: { size?: number }) {
   return (
-    <div
-      aria-label="Memlace"
-      className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary font-semibold text-primary-foreground text-[13px] leading-none tracking-tight"
-    >
-      M
-    </div>
+    <img
+      src={memlaceLogo.url}
+      alt="Memlace"
+      width={size}
+      height={size}
+      className="block select-none"
+      draggable={false}
+    />
   );
 }
+
 
 type Project = {
   id: string;
