@@ -46,6 +46,8 @@ import {
   type ConvFiltersState,
 } from "@/components/conversations/ConversationFilters";
 import { useDebounced } from "@/hooks/useDebounced";
+import { useHotkey } from "@/components/Dialog";
+import { CommandPalette } from "@/components/CommandPalette";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
