@@ -333,6 +333,40 @@ function BackupStat({ label, value }: { label: string; value: number | string })
 }
 
 
+function Toggle({
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label
+      className={`flex items-start gap-3 rounded-lg border border-border bg-background/60 p-3 transition-colors ${
+        disabled ? "opacity-60" : "hover:bg-background"
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-4 w-4 accent-[color:var(--color-primary)]"
+      />
+      <span className="flex-1">
+        <span className="block text-sm font-medium text-foreground">{label}</span>
+        {hint && <span className="mt-0.5 block text-xs text-muted-foreground">{hint}</span>}
+      </span>
+    </label>
+  );
+}
+
 function Kbd({ children }: { children: ReactNode }) {
   return (
     <kbd className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[11px] font-mono">
