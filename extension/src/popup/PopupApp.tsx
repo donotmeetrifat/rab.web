@@ -37,7 +37,7 @@ import {
   type ConvFiltersState,
 } from "@/components/conversations/ConversationFilters";
 import { useDebounced } from "@/hooks/useDebounced";
-import type { Memory, StoredConversation } from "@/types";
+import type { Memory } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
 type Tab = "memories" | "conversations";

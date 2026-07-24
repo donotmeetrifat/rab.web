@@ -6,8 +6,12 @@ import type {
   Project,
   ProjectIcon,
   ProviderId,
+  Settings,
   SortKey,
+  StoredConversation,
+  StoredConvMessage,
 } from "@/types";
+import { loadSettings, saveSettings, DEFAULT_SETTINGS } from "@/services/settings";
 
 /* ------------------------------------------------------------------ */
 /* PROJECTS                                                           */
@@ -311,18 +315,32 @@ export function normalizeTags(tags: string[]): string[] {
 /* IMPORT / EXPORT                                                    */
 /* ------------------------------------------------------------------ */
 
+export const EXPORT_VERSION = 3;
+
 export async function exportAll(): Promise<string> {
-  const [projects, memories] = await Promise.all([
+  const [projects, memories, conversations, messages, settings] = await Promise.all([
     db.projects.toArray(),
     db.memories.toArray(),
+    db.conversations.toArray(),
+    db.convMessages.toArray(),
+    loadSettings(),
   ]);
   const payload: ExportPayload = {
-    version: 2,
+    version: EXPORT_VERSION,
     exportedAt: Date.now(),
     projects,
     memories,
+    conversations,
+    messages,
+    settings,
   };
   return JSON.stringify(payload, null, 2);
+}
+
+/** Estimate JSON size in bytes without materializing a full export string twice. */
+export async function estimateExportSize(): Promise<number> {
+  const json = await exportAll();
+  return new Blob([json]).size;
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -355,7 +373,9 @@ function validateMemory(v: unknown): Memory | null {
     content: v.content,
     provider: (typeof v.provider === "string" ? v.provider : "other") as ProviderId,
     sourceUrl: typeof v.sourceUrl === "string" ? v.sourceUrl : null,
-    tags: Array.isArray(v.tags) ? normalizeTags(v.tags.filter((t): t is string => typeof t === "string")) : [],
+    tags: Array.isArray(v.tags)
+      ? normalizeTags(v.tags.filter((t): t is string => typeof t === "string"))
+      : [],
     favorite: v.favorite === true,
     pinned: v.pinned === true,
     archived: v.archived === true,
@@ -366,17 +386,110 @@ function validateMemory(v: unknown): Memory | null {
   };
 }
 
-export async function importAll(
-  json: string,
-): Promise<{ projects: number; memories: number; skipped: number }> {
-  const parsed: unknown = JSON.parse(json);
+function validateConversation(v: unknown): StoredConversation | null {
+  if (!isRecord(v)) return null;
+  if (
+    typeof v.id !== "string" ||
+    typeof v.provider !== "string" ||
+    typeof v.providerConversationId !== "string"
+  )
+    return null;
+  const now = Date.now();
+  const src = v.source;
+  return {
+    id: v.id,
+    provider: v.provider as ProviderId,
+    providerConversationId: v.providerConversationId,
+    title: typeof v.title === "string" ? v.title : "Untitled conversation",
+    url: typeof v.url === "string" ? v.url : "",
+    model: typeof v.model === "string" ? v.model : null,
+    messageCount: typeof v.messageCount === "number" ? v.messageCount : 0,
+    hash: typeof v.hash === "string" ? v.hash : "",
+    createdAt: typeof v.createdAt === "number" ? v.createdAt : now,
+    updatedAt: typeof v.updatedAt === "number" ? v.updatedAt : now,
+    lastSyncAt: typeof v.lastSyncAt === "number" ? v.lastSyncAt : now,
+    source: src === "manual" || src === "auto" || src === "initial" ? src : "manual",
+  };
+}
+
+function validateConvMessage(v: unknown): StoredConvMessage | null {
+  if (!isRecord(v)) return null;
+  if (typeof v.id !== "string" || typeof v.conversationId !== "string") return null;
+  const role = v.role;
+  return {
+    id: v.id,
+    conversationId: v.conversationId,
+    providerMessageId: typeof v.providerMessageId === "string" ? v.providerMessageId : v.id,
+    role:
+      role === "user" || role === "assistant" || role === "system" || role === "tool"
+        ? role
+        : "assistant",
+    content: typeof v.content === "string" ? v.content : "",
+    markdown: typeof v.markdown === "string" ? v.markdown : "",
+    order: typeof v.order === "number" ? v.order : 0,
+    images: Array.isArray(v.images) ? v.images.filter((s): s is string => typeof s === "string") : [],
+    attachments: Array.isArray(v.attachments)
+      ? (v.attachments.filter((a) => isRecord(a)) as StoredConvMessage["attachments"])
+      : [],
+    metadata: isRecord(v.metadata) ? (v.metadata as Record<string, unknown>) : {},
+    createdAt: typeof v.createdAt === "number" ? v.createdAt : Date.now(),
+  };
+}
+
+function validateSettingsPatch(v: unknown): Partial<Settings> | null {
+  if (!isRecord(v)) return null;
+  const out: Partial<Settings> = {};
+  if (v.theme === "light" || v.theme === "dark" || v.theme === "system") out.theme = v.theme;
+  if (typeof v.defaultProvider === "string") out.defaultProvider = v.defaultProvider as ProviderId;
+  if (typeof v.shortcutCapture === "string") out.shortcutCapture = v.shortcutCapture;
+  if (typeof v.shortcutOpenPopup === "string") out.shortcutOpenPopup = v.shortcutOpenPopup;
+  if (typeof v.notificationsEnabled === "boolean") out.notificationsEnabled = v.notificationsEnabled;
+  if (typeof v.autoSaveConversations === "boolean")
+    out.autoSaveConversations = v.autoSaveConversations;
+  if (v.sort === "newest" || v.sort === "oldest" || v.sort === "alphabetical")
+    out.sort = v.sort as SortKey;
+  return out;
+}
+
+export interface ImportResult {
+  projects: number;
+  memories: number;
+  conversations: number;
+  messages: number;
+  skipped: number;
+  settingsApplied: boolean;
+}
+
+export interface ImportOptions {
+  /** When true, restore settings from payload. Defaults to false. */
+  restoreSettings?: boolean;
+}
+
+export async function importAll(json: string, opts: ImportOptions = {}): Promise<ImportResult> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    throw new Error("Invalid export: not valid JSON");
+  }
   if (!isRecord(parsed)) throw new Error("Invalid export: not an object");
+
   const projectsRaw = Array.isArray(parsed.projects) ? parsed.projects : [];
   const memoriesRaw = Array.isArray(parsed.memories) ? parsed.memories : [];
+  const conversationsRaw = Array.isArray(parsed.conversations) ? parsed.conversations : [];
+  // Accept both `messages` (v3+) and legacy `convMessages`.
+  const messagesRaw = Array.isArray(parsed.messages)
+    ? parsed.messages
+    : Array.isArray(parsed.convMessages)
+      ? parsed.convMessages
+      : [];
 
   const projects: Project[] = [];
   const memories: Memory[] = [];
+  const conversations: StoredConversation[] = [];
+  const messages: StoredConvMessage[] = [];
   let skipped = 0;
+
   for (const p of projectsRaw) {
     const v = validateProject(p);
     v ? projects.push(v) : skipped++;
@@ -385,13 +498,122 @@ export async function importAll(
     const v = validateMemory(m);
     v ? memories.push(v) : skipped++;
   }
-  if (!projects.length && !memories.length) throw new Error("No valid records found");
+  for (const c of conversationsRaw) {
+    const v = validateConversation(c);
+    v ? conversations.push(v) : skipped++;
+  }
+  for (const m of messagesRaw) {
+    const v = validateConvMessage(m);
+    v ? messages.push(v) : skipped++;
+  }
 
-  await db.transaction("rw", db.projects, db.memories, async () => {
-    if (projects.length) await db.projects.bulkPut(projects);
-    if (memories.length) await db.memories.bulkPut(memories);
+  if (
+    !projects.length &&
+    !memories.length &&
+    !conversations.length &&
+    !messages.length
+  ) {
+    throw new Error("No valid records found in export");
+  }
+
+  // Deduplicate conversations by (provider, providerConversationId) against
+  // existing rows. When a duplicate is found, remap the imported id to the
+  // existing id so message relationships survive.
+  const existingConvs = conversations.length ? await db.conversations.toArray() : [];
+  const existingByKey = new Map<string, StoredConversation>();
+  for (const c of existingConvs) {
+    existingByKey.set(`${c.provider}::${c.providerConversationId}`, c);
+  }
+  const idRemap = new Map<string, string>();
+  const convsToUpsert: StoredConversation[] = [];
+  for (const c of conversations) {
+    const key = `${c.provider}::${c.providerConversationId}`;
+    const existing = existingByKey.get(key);
+    if (existing) {
+      idRemap.set(c.id, existing.id);
+      // Keep the newer record wins on updatedAt, but preserve existing id.
+      if (c.updatedAt > existing.updatedAt) {
+        convsToUpsert.push({ ...c, id: existing.id });
+      }
+    } else {
+      convsToUpsert.push(c);
+    }
+  }
+
+  // Drop orphan messages (unknown conversationId) and remap ids for merged
+  // conversations. Deduplicate against existing messages via a composite key.
+  const validConvIds = new Set<string>([
+    ...existingConvs.map((c) => c.id),
+    ...convsToUpsert.map((c) => c.id),
+    ...conversations.map((c) => c.id),
+  ]);
+  const remappedMessages: StoredConvMessage[] = [];
+  for (const m of messages) {
+    const targetConvId = idRemap.get(m.conversationId) ?? m.conversationId;
+    if (!validConvIds.has(targetConvId)) {
+      skipped++;
+      continue;
+    }
+    remappedMessages.push({ ...m, conversationId: targetConvId });
+  }
+
+  const affectedConvIds = new Set(remappedMessages.map((m) => m.conversationId));
+  const existingMsgKeys = new Set<string>();
+  if (affectedConvIds.size) {
+    const existingMsgs = await db.convMessages
+      .where("conversationId")
+      .anyOf(Array.from(affectedConvIds))
+      .toArray();
+    for (const m of existingMsgs) {
+      existingMsgKeys.add(`${m.conversationId}::${m.providerMessageId}::${m.order}`);
+    }
+  }
+  const messagesToInsert = remappedMessages.filter((m) => {
+    const key = `${m.conversationId}::${m.providerMessageId}::${m.order}`;
+    if (existingMsgKeys.has(key)) return false;
+    existingMsgKeys.add(key);
+    return true;
   });
-  return { projects: projects.length, memories: memories.length, skipped };
+
+  await db.transaction(
+    "rw",
+    db.projects,
+    db.memories,
+    db.conversations,
+    db.convMessages,
+    async () => {
+      if (projects.length) await db.projects.bulkPut(projects);
+      if (memories.length) await db.memories.bulkPut(memories);
+      if (convsToUpsert.length) await db.conversations.bulkPut(convsToUpsert);
+      if (messagesToInsert.length) await db.convMessages.bulkPut(messagesToInsert);
+
+      // Recompute messageCount for affected conversations to keep the count
+      // consistent with reality after dedupe.
+      for (const convId of affectedConvIds) {
+        const total = await db.convMessages.where("conversationId").equals(convId).count();
+        await db.conversations.update(convId, { messageCount: total });
+      }
+    },
+  );
+
+  let settingsApplied = false;
+  if (opts.restoreSettings) {
+    const patch = validateSettingsPatch(parsed.settings);
+    if (patch) {
+      const current = await loadSettings();
+      await saveSettings({ ...DEFAULT_SETTINGS, ...current, ...patch });
+      settingsApplied = true;
+    }
+  }
+
+  return {
+    projects: projects.length,
+    memories: memories.length,
+    conversations: conversations.length,
+    messages: messagesToInsert.length,
+    skipped,
+    settingsApplied,
+  };
 }
 
 export async function storageEstimate(): Promise<{ usage: number; quota: number } | null> {
@@ -400,14 +622,24 @@ export async function storageEstimate(): Promise<{ usage: number; quota: number 
   return { usage, quota };
 }
 
-export async function counts(): Promise<{ projects: number; memories: number; trashed: number }> {
-  const [projects, memories] = await Promise.all([
+export async function counts(): Promise<{
+  projects: number;
+  memories: number;
+  trashed: number;
+  conversations: number;
+  messages: number;
+}> {
+  const [projects, memories, conversations, messages] = await Promise.all([
     db.projects.count(),
     db.memories.toArray(),
+    db.conversations.count(),
+    db.convMessages.count(),
   ]);
   return {
     projects,
     memories: memories.filter((m) => !m.trashed).length,
     trashed: memories.filter((m) => m.trashed).length,
+    conversations,
+    messages,
   };
 }

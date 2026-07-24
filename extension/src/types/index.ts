@@ -123,8 +123,12 @@ export interface ExportPayload {
   projects: Project[];
   memories: Memory[];
   conversations?: StoredConversation[];
+  /** Canonical field name in v3+. `convMessages` kept as alias for backward compat. */
+  messages?: StoredConvMessage[];
   convMessages?: StoredConvMessage[];
+  settings?: Partial<Settings>;
 }
+
 
 export type RuntimeMessage =
   | { type: "PING" }
