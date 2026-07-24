@@ -250,12 +250,18 @@ export function SidePanelApp() {
         <nav className="p-2 space-y-0.5" aria-label="Primary">
           {NAV.map((item) => {
             const Icon = item.icon;
-            const isActive = activeView === item.id && (item.id !== "projects" || !filters.projectId);
+            const isActive =
+              section === "memories" &&
+              activeView === item.id &&
+              (item.id !== "projects" || !filters.projectId);
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setView(item.id)}
+                onClick={() => {
+                  setSection("memories");
+                  setView(item.id);
+                }}
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
@@ -269,6 +275,25 @@ export function SidePanelApp() {
               </button>
             );
           })}
+          <button
+            type="button"
+            onClick={() => setSection("conversations")}
+            aria-current={section === "conversations" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "conversations"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <MessagesSquare className="h-3.5 w-3.5" />
+            Conversations
+            {conversations.length > 0 && (
+              <span className="ml-auto text-[10px] text-muted-foreground tabular-nums">
+                {conversations.length}
+              </span>
+            )}
+          </button>
         </nav>
 
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
