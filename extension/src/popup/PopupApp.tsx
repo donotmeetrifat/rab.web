@@ -22,9 +22,21 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta } from "@/lib/providers";
 import { listMemories } from "@/services/memories";
-import { listConversations, deleteConversation } from "@/services/conversations";
+import {
+  searchConversations,
+  deleteConversation,
+  type ConvSearchHit,
+  type ConvSnippet,
+} from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
+import {
+  ConversationFilters,
+  emptyConvFilters,
+  toEpochRange,
+  type ConvFiltersState,
+} from "@/components/conversations/ConversationFilters";
+import { useDebounced } from "@/hooks/useDebounced";
 import type { Memory, StoredConversation } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
@@ -46,10 +58,13 @@ export function PopupApp() {
   const [tab, setTab] = useState<Tab>("memories");
   const [pinned, setPinned] = useState<Memory[]>([]);
   const [recent, setRecent] = useState<Memory[]>([]);
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
+  const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
+  const [convCount, setConvCount] = useState(0);
   const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const debouncedQuery = useDebounced(query, 160);
 
   const active = useActiveTab();
   const provider = providerMeta(active.provider);
@@ -72,21 +87,39 @@ export function PopupApp() {
     }
   }, []);
 
-  const loadConversations = useCallback(async () => {
-    setConvLoading(true);
-    try {
-      const rows = await listConversations();
-      setConversations(rows);
-    } finally {
-      setConvLoading(false);
-    }
-  }, []);
+  const runConvSearch = useCallback(
+    async (q: string, filters: ConvFiltersState, initial = false) => {
+      if (initial) setConvLoading(true);
+      try {
+        const range = toEpochRange(filters);
+        const hits = await searchConversations({
+          query: q,
+          providers: filters.providers,
+          dateFrom: range.dateFrom,
+          dateTo: range.dateTo,
+          sort: filters.sort,
+        });
+        setConvHits(hits);
+        if (!q && filters.providers.length === 0 && !filters.dateFrom && !filters.dateTo) {
+          setConvCount(hits.length);
+        }
+      } finally {
+        if (initial) setConvLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!ready) return;
     void loadLists();
-    void loadConversations();
-  }, [ready, loadLists, loadConversations, projects.length]);
+    void runConvSearch("", emptyConvFilters, true);
+  }, [ready, loadLists, runConvSearch, projects.length]);
+
+  useEffect(() => {
+    if (!ready) return;
+    void runConvSearch(debouncedQuery, convFilters);
+  }, [ready, debouncedQuery, convFilters, runConvSearch]);
 
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {
@@ -117,17 +150,16 @@ export function PopupApp() {
     );
   }, [recent, query]);
 
-  const filteredConversations = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    const base = conversations.slice(0, 8);
-    if (!q) return base;
-    return conversations.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.model ?? "").toLowerCase().includes(q) ||
-        c.provider.toLowerCase().includes(q),
-    );
-  }, [conversations, query]);
+  const displayedConversations = useMemo(() => {
+    const list = convHits.map((h) => h.conversation);
+    return debouncedQuery.trim() ? list : list.slice(0, 8);
+  }, [convHits, debouncedQuery]);
+
+  const conversationSnippets = useMemo(() => {
+    const map = new Map<string, ConvSnippet | null>();
+    for (const h of convHits) map.set(h.conversation.id, h.snippet);
+    return map;
+  }, [convHits]);
 
   const openSidePanel = async () => {
     try {
@@ -276,9 +308,9 @@ export function PopupApp() {
             >
               <Icon className="h-3 w-3" />
               {t.label}
-              {t.id === "conversations" && conversations.length > 0 && (
+              {t.id === "conversations" && convCount > 0 && (
                 <span className="ml-0.5 text-[10px] text-muted-foreground tabular-nums">
-                  {conversations.length}
+                  {convCount}
                 </span>
               )}
             </button>
@@ -398,10 +430,10 @@ export function PopupApp() {
             </section>
           </>
         ) : (
-          <section aria-labelledby="popup-conversations">
-            <div className="flex items-center justify-between mb-1.5">
+          <section aria-labelledby="popup-conversations" className="space-y-2">
+            <div className="flex items-center justify-between">
               <h3 id="popup-conversations" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {query ? "Results" : "Recent chats"}
+                {debouncedQuery ? `Results (${displayedConversations.length})` : "Recent chats"}
               </h3>
               <button
                 type="button"
@@ -411,11 +443,13 @@ export function PopupApp() {
                 View all
               </button>
             </div>
+            <ConversationFilters value={convFilters} onChange={setConvFilters} variant="compact" />
             <ConversationList
-              conversations={filteredConversations}
+              conversations={displayedConversations}
               loading={convLoading}
               compact
-              query={query || undefined}
+              query={debouncedQuery || undefined}
+              snippets={conversationSnippets}
               onOpen={(c) => {
                 if (c.url) {
                   chrome.tabs.create({ url: c.url });
@@ -424,10 +458,10 @@ export function PopupApp() {
                 }
               }}
               onDelete={async (c) => {
-                if (!window.confirm(`Delete conversation “${c.title}”?`)) return;
+                if (!window.confirm(`Delete conversation "${c.title}"?`)) return;
                 await deleteConversation(c.id);
                 toast.success("Conversation deleted");
-                void loadConversations();
+                void runConvSearch(debouncedQuery, convFilters, true);
               }}
               emptyAction={
                 <Button size="sm" variant="primary" onClick={openSidePanel}>

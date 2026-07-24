@@ -2,6 +2,8 @@ import { memo } from "react";
 import { MessagesSquare, Trash2, ExternalLink } from "lucide-react";
 import type { StoredConversation } from "@/types";
 import { ProviderBadge } from "./ProviderBadge";
+import { Highlight } from "@/components/Highlight";
+import type { ConvSnippet } from "@/services/conversations";
 
 function relTime(ts: number): string {
   const diff = Date.now() - ts;
@@ -22,12 +24,16 @@ export const ConversationCard = memo(function ConversationCard({
   onOpen,
   onDelete,
   compact = false,
+  query,
+  snippet,
 }: {
   conversation: StoredConversation;
   active?: boolean;
   onOpen?: (c: StoredConversation) => void;
   onDelete?: (c: StoredConversation) => void;
   compact?: boolean;
+  query?: string;
+  snippet?: ConvSnippet | null;
 }) {
   const c = conversation;
   return (
@@ -48,7 +54,7 @@ export const ConversationCard = memo(function ConversationCard({
           <div className="flex items-center gap-2 min-w-0">
             <MessagesSquare className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
             <span className="text-[13px] font-medium truncate flex-1">
-              {c.title || "Untitled conversation"}
+              <Highlight text={c.title || "Untitled conversation"} query={query} />
             </span>
             {!compact && (
               <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
@@ -56,6 +62,11 @@ export const ConversationCard = memo(function ConversationCard({
               </span>
             )}
           </div>
+          {snippet && snippet.text && (
+            <p className="mt-1 text-[11px] leading-snug text-muted-foreground line-clamp-2">
+              <Highlight text={snippet.text} query={query} />
+            </p>
+          )}
           <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
             <ProviderBadge provider={c.provider} size="xs" />
             <span className="text-[10px] text-muted-foreground">

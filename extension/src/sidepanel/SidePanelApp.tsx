@@ -30,10 +30,22 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta, PROVIDERS } from "@/lib/providers";
 import { listTags } from "@/services/tags";
-import { listConversations, deleteConversation } from "@/services/conversations";
+import {
+  searchConversations,
+  deleteConversation,
+  type ConvSearchHit,
+  type ConvSnippet,
+} from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
 import { ConversationDetail } from "@/components/conversations/ConversationDetail";
+import {
+  ConversationFilters,
+  emptyConvFilters,
+  toEpochRange,
+  type ConvFiltersState,
+} from "@/components/conversations/ConversationFilters";
+import { useDebounced } from "@/hooks/useDebounced";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
@@ -123,28 +135,53 @@ export function SidePanelApp() {
 
   // Conversations
   const [section, setSection] = useState<"memories" | "conversations">("memories");
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
+  const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
+  const [convTotal, setConvTotal] = useState(0);
   const [convLoading, setConvLoading] = useState(false);
   const [convQuery, setConvQuery] = useState("");
   const [selectedConv, setSelectedConv] = useState<StoredConversation | null>(null);
+  const debouncedConvQuery = useDebounced(convQuery, 180);
 
-  const loadConversations = useCallback(async () => {
-    setConvLoading(true);
-    try {
-      const rows = await listConversations();
-      setConversations(rows);
-      setSelectedConv((prev) =>
-        prev ? rows.find((r) => r.id === prev.id) ?? null : null,
-      );
-    } finally {
-      setConvLoading(false);
-    }
-  }, []);
+  const runConvSearch = useCallback(
+    async (q: string, filters: ConvFiltersState, opts: { showLoading?: boolean } = {}) => {
+      if (opts.showLoading) setConvLoading(true);
+      try {
+        const range = toEpochRange(filters);
+        const hits = await searchConversations({
+          query: q,
+          providers: filters.providers,
+          dateFrom: range.dateFrom,
+          dateTo: range.dateTo,
+          sort: filters.sort,
+        });
+        setConvHits(hits);
+        setSelectedConv((prev) =>
+          prev ? hits.find((h) => h.conversation.id === prev.id)?.conversation ?? null : null,
+        );
+        const unfiltered =
+          !q &&
+          filters.providers.length === 0 &&
+          !filters.dateFrom &&
+          !filters.dateTo;
+        if (unfiltered) setConvTotal(hits.length);
+      } finally {
+        if (opts.showLoading) setConvLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!ready) return;
-    void loadConversations();
-  }, [ready, loadConversations]);
+    void runConvSearch("", emptyConvFilters, { showLoading: true });
+  }, [ready, runConvSearch]);
+
+  useEffect(() => {
+    if (!ready) return;
+    void runConvSearch(debouncedConvQuery, convFilters);
+  }, [ready, debouncedConvQuery, convFilters, runConvSearch]);
+
 
   useEffect(() => {
     bootstrap();
@@ -223,16 +260,15 @@ export function SidePanelApp() {
       : NAV.find((n) => n.id === activeView)?.label ?? "Workspace";
 
   const visibleMemories = useMemo(() => memories.slice(0, visibleCount), [memories, visibleCount]);
-  const filteredConversations = useMemo(() => {
-    const q = convQuery.toLowerCase().trim();
-    if (!q) return conversations;
-    return conversations.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.model ?? "").toLowerCase().includes(q) ||
-        c.provider.toLowerCase().includes(q),
-    );
-  }, [conversations, convQuery]);
+  const filteredConversations = useMemo(
+    () => convHits.map((h) => h.conversation),
+    [convHits],
+  );
+  const conversationSnippets = useMemo(() => {
+    const map = new Map<string, ConvSnippet | null>();
+    for (const h of convHits) map.set(h.conversation.id, h.snippet);
+    return map;
+  }, [convHits]);
   const selectedIds = useMemo(() => Array.from(selection), [selection]);
   const allSelected = selectedIds.length > 0 && selectedIds.length === memories.length;
 
@@ -298,9 +334,9 @@ export function SidePanelApp() {
           >
             <MessagesSquare className="h-3.5 w-3.5" />
             Conversations
-            {conversations.length > 0 && (
+            {convTotal > 0 && (
               <span className="ml-auto text-[10px] text-muted-foreground tabular-nums">
-                {conversations.length}
+                {convTotal}
               </span>
             )}
           </button>
@@ -383,16 +419,28 @@ export function SidePanelApp() {
               <MessagesSquare className="h-4 w-4 text-primary" />
               <h1 className="text-sm font-semibold">Conversations</h1>
               <span className="ml-2 text-[10px] text-muted-foreground">
-                {conversations.length} saved
+                {debouncedConvQuery ||
+                convFilters.providers.length ||
+                convFilters.dateFrom ||
+                convFilters.dateTo
+                  ? `${filteredConversations.length} of ${convTotal}`
+                  : `${convTotal} saved`}
               </span>
               <div className="ml-auto flex items-center gap-2">
-                <Button size="sm" variant="ghost" onClick={loadConversations}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true })
+                  }
+                >
                   Refresh
                 </Button>
               </div>
             </header>
-            <div className="px-4 pt-3">
+            <div className="px-4 pt-3 space-y-2">
               <ConversationSearch value={convQuery} onChange={setConvQuery} />
+              <ConversationFilters value={convFilters} onChange={setConvFilters} />
             </div>
             <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
               <div className="overflow-y-auto scroll-thin px-4 py-3">
@@ -401,14 +449,15 @@ export function SidePanelApp() {
                   loading={convLoading}
                   activeId={selectedConv?.id ?? null}
                   onOpen={(c) => setSelectedConv(c)}
-                  query={convQuery || undefined}
+                  query={debouncedConvQuery || undefined}
+                  snippets={conversationSnippets}
                   onDelete={async (c) => {
-                    if (!window.confirm(`Delete conversation “${c.title}”?`))
+                    if (!window.confirm(`Delete conversation "${c.title}"?`))
                       return;
                     await deleteConversation(c.id);
                     if (selectedConv?.id === c.id) setSelectedConv(null);
                     toast.success("Conversation deleted");
-                    void loadConversations();
+                    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
                   }}
                 />
               </div>
@@ -419,7 +468,7 @@ export function SidePanelApp() {
                     onClose={() => setSelectedConv(null)}
                     onDeleted={() => {
                       setSelectedConv(null);
-                      void loadConversations();
+                      void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
                     }}
                   />
                 ) : (

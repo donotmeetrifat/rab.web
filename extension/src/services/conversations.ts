@@ -1,13 +1,64 @@
 import { db, uid } from "@/lib/db";
-import type { StoredConversation, StoredConvMessage } from "@/types";
+import type {
+  ProviderId,
+  StoredConversation,
+  StoredConvMessage,
+} from "@/types";
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
 
-/**
- * Persist a captured conversation. Upserts by (provider, conversationId).
- * De-dupes messages by their provider-scoped id. Never inserts a duplicate
- * row and never overwrites a newer local title with an empty one.
- */
+/* ------------------------------------------------------------------ *
+ * In-memory message index (lazy, invalidated on write). Lets universal
+ * search scan message bodies for thousands of conversations without a
+ * fresh IndexedDB read on every keystroke.
+ * ------------------------------------------------------------------ */
+
+interface MessageIndex {
+  version: number;
+  /** conversationId -> lower-cased concatenated body text. */
+  bodies: Map<string, string>;
+  /** conversationId -> original (case preserved) body text for snippets. */
+  originals: Map<string, string>;
+}
+
+let indexVersion = 0;
+let messageIndex: MessageIndex | null = null;
+let indexPromise: Promise<MessageIndex> | null = null;
+
+function invalidateIndex() {
+  indexVersion += 1;
+  messageIndex = null;
+  indexPromise = null;
+}
+
+async function ensureIndex(): Promise<MessageIndex> {
+  if (messageIndex && messageIndex.version === indexVersion) return messageIndex;
+  if (indexPromise) return indexPromise;
+  const version = indexVersion;
+  indexPromise = (async () => {
+    const rows = await db.convMessages.toArray();
+    const bodies = new Map<string, string>();
+    const originals = new Map<string, string>();
+    for (const m of rows) {
+      const text = m.markdown || m.content || "";
+      if (!text) continue;
+      const prev = originals.get(m.conversationId);
+      const next = prev ? `${prev}\n${text}` : text;
+      originals.set(m.conversationId, next);
+      bodies.set(m.conversationId, next.toLowerCase());
+    }
+    const built: MessageIndex = { version, bodies, originals };
+    messageIndex = built;
+    indexPromise = null;
+    return built;
+  })();
+  return indexPromise;
+}
+
+/* ------------------------------------------------------------------ *
+ * Persistence
+ * ------------------------------------------------------------------ */
+
 export async function saveConversation(
   captured: CapturedConversation,
   opts: { hash?: string; source: "manual" | "auto" | "initial" } = { source: "manual" },
@@ -15,7 +66,7 @@ export async function saveConversation(
   const hash = opts.hash ?? hashConversation(captured);
   const now = Date.now();
 
-  return db.transaction("rw", db.conversations, db.convMessages, async () => {
+  const result = await db.transaction("rw", db.conversations, db.convMessages, async () => {
     const existing = await db.conversations
       .where("[provider+providerConversationId]")
       .equals([captured.provider, captured.conversationId])
@@ -53,7 +104,6 @@ export async function saveConversation(
 
     await db.conversations.put(conversation);
 
-    // Replace-in-place strategy: cheaper than diffing, correct for edits/regens.
     await db.convMessages.where("conversationId").equals(conversation.id).delete();
     const rows: StoredConvMessage[] = captured.messages.map((m) => ({
       id: uid("msg"),
@@ -72,6 +122,9 @@ export async function saveConversation(
 
     return { conversation, changed: true, created: !existing };
   });
+
+  if (result.changed) invalidateIndex();
+  return result;
 }
 
 export async function listConversations(): Promise<StoredConversation[]> {
@@ -93,4 +146,124 @@ export async function deleteConversation(id: string): Promise<void> {
     await db.convMessages.where("conversationId").equals(id).delete();
     await db.conversations.delete(id);
   });
+  invalidateIndex();
+}
+
+/* ------------------------------------------------------------------ *
+ * Universal search
+ * ------------------------------------------------------------------ */
+
+export type ConvSort = "newest" | "oldest" | "alphabetical";
+
+export interface ConvSearchOptions {
+  query?: string;
+  providers?: ProviderId[];
+  /** Inclusive lower bound on updatedAt (ms). */
+  dateFrom?: number | null;
+  /** Inclusive upper bound on updatedAt (ms). */
+  dateTo?: number | null;
+  sort?: ConvSort;
+}
+
+export type MatchField = "title" | "message" | "provider" | "model";
+
+export interface ConvSnippet {
+  text: string;
+  matchStart: number;
+  matchLength: number;
+}
+
+export interface ConvSearchHit {
+  conversation: StoredConversation;
+  matchedIn: MatchField | null;
+  snippet: ConvSnippet | null;
+}
+
+function makeSnippet(source: string, query: string, hint = -1): ConvSnippet | null {
+  const lower = source.toLowerCase();
+  const q = query.toLowerCase();
+  const at = hint >= 0 ? hint : lower.indexOf(q);
+  if (at < 0) return null;
+  const radius = 60;
+  const rawStart = Math.max(0, at - radius);
+  const rawEnd = Math.min(source.length, at + q.length + radius);
+  const leftEll = rawStart > 0;
+  const rightEll = rawEnd < source.length;
+  const body = source.slice(rawStart, rawEnd).replace(/\s+/g, " ").trim();
+  const prefix = leftEll ? "… " : "";
+  const suffix = rightEll ? " …" : "";
+  const text = `${prefix}${body}${suffix}`;
+  // Recompute the highlight position inside the composed snippet.
+  const matchStart = text.toLowerCase().indexOf(q);
+  return { text, matchStart, matchLength: q.length };
+}
+
+export async function searchConversations(
+  opts: ConvSearchOptions = {},
+): Promise<ConvSearchHit[]> {
+  const all = await db.conversations.toArray();
+  const query = (opts.query || "").trim();
+  const q = query.toLowerCase();
+  const providers = opts.providers && opts.providers.length ? new Set(opts.providers) : null;
+  const from = opts.dateFrom ?? null;
+  const to = opts.dateTo ?? null;
+
+  const filtered = all.filter((c) => {
+    if (providers && !providers.has(c.provider)) return false;
+    if (from !== null && c.updatedAt < from) return false;
+    if (to !== null && c.updatedAt > to) return false;
+    return true;
+  });
+
+  let hits: ConvSearchHit[];
+  if (!q) {
+    hits = filtered.map((c) => ({ conversation: c, matchedIn: null, snippet: null }));
+  } else {
+    const index = await ensureIndex();
+    hits = [];
+    for (const c of filtered) {
+      const title = c.title.toLowerCase();
+      const provider = c.provider.toLowerCase();
+      const model = (c.model || "").toLowerCase();
+
+      if (title.includes(q)) {
+        hits.push({
+          conversation: c,
+          matchedIn: "title",
+          snippet: null,
+        });
+        continue;
+      }
+      const body = index.bodies.get(c.id) || "";
+      const bodyIdx = body.indexOf(q);
+      if (bodyIdx >= 0) {
+        const original = index.originals.get(c.id) || "";
+        hits.push({
+          conversation: c,
+          matchedIn: "message",
+          snippet: makeSnippet(original, query, bodyIdx),
+        });
+        continue;
+      }
+      if (provider.includes(q)) {
+        hits.push({ conversation: c, matchedIn: "provider", snippet: null });
+        continue;
+      }
+      if (model.includes(q)) {
+        hits.push({ conversation: c, matchedIn: "model", snippet: null });
+        continue;
+      }
+    }
+  }
+
+  const sort: ConvSort = opts.sort ?? "newest";
+  hits.sort((a, b) => {
+    if (sort === "oldest") return a.conversation.updatedAt - b.conversation.updatedAt;
+    if (sort === "alphabetical")
+      return a.conversation.title.localeCompare(b.conversation.title, undefined, {
+        sensitivity: "base",
+      });
+    return b.conversation.updatedAt - a.conversation.updatedAt;
+  });
+  return hits;
 }
