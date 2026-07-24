@@ -72,11 +72,13 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2.5">
-          <Mark />
-          <span className="text-[15px] font-semibold tracking-tight">Memlace</span>
-        </div>
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-8 py-6">
+        <a href="/" className="group/brand flex items-center gap-[11px] transition-opacity duration-150 hover:opacity-80" aria-label="Memlace — home">
+          <Mark size={32} />
+          <span className="text-[26px] font-semibold leading-none text-foreground" style={{ letterSpacing: "-0.02em" }}>
+            Memlace
+          </span>
+        </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
             Features
@@ -89,6 +91,7 @@ function LandingPage() {
           </a>
         </nav>
       </header>
+
 
       <main className="mx-auto max-w-6xl px-6">
         {/* Hero */}
