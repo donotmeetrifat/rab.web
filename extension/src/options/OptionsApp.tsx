@@ -198,10 +198,12 @@ export function OptionsApp() {
         </Section>
 
         <Section title="Storage" description="Everything stays on this device — nothing is ever uploaded.">
-          <div className="grid grid-cols-3 gap-3 text-sm">
+          <div className="grid grid-cols-3 gap-3 text-sm sm:grid-cols-5">
             <Stat label="Projects" value={stats?.projects ?? "—"} />
             <Stat label="Memories" value={stats?.memories ?? "—"} />
             <Stat label="Trashed" value={stats?.trashed ?? "—"} />
+            <Stat label="Chats" value={stats?.conversations ?? "—"} />
+            <Stat label="Messages" value={stats?.messages ?? "—"} />
           </div>
           {storage && storage.quota > 0 && (
             <div className="mt-4">
@@ -225,11 +227,35 @@ export function OptionsApp() {
           )}
         </Section>
 
-        <Section title="Import & export" description="Move your memories between devices as a JSON file.">
-          <div className="flex gap-2">
+        <Section
+          title="Import & export"
+          description="Move projects, memories, and saved chats between devices as a single JSON file."
+        >
+          <div className="flex flex-wrap gap-2">
             <Button variant="primary" onClick={doExport}>Export data</Button>
             <Button variant="secondary" onClick={doImport}>Import data</Button>
           </div>
+          <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-muted-foreground sm:grid-cols-4">
+            <BackupStat label="Projects" value={stats?.projects ?? "—"} />
+            <BackupStat label="Memories" value={stats?.memories ?? "—"} />
+            <BackupStat label="Chats" value={stats?.conversations ?? "—"} />
+            <BackupStat
+              label="Est. export size"
+              value={exportSize == null ? "—" : formatBytes(exportSize)}
+            />
+          </div>
+          <label className="mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={restoreSettings}
+              onChange={(e) => setRestoreSettings(e.target.checked)}
+              className="h-3.5 w-3.5 accent-[color:var(--color-primary)]"
+            />
+            Also restore settings from the imported file
+          </label>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Duplicate chats are matched by provider and conversation id — nothing is overwritten unless it's newer.
+          </p>
         </Section>
 
         <Section title="Danger zone" description="These actions can't be undone.">
