@@ -1,60 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Search, Command, X, Sparkles, Layers, Repeat } from "lucide-react";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-/**
- * Roving tabindex hook. Only the active item is tabbable; ArrowUp/Down (or
- * ArrowLeft/Right when horizontal) moves within the group, Home/End jump to
- * ends, Enter/Space activates. Tab exits the group entirely.
- */
-function useRovingIndex(count: number, initial = 0, orientation: "vertical" | "horizontal" = "vertical") {
-  const [index, setIndex] = useState(initial);
-  const refs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const focusAt = useCallback((i: number) => {
-    setIndex(i);
-    // Focus asynchronously so React commits tabIndex first.
-    requestAnimationFrame(() => refs.current[i]?.focus());
-  }, []);
-
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLElement>, onActivate?: (i: number) => void) => {
-      const next = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
-      const prev = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
-      if (e.key === next) {
-        e.preventDefault();
-        focusAt((index + 1) % count);
-      } else if (e.key === prev) {
-        e.preventDefault();
-        focusAt((index - 1 + count) % count);
-      } else if (e.key === "Home") {
-        e.preventDefault();
-        focusAt(0);
-      } else if (e.key === "End") {
-        e.preventDefault();
-        focusAt(count - 1);
-      } else if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onActivate?.(index);
-      }
-    },
-    [count, focusAt, index, orientation],
-  );
-
-  const getItemProps = (i: number) => ({
-    ref: (el: HTMLButtonElement | null) => {
-      refs.current[i] = el;
-    },
-    tabIndex: i === index ? 0 : -1,
-    onFocus: () => setIndex(i),
-  });
-
-  return { index, setIndex, onKeyDown, getItemProps };
-}
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -332,7 +283,6 @@ function PreviewFrame() {
   const [activeNav, setActiveNav] = useState("Projects");
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
-  const [announce, setAnnounce] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // First-run onboarding: show once per browser, persisted via localStorage.
@@ -352,7 +302,6 @@ function PreviewFrame() {
     } catch {
       /* storage blocked — session-only dismiss is fine */
     }
-    setAnnounce("Onboarding dismissed");
   }, []);
 
   const replayOnboarding = useCallback(() => {
@@ -367,44 +316,18 @@ function PreviewFrame() {
     [activeProjectId],
   );
 
-  const navRoving = useRovingIndex(NAV.length, NAV.indexOf(activeNav));
-  const projectRoving = useRovingIndex(
-    PROJECTS.length,
-    Math.max(0, PROJECTS.findIndex((p) => p.id === activeProjectId)),
-  );
-  const chatRoving = useRovingIndex(project.chats.length, 0);
-
-  const selectNav = useCallback((i: number) => {
-    setActiveNav(NAV[i]);
-    setAnnounce(`${NAV[i]} selected`);
-  }, []);
-  const selectProject = useCallback((i: number) => {
-    setActiveProjectId(PROJECTS[i].id);
-    setAnnounce(`Project ${PROJECTS[i].name} opened`);
-  }, []);
   const cycleProvider = useCallback(() => {
-    setProviderIdx((prev) => {
-      const next = (prev + 1) % PROVIDERS.length;
-      setAnnounce(`Continue in ${PROVIDERS[next]}`);
-      return next;
-    });
+    setProviderIdx((prev) => (prev + 1) % PROVIDERS.length);
   }, []);
-  const openChat = useCallback(
-    (i: number) => setAnnounce(`Opening ${project.chats[i].title}`),
-    [project.chats],
-  );
+
 
   return (
     <div
       role="region"
       aria-label="Universal AI Workspace popup preview"
-      aria-describedby="popup-shortcuts"
       className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
     >
-      {/* Live region for keyboard/mouse selection changes */}
-      <span className="sr-only" aria-live="polite" aria-atomic="true">
-        {announce}
-      </span>
+
 
       {/* Chrome */}
       <div className="flex items-center gap-1.5 border-b border-border bg-background/60 px-4 py-3 backdrop-blur">
@@ -452,11 +375,9 @@ function PreviewFrame() {
           {/* Fake search */}
           <button
             type="button"
-            onClick={() => {
-              setActiveNav("Search");
-              setAnnounce("Search selected");
-            }}
+            onClick={() => setActiveNav("Search")}
             aria-label="Open universal search"
+
             className={
               "mb-4 flex w-full items-center gap-2 rounded-md border border-border bg-[color:var(--surface)]/60 px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-[color:var(--surface)] " +
               focusRing
@@ -471,8 +392,8 @@ function PreviewFrame() {
               role="menu"
               aria-label="Sections"
               className="space-y-0.5 text-sm"
-              onKeyDown={(e) => navRoving.onKeyDown(e, selectNav)}
             >
+
               {NAV.map((item, i) => {
                 const active = item === activeNav;
                 return (
@@ -482,8 +403,8 @@ function PreviewFrame() {
                       role="menuitemradio"
                       aria-checked={active}
                       aria-current={active ? "page" : undefined}
-                      onClick={() => selectNav(i)}
-                      {...navRoving.getItemProps(i)}
+                      onClick={() => setActiveNav(item)}
+
                       className={
                         "group/nav flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
                         focusRing +
@@ -532,9 +453,8 @@ function PreviewFrame() {
               aria-labelledby="projects-heading"
               aria-activedescendant={`project-${activeProjectId}`}
               className="space-y-0.5 text-sm"
-              onKeyDown={(e) => projectRoving.onKeyDown(e, selectProject)}
             >
-              {PROJECTS.map((p, i) => {
+              {PROJECTS.map((p) => {
                 const active = p.id === activeProjectId;
                 return (
                   <li key={p.id} role="none">
@@ -543,8 +463,8 @@ function PreviewFrame() {
                       id={`project-${p.id}`}
                       role="option"
                       aria-selected={active}
-                      onClick={() => selectProject(i)}
-                      {...projectRoving.getItemProps(i)}
+                      onClick={() => setActiveProjectId(p.id)}
+
                       className={
                         "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
                         focusRing +
@@ -623,35 +543,16 @@ function PreviewFrame() {
           <ul
             aria-label={`Chats in ${project.name}`}
             className="mt-5 space-y-1.5 [contain:layout_paint]"
-            onKeyDown={(e) => chatRoving.onKeyDown(e, openChat)}
           >
             {project.chats.map((c, i) => (
               <ChatRow
                 key={`${project.id}-${c.title}`}
                 chat={c}
                 index={i}
-                itemProps={chatRoving.getItemProps(i)}
-                onOpen={openChat}
               />
             ))}
           </ul>
 
-          {/* Keyboard hint */}
-          <p
-            id="popup-shortcuts"
-            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-          >
-            <span className="inline-flex items-center gap-1">
-              <Key>Tab</Key> move between groups
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Key>↑</Key>
-              <Key>↓</Key> within a list
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Key>↵</Key> open
-            </span>
-          </p>
 
           {/* Ambient gradient wash */}
           <div
@@ -692,18 +593,12 @@ const ProviderChip = memo(function ProviderChip({ name }: { name: string }) {
 type ChatRowProps = {
   chat: { provider: string; title: string; when: string };
   index: number;
-  itemProps: {
-    ref: (el: HTMLButtonElement | null) => void;
-    tabIndex: number;
-    onFocus: () => void;
-  };
-  onOpen: (i: number) => void;
 };
 
 /** Memoized row. Cap entrance-animation stagger at 10 rows so long lists
  *  don't queue up seconds of transitions, and use content-visibility so
  *  off-screen rows skip layout/paint entirely. */
-const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRowProps) {
+const ChatRow = memo(function ChatRow({ chat, index }: ChatRowProps) {
   const staggered = index < 10;
   return (
     <li
@@ -712,9 +607,7 @@ const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRo
     >
       <button
         type="button"
-        onClick={() => onOpen(index)}
         aria-label={`${chat.title}, from ${chat.provider}, ${chat.when}`}
-        {...itemProps}
         style={
           staggered
             ? { animationDelay: `${index * 40}ms`, animationFillMode: "backwards" }
@@ -742,13 +635,6 @@ const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRo
   );
 });
 
-function Key({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="inline-flex min-w-[1.25rem] items-center justify-center rounded border border-border bg-[color:var(--surface)] px-1 py-0.5 font-mono text-[10px] normal-case text-foreground">
-      {children}
-    </kbd>
-  );
-}
 
 /* ------------------------------ Onboarding ------------------------------- */
 
