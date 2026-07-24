@@ -168,7 +168,10 @@ export function OptionsApp() {
           </select>
         </Section>
 
-        <Section title="Notifications" description="Show a system notification when Memlace captures a memory in the background.">
+        <Section
+          title="Notifications"
+          description="Show a system notification when Memlace captures a memory in the background."
+        >
           <label className="inline-flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -178,6 +181,45 @@ export function OptionsApp() {
             />
             Enable capture notifications
           </label>
+        </Section>
+
+        <Section
+          title="Conversation capture"
+          description="Control what Memlace records when you save an AI chat. Everything stays on this device — nothing is uploaded."
+        >
+          <div className="space-y-3">
+            <Toggle
+              label="Auto-save conversations"
+              hint="Silently keep saved chats in sync with the AI website as you talk. When off, use the “Save to Memlace” button on the page."
+              checked={settings.autoSaveConversations}
+              disabled={settings.saveConversationsManualOnly}
+              onChange={(v) => updateSettings({ autoSaveConversations: v })}
+            />
+            <Toggle
+              label="Save images"
+              hint="Store URLs of images that appear in messages so they render inside Memlace. The image files themselves stay on the provider’s servers."
+              checked={settings.saveImages}
+              onChange={(v) => updateSettings({ saveImages: v })}
+            />
+            <Toggle
+              label="Save attachments"
+              hint="Store filenames and metadata for files you attached in the chat. File contents are not downloaded."
+              checked={settings.saveAttachments}
+              onChange={(v) => updateSettings({ saveAttachments: v })}
+            />
+            <Toggle
+              label="Show save notifications"
+              hint="Get a small system notification whenever a chat is saved to Memlace."
+              checked={settings.notificationsEnabled}
+              onChange={(v) => updateSettings({ notificationsEnabled: v })}
+            />
+            <Toggle
+              label="Save only manually selected chats"
+              hint="Strict privacy mode: Memlace will never save a conversation automatically, even if auto-save is on. Only the “Save to Memlace” button will store anything."
+              checked={settings.saveConversationsManualOnly}
+              onChange={(v) => updateSettings({ saveConversationsManualOnly: v })}
+            />
+          </div>
         </Section>
 
         <Section title="Keyboard shortcuts" description="Trigger Memlace anywhere without leaving the page.">
