@@ -74,7 +74,7 @@ function LandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-8 py-6">
         <a href="/" className="group/brand flex items-center gap-[10px] transition-opacity duration-150 hover:opacity-80" aria-label="Memlace — home">
-          <Mark size={36} />
+          <Mark size={44} />
           <span className="text-[19px] font-semibold leading-none text-foreground" style={{ letterSpacing: "-0.02em" }}>
             Memlace
           </span>
