@@ -92,15 +92,9 @@ function LandingPage() {
           <img
             src={memlaceWordmark.url}
             alt="Memlace"
-            height={32}
-            style={{
-              height: "32px",
-              width: "auto",
-              display: "block",
-              margin: 0,
-              padding: 0,
-            }}
+            className="h-6 sm:h-7 md:h-8 w-auto block m-0 p-0"
           />
+
         </a>
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
