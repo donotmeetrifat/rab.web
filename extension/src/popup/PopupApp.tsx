@@ -87,21 +87,39 @@ export function PopupApp() {
     }
   }, []);
 
-  const loadConversations = useCallback(async () => {
-    setConvLoading(true);
-    try {
-      const rows = await listConversations();
-      setConversations(rows);
-    } finally {
-      setConvLoading(false);
-    }
-  }, []);
+  const runConvSearch = useCallback(
+    async (q: string, filters: ConvFiltersState, initial = false) => {
+      if (initial) setConvLoading(true);
+      try {
+        const range = toEpochRange(filters);
+        const hits = await searchConversations({
+          query: q,
+          providers: filters.providers,
+          dateFrom: range.dateFrom,
+          dateTo: range.dateTo,
+          sort: filters.sort,
+        });
+        setConvHits(hits);
+        if (!q && filters.providers.length === 0 && !filters.dateFrom && !filters.dateTo) {
+          setConvCount(hits.length);
+        }
+      } finally {
+        if (initial) setConvLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!ready) return;
     void loadLists();
-    void loadConversations();
-  }, [ready, loadLists, loadConversations, projects.length]);
+    void runConvSearch("", emptyConvFilters, true);
+  }, [ready, loadLists, runConvSearch, projects.length]);
+
+  useEffect(() => {
+    if (!ready) return;
+    void runConvSearch(debouncedQuery, convFilters);
+  }, [ready, debouncedQuery, convFilters, runConvSearch]);
 
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {
