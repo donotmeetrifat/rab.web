@@ -111,7 +111,7 @@ function LandingPage() {
                   backgroundImage: "var(--gradient-primary)",
                   boxShadow: "var(--shadow-3d-primary)",
                 }}
-                className="group/dl inline-flex h-12 translate-y-0 items-center justify-center rounded-[12px] px-6 text-sm font-semibold tracking-tight text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] disabled:opacity-60 disabled:hover:translate-y-0"
+                className="group/dl relative inline-flex h-12 translate-y-0 items-center justify-center overflow-hidden rounded-[12px] px-6 text-sm font-semibold tracking-tight text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
