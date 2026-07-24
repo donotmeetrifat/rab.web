@@ -332,7 +332,6 @@ function PreviewFrame() {
   const [activeNav, setActiveNav] = useState("Projects");
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
-  const [pulseKey, setPulseKey] = useState(0);
   const [announce, setAnnounce] = useState("");
 
   const project = useMemo(
@@ -347,25 +346,25 @@ function PreviewFrame() {
   );
   const chatRoving = useRovingIndex(project.chats.length, 0);
 
-  // Ambient live-capture pulse in the header
-  useEffect(() => {
-    const id = window.setInterval(() => setPulseKey((k) => k + 1), 2600);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const selectNav = (i: number) => {
+  const selectNav = useCallback((i: number) => {
     setActiveNav(NAV[i]);
     setAnnounce(`${NAV[i]} selected`);
-  };
-  const selectProject = (i: number) => {
+  }, []);
+  const selectProject = useCallback((i: number) => {
     setActiveProjectId(PROJECTS[i].id);
     setAnnounce(`Project ${PROJECTS[i].name} opened`);
-  };
-  const cycleProvider = () => {
-    const next = (providerIdx + 1) % PROVIDERS.length;
-    setProviderIdx(next);
-    setAnnounce(`Continue in ${PROVIDERS[next]}`);
-  };
+  }, []);
+  const cycleProvider = useCallback(() => {
+    setProviderIdx((prev) => {
+      const next = (prev + 1) % PROVIDERS.length;
+      setAnnounce(`Continue in ${PROVIDERS[next]}`);
+      return next;
+    });
+  }, []);
+  const openChat = useCallback(
+    (i: number) => setAnnounce(`Opening ${project.chats[i].title}`),
+    [project.chats],
+  );
 
   return (
     <div
