@@ -77,20 +77,40 @@ function LandingPage() {
           href="/"
           aria-label="Memlace — home"
           className="group/brand"
-          style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "12px", margin: 0, padding: 0, lineHeight: 1, textDecoration: "none" }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            margin: 0,
+            padding: 0,
+            lineHeight: 1,
+            textDecoration: "none",
+          }}
         >
-          <span className="brand-mark" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
-            <span className="md:hidden"><Mark size={32} /></span>
-            <span className="hidden md:inline-flex"><Mark size={36} /></span>
-          </span>
+          <img
+            src={memlaceLogo}
+            alt=""
+            aria-hidden="true"
+            width={34}
+            height={34}
+            style={{
+              width: "34px",
+              height: "34px",
+              display: "block",
+              margin: 0,
+              padding: 0,
+              flexShrink: 0,
+            }}
+          />
           <span
             className="transition-colors duration-150"
             style={{
               fontFamily: "Inter, sans-serif",
               fontWeight: 700,
-              fontSize: "34px",
-              letterSpacing: "-0.03em",
+              fontSize: "24px",
               lineHeight: 1,
+              letterSpacing: "-0.02em",
               color: "#111827",
               display: "inline-block",
               margin: 0,
