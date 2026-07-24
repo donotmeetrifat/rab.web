@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowRight, Search, Command } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { ArrowRight, Search, Command, X, Sparkles, Layers, Repeat } from "lucide-react";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
