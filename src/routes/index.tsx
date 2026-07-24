@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
-import memlaceWordmark from "@/assets/memlace-wordmark-v3.png.asset.json";
+import memlaceWordmark from "@/assets/memlace-wordmark-v4.png.asset.json";
 import { BRANDS } from "@/components/brand-icons";
 
 
