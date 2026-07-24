@@ -6,8 +6,12 @@ import type {
   Project,
   ProjectIcon,
   ProviderId,
+  Settings,
   SortKey,
+  StoredConversation,
+  StoredConvMessage,
 } from "@/types";
+import { getSettings } from "@/services/settings";
 
 /* ------------------------------------------------------------------ */
 /* PROJECTS                                                           */
