@@ -324,6 +324,7 @@ export function ConversationDetail({
               Open original
             </a>
           )}
+          <ContinueButton conversation={conversation} messages={messages} />
           <div className="ml-auto">
             <Button size="sm" variant="danger" onClick={handleDelete} disabled={deleting}>
               <Trash2 className="h-3.5 w-3.5" />
