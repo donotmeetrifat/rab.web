@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Search, Command } from "lucide-react";
+import { memo, useCallback, useMemo, useState } from "react";
+import { ArrowRight, Search, Command, Menu, X } from "lucide-react";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
+
 import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
 import memlaceWordmark from "@/assets/memlace-wordmark-v4.png.asset.json";
 import { BRANDS } from "@/components/brand-icons";
@@ -48,6 +49,7 @@ const steps = [
 function LandingPage() {
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const download = () => {
     setState("loading");
@@ -71,76 +73,119 @@ function LandingPage() {
       });
   };
 
+  const navLinks = [
+    { href: "#features", label: "Features" },
+    { href: "#install", label: "Install" },
+    { href: "#principles", label: "Principles" },
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-8" style={{ height: "72px" }}>
-        <a
-          href="/"
-          aria-label="Memlace — home"
-          className="group/brand"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            margin: 0,
-            padding: 0,
-            lineHeight: 1,
-            textDecoration: "none",
-          }}
+    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-transparent bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-5 sm:px-6 md:h-[72px] md:px-8">
+          <a
+            href="/"
+            aria-label="Memlace — home"
+            className="inline-flex items-center gap-[10px] leading-none"
+          >
+            <img
+              src={memlaceWordmark.url}
+              alt="Memlace"
+              className="block h-6 w-auto sm:h-7 md:h-8"
+            />
+          </a>
+
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex lg:gap-8">
+            {navLinks.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className={"transition-colors hover:text-foreground " + focusRing}
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <button
+            type="button"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMenuOpen((v) => !v)}
+            className={
+              "inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:bg-[color:var(--surface)] md:hidden " +
+              focusRing
+            }
+          >
+            {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        <div
+          id="mobile-menu"
+          className={
+            "overflow-hidden border-t border-border bg-background transition-[max-height,opacity] duration-300 ease-out md:hidden motion-reduce:transition-none " +
+            (menuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0")
+          }
         >
-          <img
-            src={memlaceWordmark.url}
-            alt="Memlace"
-            className="h-6 sm:h-7 md:h-8 w-auto block m-0 p-0"
-          />
-
-        </a>
-
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a href="#features" className="transition-colors hover:text-foreground">
-            Features
-          </a>
-          <a href="#install" className="transition-colors hover:text-foreground">
-            Install
-          </a>
-          <a href="#principles" className="transition-colors hover:text-foreground">
-            Principles
-          </a>
-        </nav>
+          <nav aria-label="Mobile" className="mx-auto max-w-7xl px-5 py-3">
+            <ul className="flex flex-col">
+              {navLinks.map((l) => (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={
+                      "flex min-h-11 items-center rounded-md px-2 text-sm text-foreground/90 transition-colors hover:bg-[color:var(--surface)] " +
+                      focusRing
+                    }
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </header>
 
 
-      <main className="mx-auto max-w-6xl px-6">
+      <main className="mx-auto max-w-7xl px-5 sm:px-6 md:px-8">
         {/* Hero */}
-        <section className="pt-16 pb-20 md:pt-24 md:pb-28">
+        <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--surface)] px-3 py-1 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               A place for your AI memory.
             </div>
-            <h1 className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
+            <h1 className="text-balance text-[clamp(2.25rem,8vw,4.5rem)] font-semibold leading-[1.05] tracking-tight">
               Your AI memory,
               <br />
               <span className="text-primary">all in one place.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
+            <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-[17px] md:text-lg">
               Memlace is a private, local-first workspace that keeps your AI conversations,
               projects, and context organized across ChatGPT, Claude, Gemini, DeepSeek, Perplexity,
               Copilot, and future AI assistants.
             </p>
 
-            <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:items-center sm:justify-center">
               <Button3D
                 size="lg"
                 onClick={download}
                 disabled={state === "loading"}
+                className="w-full min-h-12 sm:w-auto"
               >
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
               </Button3D>
               <a
                 href="#install"
-                className="inline-flex h-11 items-center justify-center rounded-[10px] border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-[color:var(--surface)]"
+                className={
+                  "inline-flex min-h-12 w-full items-center justify-center rounded-[10px] border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-[color:var(--surface)] sm:w-auto " +
+                  focusRing
+                }
               >
                 Installation Guide
               </a>
@@ -150,14 +195,14 @@ function LandingPage() {
               <p className="mt-4 text-xs text-destructive">{error}</p>
             )}
 
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+            <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground sm:mt-6">
               Works with
             </p>
-            <ul className="mt-4 flex flex-wrap items-end justify-center gap-x-10 gap-y-5">
+            <ul className="mt-4 flex flex-wrap items-end justify-center gap-x-6 gap-y-5 sm:gap-x-8 md:gap-x-10">
               {BRANDS.map(({ name, color, Icon }) => (
                 <li key={name} className="group flex flex-col items-center gap-2">
                   <Icon
-                    className="h-6 w-6 text-muted-foreground/80 transition-colors duration-200 ease-out group-hover:[color:var(--brand)]"
+                    className="h-5 w-5 text-muted-foreground/80 transition-colors duration-200 ease-out group-hover:[color:var(--brand)] sm:h-6 sm:w-6"
                     style={{ ["--brand" as string]: color }}
                   />
                   <span className="text-xs font-medium text-muted-foreground transition-colors duration-200 ease-out group-hover:text-foreground">
@@ -171,23 +216,24 @@ function LandingPage() {
         </section>
 
         {/* Product frame preview */}
-        <section className="pb-24">
+        <section className="pb-16 sm:pb-20 md:pb-24">
           <PreviewFrame />
         </section>
 
+
         {/* Features */}
-        <section id="features" className="border-t border-border py-20">
-          <div className="mb-14 max-w-2xl">
+        <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="mb-10 max-w-2xl sm:mb-14">
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Phase 1
             </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold tracking-tight">
               Four things, done properly.
             </h2>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-2">
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
             {features.map((f) => (
-              <div key={f.title} className="bg-background p-8">
+              <div key={f.title} className="bg-background p-6 sm:p-8">
                 <h3 className="text-base font-semibold tracking-tight">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
               </div>
@@ -196,13 +242,13 @@ function LandingPage() {
         </section>
 
         {/* Install */}
-        <section id="install" className="border-t border-border py-20">
-          <div className="grid gap-12 md:grid-cols-[1fr_1.2fr] md:gap-16">
+        <section id="install" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:gap-16">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Install
               </p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="mt-3 text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold tracking-tight">
                 Four steps. One minute.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
@@ -210,7 +256,7 @@ function LandingPage() {
                 listing is on its way.
               </p>
             </div>
-            <ol className="space-y-4">
+            <ol className="space-y-3 sm:space-y-4">
               {steps.map((s, i) => (
                 <li
                   key={s}
@@ -219,7 +265,7 @@ function LandingPage() {
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--surface)] font-mono text-[11px] text-muted-foreground">
                     {i + 1}
                   </span>
-                  <span className="text-sm leading-relaxed">{s}</span>
+                  <span className="min-w-0 text-sm leading-relaxed">{s}</span>
                 </li>
               ))}
             </ol>
@@ -227,8 +273,8 @@ function LandingPage() {
         </section>
 
         {/* Principles */}
-        <section id="principles" className="border-t border-border py-20">
-          <div className="grid gap-10 md:grid-cols-3">
+        <section id="principles" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 md:gap-10">
             {[
               ["Everything is local.", "No cloud, no backend, no account. Your data never leaves your device."],
               ["You own everything.", "Projects belong to you — not to OpenAI, not to Anthropic, not to us."],
@@ -244,13 +290,12 @@ function LandingPage() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-8 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-[10px]">
-            <Mark size={32} />
-
-            <div className="flex flex-col leading-tight">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:px-8">
+          <div className="flex min-w-0 items-center gap-[10px]">
+            <Mark size={28} />
+            <div className="flex min-w-0 flex-col leading-tight">
               <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
-              <span className="text-xs">A place for your AI memory.</span>
+              <span className="truncate text-xs">A place for your AI memory.</span>
             </div>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
@@ -262,6 +307,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 function Mark({ size = 28 }: { size?: number }) {
   return (
@@ -366,9 +412,10 @@ function PreviewFrame() {
         </div>
       </div>
 
-      <div className="grid gap-px bg-border md:grid-cols-[240px_1fr]">
+      <div className="grid gap-px bg-border sm:grid-cols-[220px_1fr] md:grid-cols-[240px_1fr]">
         {/* Sidebar */}
-        <aside className="bg-background p-4" aria-label="Workspace sidebar">
+        <aside className="bg-background p-3 sm:p-4" aria-label="Workspace sidebar">
+
           <div className="mb-4 flex items-center gap-2.5">
             <Mark size={24} />
             <span className="text-[13px] font-semibold text-foreground" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
@@ -506,17 +553,17 @@ function PreviewFrame() {
 
         {/* Main pane */}
         <section
-          className="relative bg-background p-6"
+          className="relative bg-background p-4 sm:p-6"
           aria-labelledby="active-project-heading"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div key={project.id} className="animate-fade-in">
+          <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap sm:gap-4">
+            <div key={project.id} className="min-w-0 animate-fade-in">
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Project · {project.chats.length} chats
               </p>
               <h3
                 id="active-project-heading"
-                className="mt-1 text-lg font-semibold tracking-tight"
+                className="mt-1 truncate text-lg font-semibold tracking-tight"
               >
                 {project.name}
               </h3>
@@ -542,6 +589,7 @@ function PreviewFrame() {
               />
             </button>
           </div>
+
 
           <ul
             aria-label={`Chats in ${project.name}`}
