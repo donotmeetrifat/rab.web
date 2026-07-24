@@ -89,7 +89,7 @@ function LandingPage() {
           }}
         >
           <img
-            src={memlaceLogo}
+            src={memlaceLogo.url}
             alt=""
             aria-hidden="true"
             width={34}
