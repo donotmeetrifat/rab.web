@@ -694,6 +694,8 @@ export function SidePanelApp() {
             )}
           </aside>
         </div>
+          </>
+        )}
       </main>
 
       {projectDialog && (
