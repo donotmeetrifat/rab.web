@@ -5,7 +5,13 @@ import { useToast } from "@/components/Toast";
 import { useMemlace } from "@/store/useMemlace";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { PROVIDERS } from "@/lib/providers";
-import { counts, exportAll, importAll, storageEstimate } from "@/services/memories";
+import {
+  counts,
+  estimateExportSize,
+  exportAll,
+  importAll,
+  storageEstimate,
+} from "@/services/memories";
 import type { ProviderId, Settings } from "@/types";
 
 function formatBytes(n: number): string {
