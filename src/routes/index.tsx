@@ -107,11 +107,16 @@ function LandingPage() {
               <button
                 onClick={download}
                 disabled={state === "loading"}
-                className="inline-flex h-11 items-center justify-center rounded-[10px] bg-foreground px-5 text-sm font-medium text-background shadow-[var(--shadow-soft)] transition-all duration-150 hover:opacity-90 disabled:opacity-60"
+                style={{
+                  backgroundImage: "var(--gradient-primary)",
+                  boxShadow: "var(--shadow-3d-primary)",
+                }}
+                className="group/dl relative inline-flex h-12 translate-y-0 items-center justify-center overflow-hidden rounded-[12px] px-6 text-sm font-semibold tracking-tight text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] disabled:opacity-60 disabled:hover:translate-y-0"
               >
+                <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
-                <span className="ml-2 text-background/60">·</span>
-                <span className="ml-2 text-background/70">.zip</span>
+                <span className="ml-2 text-primary-foreground/60">·</span>
+                <span className="ml-1 text-primary-foreground/80">.zip</span>
               </button>
               <a
                 href="#install"
@@ -483,11 +488,16 @@ function PreviewFrame() {
               type="button"
               onClick={cycleProvider}
               aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
+              style={{
+                backgroundImage: "var(--gradient-primary)",
+                boxShadow: "var(--shadow-3d-primary)",
+              }}
               className={
-                "group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_4px_12px_-4px_oklch(0.53_0.19_285/0.5)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_8px_20px_-6px_oklch(0.53_0.19_285/0.6)] active:translate-y-0 " +
+                "group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-lg px-3 text-xs font-semibold text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] " +
                 focusRing
               }
             >
+              <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-white/50" aria-hidden />
               <span className="relative">
                 Continue in{" "}
                 <span
