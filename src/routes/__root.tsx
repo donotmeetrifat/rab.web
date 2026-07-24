@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Button3D, LinkButton3D } from "../components/ui/button-3d";
 
 function NotFoundComponent() {
   return (
