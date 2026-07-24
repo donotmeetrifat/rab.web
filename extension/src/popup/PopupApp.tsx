@@ -37,6 +37,8 @@ import {
   type ConvFiltersState,
 } from "@/components/conversations/ConversationFilters";
 import { useDebounced } from "@/hooks/useDebounced";
+import { useHotkey } from "@/components/Dialog";
+import { CommandPalette } from "@/components/CommandPalette";
 import type { Memory } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
