@@ -632,19 +632,72 @@ const PROVIDER_TONES: Record<string, string> = {
   Copilot: "text-[oklch(0.5_0.02_260)]",
 };
 
-function ProviderChip({ name }: { name: string }) {
+const ProviderChip = memo(function ProviderChip({ name }: { name: string }) {
   const tone = PROVIDER_TONES[name] ?? "text-muted-foreground";
   return (
     <span
       className={
-        "rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors " +
+        "rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider " +
         tone
       }
     >
       {name}
     </span>
   );
-}
+});
+
+type ChatRowProps = {
+  chat: { provider: string; title: string; when: string };
+  index: number;
+  itemProps: {
+    ref: (el: HTMLButtonElement | null) => void;
+    tabIndex: number;
+    onFocus: () => void;
+  };
+  onOpen: (i: number) => void;
+};
+
+/** Memoized row. Cap entrance-animation stagger at 10 rows so long lists
+ *  don't queue up seconds of transitions, and use content-visibility so
+ *  off-screen rows skip layout/paint entirely. */
+const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRowProps) {
+  const staggered = index < 10;
+  return (
+    <li
+      role="none"
+      className="[content-visibility:auto] [contain-intrinsic-size:auto_44px]"
+    >
+      <button
+        type="button"
+        onClick={() => onOpen(index)}
+        aria-label={`${chat.title}, from ${chat.provider}, ${chat.when}`}
+        {...itemProps}
+        style={
+          staggered
+            ? { animationDelay: `${index * 40}ms`, animationFillMode: "backwards" }
+            : undefined
+        }
+        className={
+          "group/row flex w-full transform-gpu items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left transition-[transform,border-color,background-color,box-shadow] duration-200 hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)] " +
+          (staggered ? "animate-fade-in " : "") +
+          focusRing
+        }
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <ProviderChip name={chat.provider} />
+          <span className="truncate text-sm">{chat.title}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          <span className="font-mono text-[11px] text-muted-foreground">{chat.when}</span>
+          <ArrowRight
+            aria-hidden
+            className="h-3 w-3 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-100 group-focus-visible/row:translate-x-0 group-focus-visible/row:opacity-100"
+          />
+        </span>
+      </button>
+    </li>
+  );
+});
 
 function Key({ children }: { children: React.ReactNode }) {
   return (
