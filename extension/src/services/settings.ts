@@ -10,6 +10,9 @@ export const DEFAULT_SETTINGS: Settings = {
   telemetryEnabled: false,
   notificationsEnabled: true,
   autoSaveConversations: false,
+  saveImages: true,
+  saveAttachments: true,
+  saveConversationsManualOnly: false,
   sort: "newest",
   version: "0.3.0",
 };
