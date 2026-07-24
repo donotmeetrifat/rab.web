@@ -30,10 +30,22 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta, PROVIDERS } from "@/lib/providers";
 import { listTags } from "@/services/tags";
-import { listConversations, deleteConversation } from "@/services/conversations";
+import {
+  searchConversations,
+  deleteConversation,
+  type ConvSearchHit,
+  type ConvSnippet,
+} from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
 import { ConversationDetail } from "@/components/conversations/ConversationDetail";
+import {
+  ConversationFilters,
+  emptyConvFilters,
+  toEpochRange,
+  type ConvFiltersState,
+} from "@/components/conversations/ConversationFilters";
+import { useDebounced } from "@/hooks/useDebounced";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
