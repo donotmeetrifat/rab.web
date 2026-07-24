@@ -488,16 +488,11 @@ function PreviewFrame() {
               type="button"
               onClick={cycleProvider}
               aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
-              style={{
-                backgroundImage: "var(--gradient-primary)",
-                boxShadow: "var(--shadow-3d-primary)",
-              }}
               className={
-                "group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-lg px-3 text-xs font-semibold text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] " +
+                "btn-3d-primary group/cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold " +
                 focusRing
               }
             >
-              <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-white/50" aria-hidden />
               <span className="relative">
                 Continue in{" "}
                 <span
