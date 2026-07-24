@@ -116,13 +116,17 @@ export function PopupApp() {
   useEffect(() => {
     if (!ready) return;
     void loadLists();
-    void runConvSearch("", emptyConvFilters, true);
-  }, [ready, loadLists, runConvSearch, projects.length]);
+  }, [ready, loadLists, projects.length]);
 
   useEffect(() => {
     if (!ready) return;
-    void runConvSearch(debouncedQuery, convFilters);
-  }, [ready, debouncedQuery, convFilters, runConvSearch]);
+    // Passing `initial` on the very first search shows the skeleton once;
+    // subsequent keystrokes update silently. This replaces a previous
+    // duplicate initial fetch that ran on mount.
+    const initial = convHits.length === 0 && !convLoading;
+    void runConvSearch(debouncedQuery, convFilters, initial);
+  }, [ready, debouncedQuery, convFilters, runConvSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {

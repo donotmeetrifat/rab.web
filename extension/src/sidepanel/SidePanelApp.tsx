@@ -178,13 +178,14 @@ export function SidePanelApp() {
 
   useEffect(() => {
     if (!ready) return;
-    void runConvSearch("", emptyConvFilters, { showLoading: true });
-  }, [ready, runConvSearch]);
+    // Single search on ready + when query/filters change. `showLoading`
+    // gates the skeleton to the initial run only, avoiding a duplicate
+    // empty-query fetch that used to fire on mount.
+    const initial = convHits.length === 0 && !convLoading;
+    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: initial });
+  }, [ready, debouncedConvQuery, convFilters, runConvSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (!ready) return;
-    void runConvSearch(debouncedConvQuery, convFilters);
-  }, [ready, debouncedConvQuery, convFilters, runConvSearch]);
+
 
 
   useEffect(() => {
