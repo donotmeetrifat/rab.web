@@ -77,17 +77,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Universal AI Workspace — One Brain. Every AI." },
+      { title: "Memlace — A place for your AI memory." },
       {
         name: "description",
         content:
-          "A free, local-first browser extension that gives you one workspace across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot. Own your projects, not your AI.",
+          "Memlace is a private, local-first workspace that keeps your AI conversations, projects, and context organized across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot.",
       },
-      { property: "og:title", content: "Universal AI Workspace — One Brain. Every AI." },
+      { property: "og:title", content: "Memlace — A place for your AI memory." },
       {
         property: "og:description",
         content:
-          "One workspace across every AI. Local-first, private, free forever. Switch AIs without losing your context.",
+          "A private, local-first workspace for your AI memory. Organize conversations, projects, and context across every AI assistant.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
