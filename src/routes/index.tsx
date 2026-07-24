@@ -337,10 +337,10 @@ function PreviewFrame() {
         {/* Sidebar */}
         <aside className="bg-background p-4" aria-label="Workspace sidebar">
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-300 hover:rotate-6">
-              <div className="h-2 w-2 rounded-[3px] bg-primary" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-primary text-primary-foreground text-[11px] font-semibold leading-none tracking-tight transition-transform duration-300 hover:rotate-6">
+              M
             </div>
-            <span className="text-xs font-medium">Workspace</span>
+            <span className="text-xs font-medium">Memlace</span>
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
               <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
