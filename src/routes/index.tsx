@@ -116,7 +116,7 @@ function LandingPage() {
               margin: 0,
               padding: 0,
               whiteSpace: "nowrap",
-              transform: "translateY(2px)",
+              transform: "translateY(4px)",
             }}
           >
             Memlace
