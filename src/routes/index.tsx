@@ -73,12 +73,13 @@ function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-8 py-6">
-        <a href="/" className="group/brand flex items-center gap-[11px] transition-opacity duration-150 hover:opacity-80" aria-label="Memlace — home">
-          <Mark size={32} />
-          <span className="text-[26px] font-semibold leading-none text-foreground" style={{ letterSpacing: "-0.02em" }}>
+        <a href="/" className="group/brand flex items-center gap-[10px] transition-opacity duration-150 hover:opacity-80" aria-label="Memlace — home">
+          <Mark size={36} />
+          <span className="text-[19px] font-semibold leading-none text-foreground" style={{ letterSpacing: "-0.02em" }}>
             Memlace
           </span>
         </a>
+
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
             Features
@@ -227,8 +228,9 @@ function LandingPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-8 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-[11px]">
-            <Mark size={28} />
+          <div className="flex items-center gap-[10px]">
+            <Mark size={32} />
+
             <div className="flex flex-col leading-tight">
               <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
               <span className="text-xs">A place for your AI memory.</span>
