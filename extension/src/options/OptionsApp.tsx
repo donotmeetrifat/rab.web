@@ -83,11 +83,18 @@ export function OptionsApp() {
       if (!file) return;
       try {
         const text = await file.text();
-        const { projects, memories, skipped } = await importAll(text);
-        toast.success(
-          `Imported ${projects} project${projects === 1 ? "" : "s"} and ${memories} memor${memories === 1 ? "y" : "ies"}`,
-          skipped > 0 ? `${skipped} invalid record${skipped === 1 ? "" : "s"} skipped` : undefined,
-        );
+        const res = await importAll(text, { restoreSettings });
+        const parts = [
+          `${res.projects} project${res.projects === 1 ? "" : "s"}`,
+          `${res.memories} memor${res.memories === 1 ? "y" : "ies"}`,
+          `${res.conversations} conversation${res.conversations === 1 ? "" : "s"}`,
+          `${res.messages} message${res.messages === 1 ? "" : "s"}`,
+        ];
+        const detailBits: string[] = [];
+        if (res.skipped > 0)
+          detailBits.push(`${res.skipped} invalid record${res.skipped === 1 ? "" : "s"} skipped`);
+        if (res.settingsApplied) detailBits.push("settings restored");
+        toast.success(`Imported ${parts.join(", ")}`, detailBits.join(" · ") || undefined);
         await refreshStats();
       } catch (err) {
         toast.error("Import failed", err instanceof Error ? err.message : "Invalid JSON");
