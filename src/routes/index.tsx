@@ -3,6 +3,8 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
+import { BRANDS } from "@/components/brand-icons";
+
 
 
 /** Shared focus-ring class — visible only on keyboard focus. */
@@ -130,13 +132,20 @@ function LandingPage() {
             <p className="mt-6 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Works with
             </p>
-            <div className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              {providers.map((p) => (
-                <span key={p} className="transition-colors hover:text-foreground">
-                  {p}
-                </span>
+            <ul className="mt-4 flex flex-wrap items-end justify-center gap-x-10 gap-y-5">
+              {BRANDS.map(({ name, color, Icon }) => (
+                <li key={name} className="group flex flex-col items-center gap-2">
+                  <Icon
+                    className="h-6 w-6 text-muted-foreground/80 transition-colors duration-200 ease-out group-hover:[color:var(--brand)]"
+                    style={{ ["--brand" as string]: color }}
+                  />
+                  <span className="text-xs font-medium text-muted-foreground transition-colors duration-200 ease-out group-hover:text-foreground">
+                    {name}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
+
           </div>
         </section>
 
