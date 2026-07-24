@@ -8,6 +8,8 @@ import {
   Pin,
   FolderOpen,
   Keyboard,
+  MessagesSquare,
+  StickyNote,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -20,9 +22,13 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta } from "@/lib/providers";
 import { listMemories } from "@/services/memories";
-import type { Memory } from "@/types";
+import { listConversations, deleteConversation } from "@/services/conversations";
+import { ConversationList } from "@/components/conversations/ConversationList";
+import { ConversationSearch } from "@/components/conversations/ConversationSearch";
+import type { Memory, StoredConversation } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
+type Tab = "memories" | "conversations";
 
 export function PopupApp() {
   useThemeSync();
@@ -37,8 +43,11 @@ export function PopupApp() {
   const trashMemory = useMemlace((s) => s.trashMemory);
 
   const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("memories");
   const [pinned, setPinned] = useState<Memory[]>([]);
   const [recent, setRecent] = useState<Memory[]>([]);
+  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -63,10 +72,21 @@ export function PopupApp() {
     }
   }, []);
 
+  const loadConversations = useCallback(async () => {
+    setConvLoading(true);
+    try {
+      const rows = await listConversations();
+      setConversations(rows);
+    } finally {
+      setConvLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!ready) return;
     void loadLists();
-  }, [ready, loadLists, projects.length]);
+    void loadConversations();
+  }, [ready, loadLists, loadConversations, projects.length]);
 
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {
@@ -96,6 +116,18 @@ export function PopupApp() {
         m.tags.some((t) => t.toLowerCase().includes(q)),
     );
   }, [recent, query]);
+
+  const filteredConversations = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    const base = conversations.slice(0, 8);
+    if (!q) return base;
+    return conversations.filter(
+      (c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.model ?? "").toLowerCase().includes(q) ||
+        c.provider.toLowerCase().includes(q),
+    );
+  }, [conversations, query]);
 
   const openSidePanel = async () => {
     try {
@@ -195,17 +227,63 @@ export function PopupApp() {
       </header>
 
       <div className="px-3 pt-2.5">
-        <label className="relative block">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            placeholder="Search memories, projects, tags…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search memories"
-            className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-          />
-        </label>
+        {tab === "memories" ? (
+          <label className="relative block">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              placeholder="Search memories, projects, tags…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search memories"
+              className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+            />
+          </label>
+        ) : (
+          <ConversationSearch value={query} onChange={setQuery} />
+        )}
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Popup section"
+        className="mx-3 mt-2.5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
+      >
+        {(
+          [
+            { id: "memories" as Tab, label: "Memories", icon: StickyNote },
+            { id: "conversations" as Tab, label: "Chats", icon: MessagesSquare },
+          ]
+        ).map((t) => {
+          const Icon = t.icon;
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => {
+                setTab(t.id);
+                setQuery("");
+              }}
+              className={
+                "h-7 rounded-md text-[11px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors " +
+                (active
+                  ? "bg-surface text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground")
+              }
+            >
+              <Icon className="h-3 w-3" />
+              {t.label}
+              {t.id === "conversations" && conversations.length > 0 && (
+                <span className="ml-0.5 text-[10px] text-muted-foreground tabular-nums">
+                  {conversations.length}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {pending && (
@@ -222,11 +300,108 @@ export function PopupApp() {
       )}
 
       <div className="flex-1 overflow-y-auto scroll-thin px-3 py-2.5 space-y-4">
-        {(pinnedProjects.length + recentProjects.length > 0) && (
-          <section aria-labelledby="popup-projects">
+        {tab === "memories" ? (
+          <>
+            {(pinnedProjects.length + recentProjects.length > 0) && (
+              <section aria-labelledby="popup-projects">
+                <div className="flex items-center justify-between mb-1.5">
+                  <h3 id="popup-projects" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Projects
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={openSidePanel}
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    View all
+                  </button>
+                </div>
+                <ul className="grid grid-cols-2 gap-1.5">
+                  {[...pinnedProjects, ...recentProjects].slice(0, 4).map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={openSidePanel}
+                        className="w-full flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs hover:border-primary/40 text-left"
+                      >
+                        <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
+                        <span className="truncate flex-1">{p.name}</span>
+                        {p.pinned && <Pin className="h-3 w-3 text-primary" />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {pinned.length > 0 && (
+              <section aria-labelledby="popup-pinned">
+                <h3 id="popup-pinned" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Favorites
+                </h3>
+                <ul className="space-y-1.5">
+                  {pinned.map((m) => (
+                    <MemoryRow
+                      key={m.id}
+                      memory={m}
+                      onToggleFavorite={toggleFavorite}
+                      onTogglePin={togglePinMemory}
+                      onTrash={trashMemory}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section aria-labelledby="popup-recent">
+              <div className="flex items-center justify-between mb-1.5">
+                <h3 id="popup-recent" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {query ? "Results" : "Recent"}
+                </h3>
+                <Button size="sm" variant="ghost" onClick={captureFromPage}>
+                  <Plus className="h-3 w-3" />
+                  Capture
+                </Button>
+              </div>
+              {busy && !recent.length ? (
+                <MemoryListSkeleton rows={4} />
+              ) : filtered.length === 0 ? (
+                <Empty
+                  icon={<FolderOpen className="h-5 w-5" />}
+                  title={query ? "No matches" : "No memories yet."}
+                  description={
+                    query
+                      ? "Try a different search term or open the workspace."
+                      : "Select text on any AI page and press Alt+Shift+S — or right-click to save."
+                  }
+                  action={
+                    !query && (
+                      <Button size="sm" variant="primary" onClick={openSidePanel}>
+                        Open workspace
+                      </Button>
+                    )
+                  }
+                />
+              ) : (
+                <ul className="space-y-1.5">
+                  {filtered.map((m) => (
+                    <MemoryRow
+                      key={m.id}
+                      memory={m}
+                      onToggleFavorite={toggleFavorite}
+                      onTogglePin={togglePinMemory}
+                      onTrash={trashMemory}
+                    />
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
+        ) : (
+          <section aria-labelledby="popup-conversations">
             <div className="flex items-center justify-between mb-1.5">
-              <h3 id="popup-projects" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Projects
+              <h3 id="popup-conversations" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {query ? "Results" : "Recent chats"}
               </h3>
               <button
                 type="button"
@@ -236,86 +411,32 @@ export function PopupApp() {
                 View all
               </button>
             </div>
-            <ul className="grid grid-cols-2 gap-1.5">
-              {[...pinnedProjects, ...recentProjects].slice(0, 4).map((p) => (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={openSidePanel}
-                    className="w-full flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs hover:border-primary/40 text-left"
-                  >
-                    <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
-                    <span className="truncate flex-1">{p.name}</span>
-                    {p.pinned && <Pin className="h-3 w-3 text-primary" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {pinned.length > 0 && (
-          <section aria-labelledby="popup-pinned">
-            <h3 id="popup-pinned" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Favorites
-            </h3>
-            <ul className="space-y-1.5">
-              {pinned.map((m) => (
-                <MemoryRow
-                  key={m.id}
-                  memory={m}
-                  onToggleFavorite={toggleFavorite}
-                  onTogglePin={togglePinMemory}
-                  onTrash={trashMemory}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <section aria-labelledby="popup-recent">
-          <div className="flex items-center justify-between mb-1.5">
-            <h3 id="popup-recent" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {query ? "Results" : "Recent"}
-            </h3>
-            <Button size="sm" variant="ghost" onClick={captureFromPage}>
-              <Plus className="h-3 w-3" />
-              Capture
-            </Button>
-          </div>
-          {busy && !recent.length ? (
-            <MemoryListSkeleton rows={4} />
-          ) : filtered.length === 0 ? (
-            <Empty
-              icon={<FolderOpen className="h-5 w-5" />}
-              title={query ? "No matches" : "No memories yet."}
-              description={
-                query
-                  ? "Try a different search term or open the workspace."
-                  : "Select text on any AI page and press Alt+Shift+S — or right-click to save."
-              }
-              action={
-                !query && (
-                  <Button size="sm" variant="primary" onClick={openSidePanel}>
-                    Open workspace
-                  </Button>
-                )
+            <ConversationList
+              conversations={filteredConversations}
+              loading={convLoading}
+              compact
+              query={query || undefined}
+              onOpen={(c) => {
+                if (c.url) {
+                  chrome.tabs.create({ url: c.url });
+                } else {
+                  void openSidePanel();
+                }
+              }}
+              onDelete={async (c) => {
+                if (!window.confirm(`Delete conversation “${c.title}”?`)) return;
+                await deleteConversation(c.id);
+                toast.success("Conversation deleted");
+                void loadConversations();
+              }}
+              emptyAction={
+                <Button size="sm" variant="primary" onClick={openSidePanel}>
+                  Open workspace
+                </Button>
               }
             />
-          ) : (
-            <ul className="space-y-1.5">
-              {filtered.map((m) => (
-                <MemoryRow
-                  key={m.id}
-                  memory={m}
-                  onToggleFavorite={toggleFavorite}
-                  onTogglePin={togglePinMemory}
-                  onTrash={trashMemory}
-                />
-              ))}
-            </ul>
-          )}
-        </section>
+          </section>
+        )}
       </div>
 
       <footer className="border-t border-border px-3 py-2 flex items-center justify-between text-[10px] text-muted-foreground">
