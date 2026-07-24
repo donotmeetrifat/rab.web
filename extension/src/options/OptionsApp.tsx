@@ -31,17 +31,31 @@ export function OptionsApp() {
   const resetSettings = useMemlace((s) => s.resetSettings);
 
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
-  const [stats, setStats] = useState<{ projects: number; memories: number; trashed: number } | null>(null);
+  const [stats, setStats] = useState<{
+    projects: number;
+    memories: number;
+    trashed: number;
+    conversations: number;
+    messages: number;
+  } | null>(null);
+  const [exportSize, setExportSize] = useState<number | null>(null);
+  const [restoreSettings, setRestoreSettings] = useState(false);
 
   useEffect(() => {
     bootstrap();
     void storageEstimate().then(setStorage);
     void counts().then(setStats);
+    void estimateExportSize().then(setExportSize).catch(() => setExportSize(null));
   }, [bootstrap]);
 
   const refreshStats = async () => {
     setStorage(await storageEstimate());
     setStats(await counts());
+    try {
+      setExportSize(await estimateExportSize());
+    } catch {
+      setExportSize(null);
+    }
   };
 
   const doExport = async () => {
