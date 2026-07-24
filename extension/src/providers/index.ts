@@ -7,8 +7,8 @@ import { PerplexityAdapter } from "./perplexity";
 import { CopilotAdapter } from "./copilot";
 import { AIStudioAdapter } from "./aistudio";
 
-/** Order matters: first matching adapter wins. ChatGPT ships fully; others are
- *  placeholders until their DOM integration lands (Phase 2.x). */
+/** Order matters: first matching adapter wins. All adapters implement the
+ *  full ProviderAdapter contract via BaseChatAdapter. */
 export function buildAdapters(): ProviderAdapter[] {
   return [
     new ChatGPTAdapter(),
