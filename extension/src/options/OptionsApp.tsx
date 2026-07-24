@@ -296,6 +296,14 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+function BackupStat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="rounded-lg border border-border bg-background px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">{value}</div>
+    </div>
+  );
+
 function Kbd({ children }: { children: ReactNode }) {
   return (
     <kbd className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[11px] font-mono">
