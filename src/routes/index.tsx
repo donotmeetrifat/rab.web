@@ -108,13 +108,8 @@ function LandingPage() {
               <button
                 onClick={download}
                 disabled={state === "loading"}
-                style={{
-                  backgroundImage: "var(--gradient-primary)",
-                  boxShadow: "var(--shadow-3d-primary)",
-                }}
-                className="group/dl relative inline-flex h-12 translate-y-0 items-center justify-center overflow-hidden rounded-[12px] px-6 text-sm font-semibold tracking-tight text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] disabled:opacity-60 disabled:hover:translate-y-0"
+                className="btn-3d-primary inline-flex h-12 items-center justify-center rounded-[12px] px-6 text-sm font-semibold tracking-tight"
               >
-                <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
               </button>
               <a
@@ -493,16 +488,11 @@ function PreviewFrame() {
               type="button"
               onClick={cycleProvider}
               aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
-              style={{
-                backgroundImage: "var(--gradient-primary)",
-                boxShadow: "var(--shadow-3d-primary)",
-              }}
               className={
-                "group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-lg px-3 text-xs font-semibold text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] " +
+                "btn-3d-primary group/cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold " +
                 focusRing
               }
             >
-              <span className="pointer-events-none absolute inset-x-2 top-0 h-px bg-white/50" aria-hidden />
               <span className="relative">
                 Continue in{" "}
                 <span
