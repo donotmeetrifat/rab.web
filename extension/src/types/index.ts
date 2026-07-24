@@ -80,8 +80,41 @@ export interface Settings {
   shortcutOpenPopup: string;
   telemetryEnabled: false;
   notificationsEnabled: boolean;
+  /** When true, ProviderManager auto-saves every conversation change. */
+  autoSaveConversations: boolean;
   sort: SortKey;
   version: string;
+}
+
+/* ---------------- Conversations (provider capture) ---------------- */
+
+export interface StoredConversation {
+  id: string;
+  provider: ProviderId;
+  providerConversationId: string;
+  title: string;
+  url: string;
+  model: string | null;
+  messageCount: number;
+  hash: string;
+  createdAt: number;
+  updatedAt: number;
+  lastSyncAt: number;
+  source: "manual" | "auto" | "initial";
+}
+
+export interface StoredConvMessage {
+  id: string;
+  conversationId: string;
+  providerMessageId: string;
+  role: "user" | "assistant" | "system" | "tool";
+  content: string;
+  markdown: string;
+  order: number;
+  images: string[];
+  attachments: { kind: "image" | "file" | "link"; name?: string; url?: string; mime?: string }[];
+  metadata: Record<string, unknown>;
+  createdAt: number;
 }
 
 export interface ExportPayload {
@@ -89,6 +122,8 @@ export interface ExportPayload {
   exportedAt: number;
   projects: Project[];
   memories: Memory[];
+  conversations?: StoredConversation[];
+  convMessages?: StoredConvMessage[];
 }
 
 export type RuntimeMessage =
@@ -97,7 +132,16 @@ export type RuntimeMessage =
   | { type: "OPEN_SIDE_PANEL" }
   | { type: "OPEN_POPUP" }
   | { type: "GET_ACTIVE_PROVIDER" }
-  | { type: "REQUEST_SELECTION_CAPTURE" };
+  | { type: "REQUEST_SELECTION_CAPTURE" }
+  | {
+      type: "CONVERSATION_SAVED";
+      payload: {
+        provider: ProviderId;
+        title: string;
+        created: boolean;
+        source: "manual" | "auto" | "initial";
+      };
+    };
 
 export type RuntimeResponse =
   | { ok: true; data?: unknown }
