@@ -72,11 +72,13 @@ function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2.5">
-          <Mark />
-          <span className="text-[15px] font-semibold tracking-tight">Memlace</span>
-        </div>
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-8 py-6">
+        <a href="/" className="group/brand flex items-center gap-[11px] transition-opacity duration-150 hover:opacity-80" aria-label="Memlace — home">
+          <Mark size={32} />
+          <span className="text-[26px] font-semibold leading-none text-foreground" style={{ letterSpacing: "-0.02em" }}>
+            Memlace
+          </span>
+        </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
             Features
@@ -89,6 +91,7 @@ function LandingPage() {
           </a>
         </nav>
       </header>
+
 
       <main className="mx-auto max-w-6xl px-6">
         {/* Hero */}
@@ -223,11 +226,11 @@ function LandingPage() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-3">
-            <Mark />
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-8 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
+          <div className="flex items-center gap-[11px]">
+            <Mark size={28} />
             <div className="flex flex-col leading-tight">
-              <span className="text-foreground font-semibold tracking-tight">Memlace</span>
+              <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
               <span className="text-xs">A place for your AI memory.</span>
             </div>
           </div>
@@ -236,6 +239,7 @@ function LandingPage() {
           </p>
         </div>
       </footer>
+
     </div>
   );
 }
@@ -346,15 +350,14 @@ function PreviewFrame() {
       <div className="grid gap-px bg-border md:grid-cols-[240px_1fr]">
         {/* Sidebar */}
         <aside className="bg-background p-4" aria-label="Workspace sidebar">
-          <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-primary text-primary-foreground text-[11px] font-semibold leading-none tracking-tight transition-transform duration-300 hover:rotate-6">
-              M
-            </div>
-            <span className="text-xs font-medium">Memlace</span>
+          <div className="mb-4 flex items-center gap-2.5">
+            <Mark size={24} />
+            <span className="text-[13px] font-semibold text-foreground" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
               <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
           </div>
+
 
           {/* Fake search */}
           <button

@@ -41,11 +41,12 @@
 :root {
   --radius: 0.625rem;
 
-  --background: oklch(0.985 0.006 85);      /* #FBFAF7 warm off-white */
-  --foreground: oklch(0.22 0.005 60);       /* #1A1A1A ink */
+  --background: oklch(0.985 0.002 90);      /* #FAFAF9 near-white */
+  --foreground: oklch(0.205 0.03 265);      /* #0F172A dark navy */
 
-  --surface: oklch(0.955 0.008 80);         /* #F1EFEA */
-  --hairline: oklch(0.905 0.008 75);        /* #E8E5DE */
+  --surface: oklch(1 0 0);                  /* #FFFFFF cards */
+  --hairline: oklch(0.925 0.005 260);       /* #E5E7EB border */
+
 
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
@@ -79,7 +80,7 @@
   --secondary: var(--surface);
   --secondary-foreground: var(--foreground);
   --muted: var(--surface);
-  --muted-foreground: oklch(0.5 0.01 70);
+  --muted-foreground: oklch(0.55 0.03 260); /* #64748B slate */
   --accent: var(--surface);
   --accent-foreground: var(--foreground);
 
