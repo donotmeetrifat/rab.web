@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
@@ -332,7 +332,6 @@ function PreviewFrame() {
   const [activeNav, setActiveNav] = useState("Projects");
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
-  const [pulseKey, setPulseKey] = useState(0);
   const [announce, setAnnounce] = useState("");
 
   const project = useMemo(
@@ -347,25 +346,25 @@ function PreviewFrame() {
   );
   const chatRoving = useRovingIndex(project.chats.length, 0);
 
-  // Ambient live-capture pulse in the header
-  useEffect(() => {
-    const id = window.setInterval(() => setPulseKey((k) => k + 1), 2600);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const selectNav = (i: number) => {
+  const selectNav = useCallback((i: number) => {
     setActiveNav(NAV[i]);
     setAnnounce(`${NAV[i]} selected`);
-  };
-  const selectProject = (i: number) => {
+  }, []);
+  const selectProject = useCallback((i: number) => {
     setActiveProjectId(PROJECTS[i].id);
     setAnnounce(`Project ${PROJECTS[i].name} opened`);
-  };
-  const cycleProvider = () => {
-    const next = (providerIdx + 1) % PROVIDERS.length;
-    setProviderIdx(next);
-    setAnnounce(`Continue in ${PROVIDERS[next]}`);
-  };
+  }, []);
+  const cycleProvider = useCallback(() => {
+    setProviderIdx((prev) => {
+      const next = (prev + 1) % PROVIDERS.length;
+      setAnnounce(`Continue in ${PROVIDERS[next]}`);
+      return next;
+    });
+  }, []);
+  const openChat = useCallback(
+    (i: number) => setAnnounce(`Opening ${project.chats[i].title}`),
+    [project.chats],
+  );
 
   return (
     <div
@@ -388,7 +387,7 @@ function PreviewFrame() {
           extension · popup
         </span>
         <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span key={pulseKey} className="relative flex h-1.5 w-1.5" aria-hidden>
+          <span className="relative flex h-1.5 w-1.5" aria-hidden>
             <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
           </span>
@@ -582,38 +581,17 @@ function PreviewFrame() {
 
           <ul
             aria-label={`Chats in ${project.name}`}
-            className="mt-5 space-y-1.5"
-            onKeyDown={(e) => chatRoving.onKeyDown(e, (i) => setAnnounce(`Opening ${project.chats[i].title}`))}
+            className="mt-5 space-y-1.5 [contain:layout_paint]"
+            onKeyDown={(e) => chatRoving.onKeyDown(e, openChat)}
           >
             {project.chats.map((c, i) => (
-              <li key={`${project.id}-${c.title}`} role="none">
-                <button
-                  type="button"
-                  onClick={() => setAnnounce(`Opening ${c.title}`)}
-                  aria-label={`${c.title}, from ${c.provider}, ${c.when}`}
-                  {...chatRoving.getItemProps(i)}
-                  style={{
-                    animationDelay: `${i * 55}ms`,
-                    animationFillMode: "backwards",
-                  }}
-                  className={
-                    "group/row flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left transition-all duration-200 animate-fade-in hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)] " +
-                    focusRing
-                  }
-                >
-                  <span className="flex min-w-0 items-center gap-3">
-                    <ProviderChip name={c.provider} />
-                    <span className="truncate text-sm">{c.title}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    <span className="font-mono text-[11px] text-muted-foreground">{c.when}</span>
-                    <ArrowRight
-                      aria-hidden
-                      className="h-3 w-3 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-100 group-focus-visible/row:translate-x-0 group-focus-visible/row:opacity-100"
-                    />
-                  </span>
-                </button>
-              </li>
+              <ChatRow
+                key={`${project.id}-${c.title}`}
+                chat={c}
+                index={i}
+                itemProps={chatRoving.getItemProps(i)}
+                onOpen={openChat}
+              />
             ))}
           </ul>
 
@@ -654,19 +632,72 @@ const PROVIDER_TONES: Record<string, string> = {
   Copilot: "text-[oklch(0.5_0.02_260)]",
 };
 
-function ProviderChip({ name }: { name: string }) {
+const ProviderChip = memo(function ProviderChip({ name }: { name: string }) {
   const tone = PROVIDER_TONES[name] ?? "text-muted-foreground";
   return (
     <span
       className={
-        "rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors " +
+        "rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider " +
         tone
       }
     >
       {name}
     </span>
   );
-}
+});
+
+type ChatRowProps = {
+  chat: { provider: string; title: string; when: string };
+  index: number;
+  itemProps: {
+    ref: (el: HTMLButtonElement | null) => void;
+    tabIndex: number;
+    onFocus: () => void;
+  };
+  onOpen: (i: number) => void;
+};
+
+/** Memoized row. Cap entrance-animation stagger at 10 rows so long lists
+ *  don't queue up seconds of transitions, and use content-visibility so
+ *  off-screen rows skip layout/paint entirely. */
+const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRowProps) {
+  const staggered = index < 10;
+  return (
+    <li
+      role="none"
+      className="[content-visibility:auto] [contain-intrinsic-size:auto_44px]"
+    >
+      <button
+        type="button"
+        onClick={() => onOpen(index)}
+        aria-label={`${chat.title}, from ${chat.provider}, ${chat.when}`}
+        {...itemProps}
+        style={
+          staggered
+            ? { animationDelay: `${index * 40}ms`, animationFillMode: "backwards" }
+            : undefined
+        }
+        className={
+          "group/row flex w-full transform-gpu items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left transition-[transform,border-color,background-color,box-shadow] duration-200 hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)] " +
+          (staggered ? "animate-fade-in " : "") +
+          focusRing
+        }
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <ProviderChip name={chat.provider} />
+          <span className="truncate text-sm">{chat.title}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2">
+          <span className="font-mono text-[11px] text-muted-foreground">{chat.when}</span>
+          <ArrowRight
+            aria-hidden
+            className="h-3 w-3 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-100 group-focus-visible/row:translate-x-0 group-focus-visible/row:opacity-100"
+          />
+        </span>
+      </button>
+    </li>
+  );
+});
 
 function Key({ children }: { children: React.ReactNode }) {
   return (
