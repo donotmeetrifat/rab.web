@@ -334,9 +334,9 @@ export function SidePanelApp() {
           >
             <MessagesSquare className="h-3.5 w-3.5" />
             Conversations
-            {conversations.length > 0 && (
+            {convTotal > 0 && (
               <span className="ml-auto text-[10px] text-muted-foreground tabular-nums">
-                {conversations.length}
+                {convTotal}
               </span>
             )}
           </button>
