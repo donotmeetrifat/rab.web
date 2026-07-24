@@ -205,47 +205,57 @@ export class ChatGPTAdapter implements ProviderAdapter {
 
   private mountButton(): void {
     if (document.getElementById(BUTTON_ID)) return;
-    // Anchor next to the composer's action buttons.
-    const host =
-      document.querySelector('form [data-testid="send-button"]')?.parentElement ??
-      document.querySelector("main form") ??
-      document.body;
 
+    const toolbarHost = findComposerToolbar();
     const btn = document.createElement("button");
     btn.id = BUTTON_ID;
     btn.type = "button";
     btn.setAttribute("aria-label", "Save conversation to Memlace");
-    btn.innerHTML = BUTTON_MARKUP;
-    Object.assign(btn.style, BUTTON_BASE_STYLES);
+    btn.setAttribute("data-memlace", "save-btn");
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       void this.handlers?.onSave();
     });
-    // Prefer floating anchor to avoid CLS in the composer.
-    document.body.appendChild(btn);
+
+    if (toolbarHost) {
+      // Native-style pill button that blends with ChatGPT composer toolbar.
+      btn.className = "memlace-save-btn memlace-save-btn--native";
+      btn.innerHTML = NATIVE_BUTTON_MARKUP;
+      // Insert before send button when possible, otherwise append.
+      const sendBtn = toolbarHost.querySelector<HTMLElement>(
+        '[data-testid="send-button"], button[aria-label*="Send" i]',
+      );
+      if (sendBtn && sendBtn.parentElement === toolbarHost) {
+        toolbarHost.insertBefore(btn, sendBtn);
+      } else {
+        toolbarHost.appendChild(btn);
+      }
+    } else {
+      // Fallback: floating pill.
+      btn.className = "memlace-save-btn memlace-save-btn--floating";
+      btn.innerHTML = FLOATING_BUTTON_MARKUP;
+      Object.assign(btn.style, FLOATING_BASE_STYLES);
+      document.body.appendChild(btn);
+    }
+
+    ensureStylesInjected();
     this.buttonEl = btn;
     this.applyButtonState(this.handlers?.getState() ?? "idle");
-    // Reference host to avoid unused-var warnings and pin lifetime intent.
-    void host;
   }
 
   private applyButtonState(state: SaveButtonState): void {
     if (!this.buttonEl) return;
     const label = this.buttonEl.querySelector<HTMLSpanElement>(".memlace-btn-label");
-    const dot = this.buttonEl.querySelector<HTMLSpanElement>(".memlace-btn-dot");
-    const map: Record<SaveButtonState, { text: string; color: string; bg: string }> = {
-      idle:    { text: "Save to Memlace", color: "#FFFFFF", bg: "#2563EB" },
-      saving:  { text: "Saving…",         color: "#FFFFFF", bg: "#1D4ED8" },
-      saved:   { text: "Saved",           color: "#FFFFFF", bg: "#059669" },
-      updated: { text: "Updated",         color: "#FFFFFF", bg: "#059669" },
-      error:   { text: "Save failed",     color: "#FFFFFF", bg: "#DC2626" },
-    };
-    const cfg = map[state];
+    const icon = this.buttonEl.querySelector<HTMLSpanElement>(".memlace-btn-icon");
+    const cfg = STATE_MAP[state];
     if (label) label.textContent = cfg.text;
-    if (dot) dot.style.background = state === "saving" ? "#FDE68A" : "#FFFFFF";
-    this.buttonEl.style.background = cfg.bg;
-    this.buttonEl.style.color = cfg.color;
+    if (icon) icon.innerHTML = cfg.iconSvg;
+
+    // Tag with state so CSS can theme both native and floating variants.
+    this.buttonEl.dataset.state = state;
+    this.buttonEl.setAttribute("aria-busy", state === "saving" ? "true" : "false");
+    this.buttonEl.title = cfg.tooltip;
   }
 }
 
@@ -282,27 +292,153 @@ function hashString(input: string): string {
   return h.toString(16);
 }
 
-const BUTTON_BASE_STYLES: Partial<CSSStyleDeclaration> = {
-  position: "fixed",
-  right: "20px",
-  bottom: "88px",
-  zIndex: "2147483000",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "8px",
-  padding: "10px 14px",
-  borderRadius: "10px",
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "#2563EB",
-  color: "#FFFFFF",
-  font: "500 13px/1 Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-  cursor: "pointer",
-  boxShadow: "0 10px 24px rgba(37,99,235,0.28), 0 2px 4px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.24)",
-  transition: "transform 140ms ease, background 140ms ease, box-shadow 140ms ease",
-  userSelect: "none",
+/**
+ * Locate the row of action buttons at the bottom of ChatGPT's composer.
+ * Walk up from the send button until we find a container that also holds
+ * at least one sibling action button (attach, voice, tools). This is more
+ * resilient than a hardcoded selector against ChatGPT's frequent redesigns.
+ */
+function findComposerToolbar(): HTMLElement | null {
+  const send = document.querySelector<HTMLElement>(
+    'form [data-testid="send-button"], form button[aria-label*="Send" i]',
+  );
+  if (!send) return null;
+
+  let node: HTMLElement | null = send.parentElement;
+  for (let depth = 0; node && depth < 5; depth++, node = node.parentElement) {
+    const buttonCount = node.querySelectorAll(":scope > button").length;
+    if (buttonCount >= 2) return node;
+    // Some layouts wrap send in its own div; check one level of children too.
+    const nestedButtons = node.querySelectorAll(
+      ":scope > div > button, :scope > span > button",
+    ).length;
+    if (buttonCount + nestedButtons >= 2) return node;
+  }
+  return send.parentElement;
+}
+
+type StateConfig = { text: string; iconSvg: string; tooltip: string };
+
+const ICON_BOOKMARK =
+  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h10v13l-5-3-5 3v-13z"/></svg>';
+const ICON_SPINNER =
+  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="memlace-spin"><path d="M10 2.5a7.5 7.5 0 1 1-7.5 7.5" opacity=".9"/></svg>';
+const ICON_CHECK =
+  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>';
+const ICON_RETRY =
+  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 10a5.5 5.5 0 1 1-1.6-3.9"/><path d="M15.5 4v3.5H12"/></svg>';
+
+const STATE_MAP: Record<SaveButtonState, StateConfig> = {
+  idle:    { text: "Save to Memlace", iconSvg: ICON_BOOKMARK, tooltip: "Save this conversation to Memlace" },
+  saving:  { text: "Saving…",         iconSvg: ICON_SPINNER,  tooltip: "Saving conversation…" },
+  saved:   { text: "Saved ✓",         iconSvg: ICON_CHECK,    tooltip: "Saved to Memlace" },
+  updated: { text: "Updated ✓",       iconSvg: ICON_CHECK,    tooltip: "Updated in Memlace" },
+  error:   { text: "Retry",           iconSvg: ICON_RETRY,    tooltip: "Save failed — click to retry" },
 };
 
-const BUTTON_MARKUP = `
-  <span class="memlace-btn-dot" style="width:8px;height:8px;border-radius:50%;background:#FFFFFF;box-shadow:0 0 0 3px rgba(255,255,255,0.18);"></span>
+const NATIVE_BUTTON_MARKUP = `
+  <span class="memlace-btn-icon" aria-hidden="true">${ICON_BOOKMARK}</span>
   <span class="memlace-btn-label">Save to Memlace</span>
 `;
+
+const FLOATING_BUTTON_MARKUP = `
+  <span class="memlace-btn-icon" aria-hidden="true">${ICON_BOOKMARK}</span>
+  <span class="memlace-btn-label">Save to Memlace</span>
+`;
+
+const FLOATING_BASE_STYLES: Partial<CSSStyleDeclaration> = {
+  position: "fixed",
+  right: "20px",
+  bottom: "104px",
+  zIndex: "2147483000",
+};
+
+const STYLE_ID = "memlace-save-btn-styles";
+function ensureStylesInjected(): void {
+  if (document.getElementById(STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = `
+    .memlace-save-btn {
+      all: unset;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      font: 500 13px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+    }
+    .memlace-save-btn:focus-visible {
+      outline: 2px solid #2563EB;
+      outline-offset: 2px;
+    }
+    .memlace-save-btn .memlace-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .memlace-save-btn .memlace-spin {
+      animation: memlace-spin 900ms linear infinite;
+      transform-origin: 50% 50%;
+    }
+    @keyframes memlace-spin { to { transform: rotate(360deg); } }
+
+    /* -------- Native (inside ChatGPT composer toolbar) -------- */
+    .memlace-save-btn--native {
+      height: 32px;
+      padding: 0 10px;
+      margin: 0 4px;
+      border-radius: 9999px;
+      color: inherit;
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+    .memlace-save-btn--native:hover {
+      background: rgba(0,0,0,0.05);
+    }
+    @media (prefers-color-scheme: dark) {
+      .memlace-save-btn--native {
+        border-color: rgba(255,255,255,0.16);
+        color: rgba(255,255,255,0.92);
+      }
+      .memlace-save-btn--native:hover {
+        background: rgba(255,255,255,0.08);
+      }
+    }
+    .memlace-save-btn--native[data-state="saved"],
+    .memlace-save-btn--native[data-state="updated"] {
+      color: #047857;
+      border-color: rgba(4,120,87,0.35);
+      background: rgba(16,185,129,0.10);
+    }
+    .memlace-save-btn--native[data-state="saving"] {
+      color: #2563EB;
+      border-color: rgba(37,99,235,0.35);
+      background: rgba(37,99,235,0.08);
+    }
+    .memlace-save-btn--native[data-state="error"] {
+      color: #B91C1C;
+      border-color: rgba(185,28,28,0.35);
+      background: rgba(220,38,38,0.08);
+    }
+
+    /* -------- Floating fallback -------- */
+    .memlace-save-btn--floating {
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 10px;
+      color: #FFFFFF;
+      background: #2563EB;
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 10px 24px rgba(37,99,235,0.28), 0 2px 4px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.24);
+    }
+    .memlace-save-btn--floating:hover { transform: translateY(-1px); }
+    .memlace-save-btn--floating[data-state="saving"]  { background: #1D4ED8; }
+    .memlace-save-btn--floating[data-state="saved"],
+    .memlace-save-btn--floating[data-state="updated"] { background: #059669; }
+    .memlace-save-btn--floating[data-state="error"]   { background: #DC2626; }
+  `;
+  (document.head || document.documentElement).appendChild(style);
+}
