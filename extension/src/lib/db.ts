@@ -1,9 +1,16 @@
 import Dexie, { type Table } from "dexie";
-import type { Memory, Project } from "@/types";
+import type {
+  Memory,
+  Project,
+  StoredConversation,
+  StoredConvMessage,
+} from "@/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
   memories!: Table<Memory, string>;
+  conversations!: Table<StoredConversation, string>;
+  convMessages!: Table<StoredConvMessage, string>;
 
   constructor() {
     super("memlace");
@@ -41,6 +48,16 @@ class MemlaceDB extends Dexie {
             if (typeof p.icon !== "string") p.icon = "folder";
           });
       });
+
+    // v3 — conversation capture (provider adapters)
+    this.version(3).stores({
+      projects: "id, name, pinned, favorite, archived, updatedAt",
+      memories:
+        "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      conversations:
+        "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
+      convMessages: "id, conversationId, order, role",
+    });
   }
 }
 

@@ -166,6 +166,19 @@ chrome.runtime.onMessage.addListener(
             await captureFromActiveTab();
             sendResponse({ ok: true });
             return;
+          case "CONVERSATION_SAVED": {
+            const settings = await loadSettings().catch(() => null);
+            if (settings?.notificationsEnabled !== false) {
+              await notify({
+                title: msg.payload.created
+                  ? `Saved from ${msg.payload.provider}`
+                  : `Updated from ${msg.payload.provider}`,
+                message: msg.payload.title.slice(0, 100),
+              });
+            }
+            sendResponse({ ok: true });
+            return;
+          }
           case "GET_ACTIVE_PROVIDER": {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             sendResponse({

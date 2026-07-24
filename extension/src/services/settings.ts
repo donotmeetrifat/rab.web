@@ -9,8 +9,9 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcutOpenPopup: "Alt+Shift+P",
   telemetryEnabled: false,
   notificationsEnabled: true,
+  autoSaveConversations: false,
   sort: "newest",
-  version: "0.2.0",
+  version: "0.3.0",
 };
 
 export async function loadSettings(): Promise<Settings> {
