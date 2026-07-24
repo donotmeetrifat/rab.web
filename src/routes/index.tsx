@@ -228,8 +228,9 @@ function LandingPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-8 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-[11px]">
-            <Mark size={28} />
+          <div className="flex items-center gap-[10px]">
+            <Mark size={32} />
+
             <div className="flex flex-col leading-tight">
               <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
               <span className="text-xs">A place for your AI memory.</span>
