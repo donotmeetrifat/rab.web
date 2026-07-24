@@ -283,7 +283,6 @@ function PreviewFrame() {
   const [activeNav, setActiveNav] = useState("Projects");
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
-  const [announce, setAnnounce] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // First-run onboarding: show once per browser, persisted via localStorage.
@@ -303,7 +302,6 @@ function PreviewFrame() {
     } catch {
       /* storage blocked — session-only dismiss is fine */
     }
-    setAnnounce("Onboarding dismissed");
   }, []);
 
   const replayOnboarding = useCallback(() => {
@@ -318,32 +316,10 @@ function PreviewFrame() {
     [activeProjectId],
   );
 
-  const navRoving = useRovingIndex(NAV.length, NAV.indexOf(activeNav));
-  const projectRoving = useRovingIndex(
-    PROJECTS.length,
-    Math.max(0, PROJECTS.findIndex((p) => p.id === activeProjectId)),
-  );
-  const chatRoving = useRovingIndex(project.chats.length, 0);
-
-  const selectNav = useCallback((i: number) => {
-    setActiveNav(NAV[i]);
-    setAnnounce(`${NAV[i]} selected`);
-  }, []);
-  const selectProject = useCallback((i: number) => {
-    setActiveProjectId(PROJECTS[i].id);
-    setAnnounce(`Project ${PROJECTS[i].name} opened`);
-  }, []);
   const cycleProvider = useCallback(() => {
-    setProviderIdx((prev) => {
-      const next = (prev + 1) % PROVIDERS.length;
-      setAnnounce(`Continue in ${PROVIDERS[next]}`);
-      return next;
-    });
+    setProviderIdx((prev) => (prev + 1) % PROVIDERS.length);
   }, []);
-  const openChat = useCallback(
-    (i: number) => setAnnounce(`Opening ${project.chats[i].title}`),
-    [project.chats],
-  );
+
 
   return (
     <div
