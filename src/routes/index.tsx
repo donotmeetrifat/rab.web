@@ -543,35 +543,16 @@ function PreviewFrame() {
           <ul
             aria-label={`Chats in ${project.name}`}
             className="mt-5 space-y-1.5 [contain:layout_paint]"
-            onKeyDown={(e) => chatRoving.onKeyDown(e, openChat)}
           >
             {project.chats.map((c, i) => (
               <ChatRow
                 key={`${project.id}-${c.title}`}
                 chat={c}
                 index={i}
-                itemProps={chatRoving.getItemProps(i)}
-                onOpen={openChat}
               />
             ))}
           </ul>
 
-          {/* Keyboard hint */}
-          <p
-            id="popup-shortcuts"
-            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
-          >
-            <span className="inline-flex items-center gap-1">
-              <Key>Tab</Key> move between groups
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Key>↑</Key>
-              <Key>↓</Key> within a list
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Key>↵</Key> open
-            </span>
-          </p>
 
           {/* Ambient gradient wash */}
           <div
