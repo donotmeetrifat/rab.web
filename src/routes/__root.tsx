@@ -23,12 +23,7 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className="btn-3d-primary inline-flex h-11 items-center justify-center rounded-[10px] px-5 text-sm font-semibold tracking-tight"
-          >
-            Go home
-          </Link>
+          <LinkButton3D to="/">Go home</LinkButton3D>
         </div>
       </div>
     </div>
