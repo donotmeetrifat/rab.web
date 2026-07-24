@@ -72,10 +72,21 @@ export function PopupApp() {
     }
   }, []);
 
+  const loadConversations = useCallback(async () => {
+    setConvLoading(true);
+    try {
+      const rows = await listConversations();
+      setConversations(rows);
+    } finally {
+      setConvLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!ready) return;
     void loadLists();
-  }, [ready, loadLists, projects.length]);
+    void loadConversations();
+  }, [ready, loadLists, loadConversations, projects.length]);
 
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {
