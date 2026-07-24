@@ -3,11 +3,12 @@
  * transitions work via CSS. Paths from simple-icons where available;
  * OpenAI mark reproduced from the official brand asset.
  */
-import type { SVGProps } from "react";
+import type { ReactNode, SVGProps } from "react";
+import * as React from "react";
 
 type IconProps = SVGProps<SVGSVGElement> & { title?: string };
 
-function Svg({ title, children, ...props }: IconProps & { children: React.ReactNode }) {
+function Svg({ title, children, ...props }: IconProps & { children: ReactNode }) {
   return (
     <svg
       role="img"
