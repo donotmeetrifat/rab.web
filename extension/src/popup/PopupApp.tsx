@@ -8,6 +8,8 @@ import {
   Pin,
   FolderOpen,
   Keyboard,
+  MessagesSquare,
+  StickyNote,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -20,9 +22,13 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta } from "@/lib/providers";
 import { listMemories } from "@/services/memories";
-import type { Memory } from "@/types";
+import { listConversations, deleteConversation } from "@/services/conversations";
+import { ConversationList } from "@/components/conversations/ConversationList";
+import { ConversationSearch } from "@/components/conversations/ConversationSearch";
+import type { Memory, StoredConversation } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
+type Tab = "memories" | "conversations";
 
 export function PopupApp() {
   useThemeSync();
