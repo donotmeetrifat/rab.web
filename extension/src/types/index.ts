@@ -82,6 +82,12 @@ export interface Settings {
   notificationsEnabled: boolean;
   /** When true, ProviderManager auto-saves every conversation change. */
   autoSaveConversations: boolean;
+  /** Persist inline image URLs captured from conversations. */
+  saveImages: boolean;
+  /** Persist file attachment metadata captured from conversations. */
+  saveAttachments: boolean;
+  /** When true, disable auto-save even if autoSaveConversations is on — manual button only. */
+  saveConversationsManualOnly: boolean;
   sort: SortKey;
   version: string;
 }
