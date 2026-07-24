@@ -196,14 +196,10 @@ export function firstMatching(selectors: string[]): Element | null {
   return null;
 }
 
-export function hashString(input: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
-  }
-  return h.toString(16);
-}
+/** Re-export of the shared FNV-1a hash so provider modules only need one
+ *  import from BaseChatAdapter. Single implementation lives in `./hash`. */
+export { fnv1a as hashString } from "./hash";
+
 
 /**
  * Walk up from `start` looking for a container that holds at least
