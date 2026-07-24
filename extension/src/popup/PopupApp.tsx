@@ -308,9 +308,9 @@ export function PopupApp() {
             >
               <Icon className="h-3 w-3" />
               {t.label}
-              {t.id === "conversations" && conversations.length > 0 && (
+              {t.id === "conversations" && convCount > 0 && (
                 <span className="ml-0.5 text-[10px] text-muted-foreground tabular-nums">
-                  {conversations.length}
+                  {convCount}
                 </span>
               )}
             </button>
