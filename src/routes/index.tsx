@@ -75,17 +75,21 @@ function LandingPage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-8 py-6">
         <a
           href="/"
-          className="group/brand inline-flex items-center gap-[10px] leading-none"
           aria-label="Memlace — home"
+          className="group/brand"
+          style={{ display: "flex", alignItems: "center", gap: "12px", margin: 0, padding: 0, lineHeight: 1 }}
         >
-          <Mark size={32} />
+          <Mark size={34} />
           <span
             className="font-bold text-[20px] md:text-[22px] lg:text-[24px] text-primary transition-opacity duration-150 group-hover/brand:opacity-80"
             style={{
               letterSpacing: "-0.03em",
               lineHeight: 1,
               fontFamily: "Inter, sans-serif",
-              display: "inline-block",
+              display: "block",
+              margin: 0,
+              padding: 0,
+              whiteSpace: "nowrap",
             }}
           >
             Memlace
