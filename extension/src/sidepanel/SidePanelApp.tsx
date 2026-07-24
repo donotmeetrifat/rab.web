@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Search,
   Plus,
@@ -16,6 +16,7 @@ import {
   X,
   Check,
   ChevronDown,
+  MessagesSquare,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -29,7 +30,11 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta, PROVIDERS } from "@/lib/providers";
 import { listTags } from "@/services/tags";
-import type { Memory, Project, ProjectIcon, ProviderId, SortKey, TagMeta } from "@/types";
+import { listConversations, deleteConversation } from "@/services/conversations";
+import { ConversationList } from "@/components/conversations/ConversationList";
+import { ConversationSearch } from "@/components/conversations/ConversationSearch";
+import { ConversationDetail } from "@/components/conversations/ConversationDetail";
+import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
   { id: "recent", label: "Recent", icon: Clock },
