@@ -430,10 +430,10 @@ export function PopupApp() {
             </section>
           </>
         ) : (
-          <section aria-labelledby="popup-conversations">
-            <div className="flex items-center justify-between mb-1.5">
+          <section aria-labelledby="popup-conversations" className="space-y-2">
+            <div className="flex items-center justify-between">
               <h3 id="popup-conversations" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {query ? "Results" : "Recent chats"}
+                {debouncedQuery ? `Results (${displayedConversations.length})` : "Recent chats"}
               </h3>
               <button
                 type="button"
@@ -443,11 +443,13 @@ export function PopupApp() {
                 View all
               </button>
             </div>
+            <ConversationFilters value={convFilters} onChange={setConvFilters} variant="compact" />
             <ConversationList
-              conversations={filteredConversations}
+              conversations={displayedConversations}
               loading={convLoading}
               compact
-              query={query || undefined}
+              query={debouncedQuery || undefined}
+              snippets={conversationSnippets}
               onOpen={(c) => {
                 if (c.url) {
                   chrome.tabs.create({ url: c.url });
@@ -456,10 +458,10 @@ export function PopupApp() {
                 }
               }}
               onDelete={async (c) => {
-                if (!window.confirm(`Delete conversation “${c.title}”?`)) return;
+                if (!window.confirm(`Delete conversation "${c.title}"?`)) return;
                 await deleteConversation(c.id);
                 toast.success("Conversation deleted");
-                void loadConversations();
+                void runConvSearch(debouncedQuery, convFilters, true);
               }}
               emptyAction={
                 <Button size="sm" variant="primary" onClick={openSidePanel}>
