@@ -593,18 +593,12 @@ const ProviderChip = memo(function ProviderChip({ name }: { name: string }) {
 type ChatRowProps = {
   chat: { provider: string; title: string; when: string };
   index: number;
-  itemProps: {
-    ref: (el: HTMLButtonElement | null) => void;
-    tabIndex: number;
-    onFocus: () => void;
-  };
-  onOpen: (i: number) => void;
 };
 
 /** Memoized row. Cap entrance-animation stagger at 10 rows so long lists
  *  don't queue up seconds of transitions, and use content-visibility so
  *  off-screen rows skip layout/paint entirely. */
-const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRowProps) {
+const ChatRow = memo(function ChatRow({ chat, index }: ChatRowProps) {
   const staggered = index < 10;
   return (
     <li
@@ -613,9 +607,7 @@ const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRo
     >
       <button
         type="button"
-        onClick={() => onOpen(index)}
         aria-label={`${chat.title}, from ${chat.provider}, ${chat.when}`}
-        {...itemProps}
         style={
           staggered
             ? { animationDelay: `${index * 40}ms`, animationFillMode: "backwards" }
@@ -643,13 +635,6 @@ const ChatRow = memo(function ChatRow({ chat, index, itemProps, onOpen }: ChatRo
   );
 });
 
-function Key({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="inline-flex min-w-[1.25rem] items-center justify-center rounded border border-border bg-[color:var(--surface)] px-1 py-0.5 font-mono text-[10px] normal-case text-foreground">
-      {children}
-    </kbd>
-  );
-}
 
 /* ------------------------------ Onboarding ------------------------------- */
 
