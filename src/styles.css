@@ -98,21 +98,45 @@
   background-image: var(--gradient-primary);
   box-shadow: var(--shadow-3d-primary);
   color: var(--primary-foreground);
-  transition: transform 200ms ease-out, box-shadow 200ms ease-out, opacity 200ms ease-out;
-  will-change: transform;
+  /* Unified easing across all CTAs: quick out, gentle settle */
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease-out;
+  will-change: transform, box-shadow, filter;
   position: relative;
   overflow: hidden;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 @utility btn-3d-primary {
   &:hover:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-1.5px) scale(1.01);
     box-shadow: var(--shadow-3d-primary-hover);
+    filter: brightness(1.04) saturate(1.05);
+  }
+  &:hover:not(:disabled)::after {
+    transform: translateX(320%) skewX(-18deg);
   }
   &:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(0.5px) scale(0.985);
     box-shadow: var(--shadow-3d-primary-active);
+    filter: brightness(0.98);
+    transition:
+      transform 90ms cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 90ms cubic-bezier(0.4, 0, 0.2, 1),
+      filter 90ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      var(--shadow-3d-primary-hover),
+      0 0 0 3px oklch(1 0 0 / 0.9),
+      0 0 0 5px oklch(0.58 0.19 255 / 0.55);
   }
   &:disabled { opacity: 0.6; }
+  /* Top glass highlight */
   &::before {
     content: "";
     position: absolute;
@@ -122,6 +146,32 @@
     height: 1px;
     background: rgb(255 255 255 / 0.5);
     pointer-events: none;
+  }
+  /* Sheen sweep on hover */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 40%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(255 255 255 / 0.22) 50%,
+      transparent 100%
+    );
+    transform: translateX(0) skewX(-18deg);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-3d-primary,
+  .btn-3d-primary::after {
+    transition: none !important;
+    transform: none !important;
   }
 }
 
