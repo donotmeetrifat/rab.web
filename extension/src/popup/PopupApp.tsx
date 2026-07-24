@@ -22,9 +22,21 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta } from "@/lib/providers";
 import { listMemories } from "@/services/memories";
-import { listConversations, deleteConversation } from "@/services/conversations";
+import {
+  searchConversations,
+  deleteConversation,
+  type ConvSearchHit,
+  type ConvSnippet,
+} from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
+import {
+  ConversationFilters,
+  emptyConvFilters,
+  toEpochRange,
+  type ConvFiltersState,
+} from "@/components/conversations/ConversationFilters";
+import { useDebounced } from "@/hooks/useDebounced";
 import type { Memory, StoredConversation } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
