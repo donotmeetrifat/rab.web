@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, Search, Command } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -228,92 +229,265 @@ function Mark() {
   );
 }
 
+type Project = {
+  id: string;
+  name: string;
+  dot: string;
+  chats: { provider: string; title: string; when: string }[];
+};
+
+const PROJECTS: Project[] = [
+  {
+    id: "thesis",
+    name: "Thesis research",
+    dot: "bg-primary",
+    chats: [
+      { provider: "ChatGPT", title: "Literature review — genomic drift", when: "2h ago" },
+      { provider: "Claude", title: "Draft: methods section v3", when: "yesterday" },
+      { provider: "Gemini", title: "Chart: results comparison", when: "3d ago" },
+      { provider: "Perplexity", title: "Citations for section 4", when: "1w ago" },
+    ],
+  },
+  {
+    id: "launch",
+    name: "Product launch",
+    dot: "bg-[oklch(0.7_0.15_150)]",
+    chats: [
+      { provider: "Claude", title: "Landing page copy — v4", when: "22m ago" },
+      { provider: "ChatGPT", title: "Pricing tier rationale", when: "4h ago" },
+      { provider: "DeepSeek", title: "Cold email variants", when: "2d ago" },
+    ],
+  },
+  {
+    id: "kyoto",
+    name: "Trip to Kyoto",
+    dot: "bg-[oklch(0.75_0.15_60)]",
+    chats: [
+      { provider: "Perplexity", title: "Ryokan recommendations, Higashiyama", when: "1h ago" },
+      { provider: "Gemini", title: "7-day itinerary, cherry blossom", when: "yesterday" },
+      { provider: "ChatGPT", title: "Vegetarian kaiseki spots", when: "4d ago" },
+      { provider: "Claude", title: "Kanji phrasebook essentials", when: "1w ago" },
+    ],
+  },
+];
+
+const NAV = ["Home", "Projects", "Search", "Recent", "Settings"];
+const PROVIDERS = ["Claude", "Gemini", "ChatGPT", "Perplexity", "DeepSeek"];
+
 function PreviewFrame() {
+  const [activeNav, setActiveNav] = useState("Projects");
+  const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
+  const [providerIdx, setProviderIdx] = useState(0);
+  const [pulseKey, setPulseKey] = useState(0);
+
+  const project = useMemo(
+    () => PROJECTS.find((p) => p.id === activeProjectId) ?? PROJECTS[0],
+    [activeProjectId],
+  );
+
+  // Ambient live-capture pulse in the header
+  useEffect(() => {
+    const id = window.setInterval(() => setPulseKey((k) => k + 1), 2600);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)]">
-      <div className="flex items-center gap-1.5 border-b border-border bg-background/50 px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)]" />
+    <div className="group/frame overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]">
+      {/* Chrome */}
+      <div className="flex items-center gap-1.5 border-b border-border bg-background/60 px-4 py-3 backdrop-blur">
+        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.75_0.18_25)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.82_0.16_85)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.78_0.16_145)]" />
         <span className="ml-4 font-mono text-[11px] text-muted-foreground">
           extension · popup
         </span>
+        <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span
+            key={pulseKey}
+            className="relative flex h-1.5 w-1.5"
+            aria-hidden
+          >
+            <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+          </span>
+          Live
+        </div>
       </div>
-      <div className="grid gap-px bg-border md:grid-cols-[220px_1fr]">
+
+      <div className="grid gap-px bg-border md:grid-cols-[240px_1fr]">
+        {/* Sidebar */}
         <aside className="bg-background p-4">
           <div className="mb-4 flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-foreground" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-300 hover:rotate-6">
+              <div className="h-2 w-2 rounded-[3px] bg-primary" />
+            </div>
             <span className="text-xs font-medium">Workspace</span>
+            <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
+              <Command className="h-2.5 w-2.5" />K
+            </kbd>
           </div>
-          <nav className="space-y-1 text-sm">
-            {["Home", "Projects", "Search", "Recent", "Settings"].map((item, i) => (
-              <div
-                key={item}
-                className={
-                  "flex items-center gap-2 rounded-md px-2 py-1.5 " +
-                  (i === 1
-                    ? "bg-[color:var(--surface)] text-foreground"
-                    : "text-muted-foreground")
-                }
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
-                {item}
-              </div>
-            ))}
+
+          {/* Fake search */}
+          <button
+            type="button"
+            onClick={() => setActiveNav("Search")}
+            className="mb-4 flex w-full items-center gap-2 rounded-md border border-border bg-[color:var(--surface)]/60 px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-[color:var(--surface)]"
+          >
+            <Search className="h-3 w-3" />
+            <span>Search everything…</span>
+          </button>
+
+          <nav className="space-y-0.5 text-sm">
+            {NAV.map((item) => {
+              const active = item === activeNav;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setActiveNav(item)}
+                  className={
+                    "group/nav flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
+                    (active
+                      ? "bg-[color:var(--surface)] text-foreground"
+                      : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
+                  }
+                >
+                  <span
+                    className={
+                      "h-1.5 w-1.5 rounded-full transition-all duration-300 " +
+                      (active ? "bg-primary scale-100" : "bg-current opacity-40 scale-75")
+                    }
+                  />
+                  <span>{item}</span>
+                  <ArrowRight
+                    className={
+                      "ml-auto h-3 w-3 transition-all duration-200 " +
+                      (active
+                        ? "opacity-60 translate-x-0"
+                        : "opacity-0 -translate-x-1 group-hover/nav:opacity-40 group-hover/nav:translate-x-0")
+                    }
+                  />
+                </button>
+              );
+            })}
           </nav>
+
           <div className="mt-6">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Projects
+            <p className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <span>Projects</span>
+              <span className="opacity-60">{PROJECTS.length}</span>
             </p>
-            <div className="space-y-1 text-sm">
-              {[
-                ["Thesis research", "bg-primary"],
-                ["Product launch", "bg-[oklch(0.7_0.15_150)]"],
-                ["Trip to Kyoto", "bg-[oklch(0.75_0.15_60)]"],
-              ].map(([name, dot]) => (
-                <div key={name} className="flex items-center gap-2 rounded-md px-2 py-1.5">
-                  <span className={`h-2 w-2 rounded-full ${dot}`} />
-                  <span className="truncate">{name}</span>
-                </div>
-              ))}
+            <div className="space-y-0.5 text-sm">
+              {PROJECTS.map((p) => {
+                const active = p.id === activeProjectId;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setActiveProjectId(p.id)}
+                    className={
+                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
+                      (active
+                        ? "bg-[color:var(--surface)] text-foreground"
+                        : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
+                    }
+                  >
+                    <span
+                      className={
+                        `h-2 w-2 rounded-full ${p.dot} transition-transform duration-200 ` +
+                        (active ? "scale-110 ring-2 ring-offset-1 ring-offset-background ring-current/20" : "")
+                      }
+                    />
+                    <span className="truncate">{p.name}</span>
+                    <span className="ml-auto font-mono text-[10px] text-muted-foreground/70">
+                      {p.chats.length}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </aside>
-        <section className="bg-background p-6">
-          <div className="flex items-center justify-between">
-            <div>
+
+        {/* Main pane */}
+        <section className="relative bg-background p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div key={project.id} className="animate-fade-in">
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Project
+                Project · {project.chats.length} chats
               </p>
-              <h3 className="mt-1 text-lg font-semibold tracking-tight">Thesis research</h3>
+              <h3 className="mt-1 text-lg font-semibold tracking-tight">{project.name}</h3>
             </div>
-            <button className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground">
-              Continue in Claude →
+            <button
+              type="button"
+              onClick={() => setProviderIdx((i) => (i + 1) % PROVIDERS.length)}
+              className="group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_4px_12px_-4px_oklch(0.53_0.19_285/0.5)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_8px_20px_-6px_oklch(0.53_0.19_285/0.6)] active:translate-y-0"
+            >
+              <span className="relative">
+                Continue in{" "}
+                <span
+                  key={PROVIDERS[providerIdx]}
+                  className="inline-block animate-fade-in font-semibold"
+                >
+                  {PROVIDERS[providerIdx]}
+                </span>
+              </span>
+              <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
             </button>
           </div>
-          <div className="mt-5 space-y-2">
-            {[
-              ["ChatGPT", "Literature review — genomic drift", "2h ago"],
-              ["Claude", "Draft: methods section v3", "yesterday"],
-              ["Gemini", "Chart: results comparison", "3d ago"],
-              ["Perplexity", "Citations for section 4", "1w ago"],
-            ].map(([provider, title, when]) => (
+
+          <div className="mt-5 space-y-1.5">
+            {project.chats.map((c, i) => (
               <div
-                key={title}
-                className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:bg-[color:var(--surface)]"
+                key={`${project.id}-${c.title}`}
+                style={{
+                  animationDelay: `${i * 55}ms`,
+                  animationFillMode: "backwards",
+                }}
+                className="group/row flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-all duration-200 animate-fade-in hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)]"
               >
-                <div className="flex items-center gap-3">
-                  <span className="rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {provider}
-                  </span>
-                  <span className="text-sm">{title}</span>
+                <div className="flex min-w-0 items-center gap-3">
+                  <ProviderChip name={c.provider} />
+                  <span className="truncate text-sm">{c.title}</span>
                 </div>
-                <span className="font-mono text-[11px] text-muted-foreground">{when}</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="font-mono text-[11px] text-muted-foreground">{c.when}</span>
+                  <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 text-muted-foreground transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0" />
+                </div>
               </div>
             ))}
           </div>
+
+          {/* Ambient gradient wash */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent"
+          />
         </section>
       </div>
     </div>
+  );
+}
+
+const PROVIDER_TONES: Record<string, string> = {
+  ChatGPT: "text-[oklch(0.55_0.14_160)]",
+  Claude: "text-[oklch(0.55_0.15_45)]",
+  Gemini: "text-[oklch(0.55_0.18_255)]",
+  Perplexity: "text-[oklch(0.55_0.13_215)]",
+  DeepSeek: "text-[oklch(0.5_0.18_285)]",
+  Copilot: "text-[oklch(0.5_0.02_260)]",
+};
+
+function ProviderChip({ name }: { name: string }) {
+  const tone = PROVIDER_TONES[name] ?? "text-muted-foreground";
+  return (
+    <span
+      className={
+        "rounded-md bg-[color:var(--surface)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider transition-colors " +
+        tone
+      }
+    >
+      {name}
+    </span>
   );
 }
