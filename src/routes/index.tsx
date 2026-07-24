@@ -80,7 +80,7 @@ function LandingPage() {
         >
           <Mark size={32} />
           <span
-            className="font-bold text-[20px] md:text-[22px] lg:text-[24px] text-[#1E40AF] transition-colors duration-150 group-hover/brand:text-[#2563EB]"
+            className="font-bold text-[20px] md:text-[22px] lg:text-[24px] text-[#2563EB] transition-colors duration-150 group-hover/brand:text-[#1D4ED8]"
             style={{
               letterSpacing: "-0.03em",
               lineHeight: 1,
