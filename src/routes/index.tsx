@@ -387,7 +387,7 @@ function PreviewFrame() {
           extension · popup
         </span>
         <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span key={pulseKey} className="relative flex h-1.5 w-1.5" aria-hidden>
+          <span className="relative flex h-1.5 w-1.5" aria-hidden>
             <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
           </span>
