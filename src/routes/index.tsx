@@ -1,6 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
+
+/** Shared focus-ring class — visible only on keyboard focus. */
+const focusRing =
+  "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+/**
+ * Roving tabindex hook. Only the active item is tabbable; ArrowUp/Down (or
+ * ArrowLeft/Right when horizontal) moves within the group, Home/End jump to
+ * ends, Enter/Space activates. Tab exits the group entirely.
+ */
+function useRovingIndex(count: number, initial = 0, orientation: "vertical" | "horizontal" = "vertical") {
+  const [index, setIndex] = useState(initial);
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const focusAt = useCallback((i: number) => {
+    setIndex(i);
+    // Focus asynchronously so React commits tabIndex first.
+    requestAnimationFrame(() => refs.current[i]?.focus());
+  }, []);
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>, onActivate?: (i: number) => void) => {
+      const next = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+      const prev = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+      if (e.key === next) {
+        e.preventDefault();
+        focusAt((index + 1) % count);
+      } else if (e.key === prev) {
+        e.preventDefault();
+        focusAt((index - 1 + count) % count);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        focusAt(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        focusAt(count - 1);
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate?.(index);
+      }
+    },
+    [count, focusAt, index, orientation],
+  );
+
+  const getItemProps = (i: number) => ({
+    ref: (el: HTMLButtonElement | null) => {
+      refs.current[i] = el;
+    },
+    tabIndex: i === index ? 0 : -1,
+    onFocus: () => setIndex(i),
+  });
+
+  return { index, setIndex, onKeyDown, getItemProps };
+}
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -279,11 +333,19 @@ function PreviewFrame() {
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
   const [pulseKey, setPulseKey] = useState(0);
+  const [announce, setAnnounce] = useState("");
 
   const project = useMemo(
     () => PROJECTS.find((p) => p.id === activeProjectId) ?? PROJECTS[0],
     [activeProjectId],
   );
+
+  const navRoving = useRovingIndex(NAV.length, NAV.indexOf(activeNav));
+  const projectRoving = useRovingIndex(
+    PROJECTS.length,
+    Math.max(0, PROJECTS.findIndex((p) => p.id === activeProjectId)),
+  );
+  const chatRoving = useRovingIndex(project.chats.length, 0);
 
   // Ambient live-capture pulse in the header
   useEffect(() => {
@@ -291,8 +353,32 @@ function PreviewFrame() {
     return () => window.clearInterval(id);
   }, []);
 
+  const selectNav = (i: number) => {
+    setActiveNav(NAV[i]);
+    setAnnounce(`${NAV[i]} selected`);
+  };
+  const selectProject = (i: number) => {
+    setActiveProjectId(PROJECTS[i].id);
+    setAnnounce(`Project ${PROJECTS[i].name} opened`);
+  };
+  const cycleProvider = () => {
+    const next = (providerIdx + 1) % PROVIDERS.length;
+    setProviderIdx(next);
+    setAnnounce(`Continue in ${PROVIDERS[next]}`);
+  };
+
   return (
-    <div className="group/frame overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]">
+    <div
+      role="region"
+      aria-label="Universal AI Workspace popup preview"
+      aria-describedby="popup-shortcuts"
+      className="group/frame overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
+    >
+      {/* Live region for keyboard/mouse selection changes */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {announce}
+      </span>
+
       {/* Chrome */}
       <div className="flex items-center gap-1.5 border-b border-border bg-background/60 px-4 py-3 backdrop-blur">
         <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.75_0.18_25)]" />
@@ -302,11 +388,7 @@ function PreviewFrame() {
           extension · popup
         </span>
         <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span
-            key={pulseKey}
-            className="relative flex h-1.5 w-1.5"
-            aria-hidden
-          >
+          <span key={pulseKey} className="relative flex h-1.5 w-1.5" aria-hidden>
             <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
           </span>
@@ -316,112 +398,171 @@ function PreviewFrame() {
 
       <div className="grid gap-px bg-border md:grid-cols-[240px_1fr]">
         {/* Sidebar */}
-        <aside className="bg-background p-4">
+        <aside className="bg-background p-4" aria-label="Workspace sidebar">
           <div className="mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground transition-transform duration-300 hover:rotate-6">
               <div className="h-2 w-2 rounded-[3px] bg-primary" />
             </div>
             <span className="text-xs font-medium">Workspace</span>
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
-              <Command className="h-2.5 w-2.5" />K
+              <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
           </div>
 
           {/* Fake search */}
           <button
             type="button"
-            onClick={() => setActiveNav("Search")}
-            className="mb-4 flex w-full items-center gap-2 rounded-md border border-border bg-[color:var(--surface)]/60 px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-[color:var(--surface)]"
+            onClick={() => {
+              setActiveNav("Search");
+              setAnnounce("Search selected");
+            }}
+            aria-label="Open universal search"
+            className={
+              "mb-4 flex w-full items-center gap-2 rounded-md border border-border bg-[color:var(--surface)]/60 px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-[color:var(--surface)] " +
+              focusRing
+            }
           >
-            <Search className="h-3 w-3" />
+            <Search className="h-3 w-3" aria-hidden />
             <span>Search everything…</span>
           </button>
 
-          <nav className="space-y-0.5 text-sm">
-            {NAV.map((item) => {
-              const active = item === activeNav;
-              return (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setActiveNav(item)}
-                  className={
-                    "group/nav flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
-                    (active
-                      ? "bg-[color:var(--surface)] text-foreground"
-                      : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
-                  }
-                >
-                  <span
-                    className={
-                      "h-1.5 w-1.5 rounded-full transition-all duration-300 " +
-                      (active ? "bg-primary scale-100" : "bg-current opacity-40 scale-75")
-                    }
-                  />
-                  <span>{item}</span>
-                  <ArrowRight
-                    className={
-                      "ml-auto h-3 w-3 transition-all duration-200 " +
-                      (active
-                        ? "opacity-60 translate-x-0"
-                        : "opacity-0 -translate-x-1 group-hover/nav:opacity-40 group-hover/nav:translate-x-0")
-                    }
-                  />
-                </button>
-              );
-            })}
+          <nav aria-label="Primary">
+            <ul
+              role="menu"
+              aria-label="Sections"
+              className="space-y-0.5 text-sm"
+              onKeyDown={(e) => navRoving.onKeyDown(e, selectNav)}
+            >
+              {NAV.map((item, i) => {
+                const active = item === activeNav;
+                return (
+                  <li key={item} role="none">
+                    <button
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={active}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => selectNav(i)}
+                      {...navRoving.getItemProps(i)}
+                      className={
+                        "group/nav flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
+                        focusRing +
+                        " " +
+                        (active
+                          ? "bg-[color:var(--surface)] text-foreground"
+                          : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
+                      }
+                    >
+                      <span
+                        aria-hidden
+                        className={
+                          "h-1.5 w-1.5 rounded-full transition-all duration-300 " +
+                          (active ? "bg-primary scale-100" : "bg-current opacity-40 scale-75")
+                        }
+                      />
+                      <span>{item}</span>
+                      <ArrowRight
+                        aria-hidden
+                        className={
+                          "ml-auto h-3 w-3 transition-all duration-200 " +
+                          (active
+                            ? "opacity-60 translate-x-0"
+                            : "opacity-0 -translate-x-1 group-hover/nav:opacity-40 group-hover/nav:translate-x-0")
+                        }
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
 
           <div className="mt-6">
-            <p className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <div
+              id="projects-heading"
+              className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+            >
               <span>Projects</span>
-              <span className="opacity-60">{PROJECTS.length}</span>
-            </p>
-            <div className="space-y-0.5 text-sm">
-              {PROJECTS.map((p) => {
+              <span className="opacity-60" aria-label={`${PROJECTS.length} projects`}>
+                {PROJECTS.length}
+              </span>
+            </div>
+            <ul
+              role="listbox"
+              aria-labelledby="projects-heading"
+              aria-activedescendant={`project-${activeProjectId}`}
+              className="space-y-0.5 text-sm"
+              onKeyDown={(e) => projectRoving.onKeyDown(e, selectProject)}
+            >
+              {PROJECTS.map((p, i) => {
                 const active = p.id === activeProjectId;
                 return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setActiveProjectId(p.id)}
-                    className={
-                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
-                      (active
-                        ? "bg-[color:var(--surface)] text-foreground"
-                        : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
-                    }
-                  >
-                    <span
+                  <li key={p.id} role="none">
+                    <button
+                      type="button"
+                      id={`project-${p.id}`}
+                      role="option"
+                      aria-selected={active}
+                      onClick={() => selectProject(i)}
+                      {...projectRoving.getItemProps(i)}
                       className={
-                        `h-2 w-2 rounded-full ${p.dot} transition-transform duration-200 ` +
-                        (active ? "scale-110 ring-2 ring-offset-1 ring-offset-background ring-current/20" : "")
+                        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
+                        focusRing +
+                        " " +
+                        (active
+                          ? "bg-[color:var(--surface)] text-foreground"
+                          : "text-muted-foreground hover:bg-[color:var(--surface)]/70 hover:text-foreground")
                       }
-                    />
-                    <span className="truncate">{p.name}</span>
-                    <span className="ml-auto font-mono text-[10px] text-muted-foreground/70">
-                      {p.chats.length}
-                    </span>
-                  </button>
+                    >
+                      <span
+                        aria-hidden
+                        className={
+                          `h-2 w-2 rounded-full ${p.dot} transition-transform duration-200 ` +
+                          (active
+                            ? "scale-110 ring-2 ring-offset-1 ring-offset-background ring-current/20"
+                            : "")
+                        }
+                      />
+                      <span className="truncate">{p.name}</span>
+                      <span
+                        className="ml-auto font-mono text-[10px] text-muted-foreground/70"
+                        aria-label={`${p.chats.length} chats`}
+                      >
+                        {p.chats.length}
+                      </span>
+                    </button>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </div>
         </aside>
 
         {/* Main pane */}
-        <section className="relative bg-background p-6">
+        <section
+          className="relative bg-background p-6"
+          aria-labelledby="active-project-heading"
+        >
           <div className="flex items-start justify-between gap-4">
             <div key={project.id} className="animate-fade-in">
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Project · {project.chats.length} chats
               </p>
-              <h3 className="mt-1 text-lg font-semibold tracking-tight">{project.name}</h3>
+              <h3
+                id="active-project-heading"
+                className="mt-1 text-lg font-semibold tracking-tight"
+              >
+                {project.name}
+              </h3>
             </div>
             <button
               type="button"
-              onClick={() => setProviderIdx((i) => (i + 1) % PROVIDERS.length)}
-              className="group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_4px_12px_-4px_oklch(0.53_0.19_285/0.5)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_8px_20px_-6px_oklch(0.53_0.19_285/0.6)] active:translate-y-0"
+              onClick={cycleProvider}
+              aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
+              className={
+                "group/cta relative inline-flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_4px_12px_-4px_oklch(0.53_0.19_285/0.5)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_8px_20px_-6px_oklch(0.53_0.19_285/0.6)] active:translate-y-0 " +
+                focusRing
+              }
             >
               <span className="relative">
                 Continue in{" "}
@@ -432,36 +573,71 @@ function PreviewFrame() {
                   {PROVIDERS[providerIdx]}
                 </span>
               </span>
-              <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
+              <ArrowRight
+                aria-hidden
+                className="h-3 w-3 transition-transform duration-200 group-hover/cta:translate-x-0.5"
+              />
             </button>
           </div>
 
-          <div className="mt-5 space-y-1.5">
+          <ul
+            aria-label={`Chats in ${project.name}`}
+            className="mt-5 space-y-1.5"
+            onKeyDown={(e) => chatRoving.onKeyDown(e, (i) => setAnnounce(`Opening ${project.chats[i].title}`))}
+          >
             {project.chats.map((c, i) => (
-              <div
-                key={`${project.id}-${c.title}`}
-                style={{
-                  animationDelay: `${i * 55}ms`,
-                  animationFillMode: "backwards",
-                }}
-                className="group/row flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-all duration-200 animate-fade-in hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)]"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <ProviderChip name={c.provider} />
-                  <span className="truncate text-sm">{c.title}</span>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="font-mono text-[11px] text-muted-foreground">{c.when}</span>
-                  <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 text-muted-foreground transition-all duration-200 group-hover/row:opacity-100 group-hover/row:translate-x-0" />
-                </div>
-              </div>
+              <li key={`${project.id}-${c.title}`} role="none">
+                <button
+                  type="button"
+                  onClick={() => setAnnounce(`Opening ${c.title}`)}
+                  aria-label={`${c.title}, from ${c.provider}, ${c.when}`}
+                  {...chatRoving.getItemProps(i)}
+                  style={{
+                    animationDelay: `${i * 55}ms`,
+                    animationFillMode: "backwards",
+                  }}
+                  className={
+                    "group/row flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left transition-all duration-200 animate-fade-in hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)] " +
+                    focusRing
+                  }
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <ProviderChip name={c.provider} />
+                    <span className="truncate text-sm">{c.title}</span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="font-mono text-[11px] text-muted-foreground">{c.when}</span>
+                    <ArrowRight
+                      aria-hidden
+                      className="h-3 w-3 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-100 group-focus-visible/row:translate-x-0 group-focus-visible/row:opacity-100"
+                    />
+                  </span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
+
+          {/* Keyboard hint */}
+          <p
+            id="popup-shortcuts"
+            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+          >
+            <span className="inline-flex items-center gap-1">
+              <Key>Tab</Key> move between groups
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Key>↑</Key>
+              <Key>↓</Key> within a list
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Key>↵</Key> open
+            </span>
+          </p>
 
           {/* Ambient gradient wash */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent"
           />
         </section>
       </div>
@@ -489,5 +665,13 @@ function ProviderChip({ name }: { name: string }) {
     >
       {name}
     </span>
+  );
+}
+
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex min-w-[1.25rem] items-center justify-center rounded border border-border bg-[color:var(--surface)] px-1 py-0.5 font-mono text-[10px] normal-case text-foreground">
+      {children}
+    </kbd>
   );
 }
