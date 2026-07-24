@@ -11,7 +11,7 @@ import type {
   StoredConversation,
   StoredConvMessage,
 } from "@/types";
-import { getSettings } from "@/services/settings";
+import { loadSettings, saveSettings, DEFAULT_SETTINGS } from "@/services/settings";
 
 /* ------------------------------------------------------------------ */
 /* PROJECTS                                                           */
