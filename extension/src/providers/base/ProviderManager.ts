@@ -118,7 +118,7 @@ export class ProviderManager {
     // Button: injected once; adapter keeps it alive against re-renders.
     if (!this.disposeButton) {
       this.disposeButton = this.active.injectButton({
-        onSave: () => this.saveNow(),
+        onSave: async () => { await this.saveNow(); },
         getState: () => this.saveState,
       });
     }
