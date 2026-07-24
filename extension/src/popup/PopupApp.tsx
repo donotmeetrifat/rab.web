@@ -117,6 +117,18 @@ export function PopupApp() {
     );
   }, [recent, query]);
 
+  const filteredConversations = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    const base = conversations.slice(0, 8);
+    if (!q) return base;
+    return conversations.filter(
+      (c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.model ?? "").toLowerCase().includes(q) ||
+        c.provider.toLowerCase().includes(q),
+    );
+  }, [conversations, query]);
+
   const openSidePanel = async () => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
