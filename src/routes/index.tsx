@@ -70,7 +70,7 @@ function LandingPage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
           <Mark />
-          <span className="text-[15px] font-semibold tracking-tight">Universal AI Workspace</span>
+          <span className="text-[15px] font-semibold tracking-tight">Memlace</span>
         </div>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="transition-colors hover:text-foreground">
@@ -91,16 +91,17 @@ function LandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--surface)] px-3 py-1 text-xs text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Local-first. Free forever.
+              A place for your AI memory.
             </div>
             <h1 className="text-balance text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-              One brain.
+              Your AI memory,
               <br />
-              <span className="text-primary">Every AI.</span>
+              <span className="text-primary">all in one place.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-              A browser extension that gives you a permanent workspace across every AI assistant.
-              Your projects, memory, and context stay with you — not with any single provider.
+              Memlace is a private, local-first workspace that keeps your AI conversations,
+              projects, and context organized across ChatGPT, Claude, Gemini, DeepSeek, Perplexity,
+              Copilot, and future AI assistants.
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -115,14 +116,12 @@ function LandingPage() {
               >
                 <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
-                <span className="ml-2 text-primary-foreground/60">·</span>
-                <span className="ml-1 text-primary-foreground/80">.zip</span>
               </button>
               <a
                 href="#install"
                 className="inline-flex h-11 items-center justify-center rounded-[10px] border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-[color:var(--surface)]"
               >
-                Install guide
+                Installation Guide
               </a>
             </div>
 
