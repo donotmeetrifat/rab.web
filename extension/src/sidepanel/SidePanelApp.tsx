@@ -135,28 +135,53 @@ export function SidePanelApp() {
 
   // Conversations
   const [section, setSection] = useState<"memories" | "conversations">("memories");
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
+  const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
+  const [convTotal, setConvTotal] = useState(0);
   const [convLoading, setConvLoading] = useState(false);
   const [convQuery, setConvQuery] = useState("");
   const [selectedConv, setSelectedConv] = useState<StoredConversation | null>(null);
+  const debouncedConvQuery = useDebounced(convQuery, 180);
 
-  const loadConversations = useCallback(async () => {
-    setConvLoading(true);
-    try {
-      const rows = await listConversations();
-      setConversations(rows);
-      setSelectedConv((prev) =>
-        prev ? rows.find((r) => r.id === prev.id) ?? null : null,
-      );
-    } finally {
-      setConvLoading(false);
-    }
-  }, []);
+  const runConvSearch = useCallback(
+    async (q: string, filters: ConvFiltersState, opts: { showLoading?: boolean } = {}) => {
+      if (opts.showLoading) setConvLoading(true);
+      try {
+        const range = toEpochRange(filters);
+        const hits = await searchConversations({
+          query: q,
+          providers: filters.providers,
+          dateFrom: range.dateFrom,
+          dateTo: range.dateTo,
+          sort: filters.sort,
+        });
+        setConvHits(hits);
+        setSelectedConv((prev) =>
+          prev ? hits.find((h) => h.conversation.id === prev.id)?.conversation ?? null : null,
+        );
+        const unfiltered =
+          !q &&
+          filters.providers.length === 0 &&
+          !filters.dateFrom &&
+          !filters.dateTo;
+        if (unfiltered) setConvTotal(hits.length);
+      } finally {
+        if (opts.showLoading) setConvLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!ready) return;
-    void loadConversations();
-  }, [ready, loadConversations]);
+    void runConvSearch("", emptyConvFilters, { showLoading: true });
+  }, [ready, runConvSearch]);
+
+  useEffect(() => {
+    if (!ready) return;
+    void runConvSearch(debouncedConvQuery, convFilters);
+  }, [ready, debouncedConvQuery, convFilters, runConvSearch]);
+
 
   useEffect(() => {
     bootstrap();
