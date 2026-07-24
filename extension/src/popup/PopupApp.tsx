@@ -215,17 +215,63 @@ export function PopupApp() {
       </header>
 
       <div className="px-3 pt-2.5">
-        <label className="relative block">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            placeholder="Search memories, projects, tags…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search memories"
-            className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-          />
-        </label>
+        {tab === "memories" ? (
+          <label className="relative block">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              placeholder="Search memories, projects, tags…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search memories"
+              className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+            />
+          </label>
+        ) : (
+          <ConversationSearch value={query} onChange={setQuery} />
+        )}
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Popup section"
+        className="mx-3 mt-2.5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
+      >
+        {(
+          [
+            { id: "memories" as Tab, label: "Memories", icon: StickyNote },
+            { id: "conversations" as Tab, label: "Chats", icon: MessagesSquare },
+          ]
+        ).map((t) => {
+          const Icon = t.icon;
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => {
+                setTab(t.id);
+                setQuery("");
+              }}
+              className={
+                "h-7 rounded-md text-[11px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors " +
+                (active
+                  ? "bg-surface text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground")
+              }
+            >
+              <Icon className="h-3 w-3" />
+              {t.label}
+              {t.id === "conversations" && conversations.length > 0 && (
+                <span className="ml-0.5 text-[10px] text-muted-foreground tabular-nums">
+                  {conversations.length}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {pending && (
