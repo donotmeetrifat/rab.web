@@ -453,9 +453,8 @@ function PreviewFrame() {
               aria-labelledby="projects-heading"
               aria-activedescendant={`project-${activeProjectId}`}
               className="space-y-0.5 text-sm"
-              onKeyDown={(e) => projectRoving.onKeyDown(e, selectProject)}
             >
-              {PROJECTS.map((p, i) => {
+              {PROJECTS.map((p) => {
                 const active = p.id === activeProjectId;
                 return (
                   <li key={p.id} role="none">
@@ -464,8 +463,8 @@ function PreviewFrame() {
                       id={`project-${p.id}`}
                       role="option"
                       aria-selected={active}
-                      onClick={() => selectProject(i)}
-                      {...projectRoving.getItemProps(i)}
+                      onClick={() => setActiveProjectId(p.id)}
+
                       className={
                         "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
                         focusRing +
