@@ -291,18 +291,16 @@ function LandingPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:px-8">
-          <div className="flex min-w-0 items-center gap-[10px]">
-            <Mark size={28} />
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
-              <span className="truncate text-xs">A place for your AI memory.</span>
-            </div>
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={memlaceWordmark.url} alt="Memlace" className="block h-7 w-auto" />
+            <span className="truncate text-xs">A place for your AI memory.</span>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
             Local · Private · Free
           </p>
         </div>
       </footer>
+
 
     </div>
   );
