@@ -375,11 +375,9 @@ function PreviewFrame() {
           {/* Fake search */}
           <button
             type="button"
-            onClick={() => {
-              setActiveNav("Search");
-              setAnnounce("Search selected");
-            }}
+            onClick={() => setActiveNav("Search")}
             aria-label="Open universal search"
+
             className={
               "mb-4 flex w-full items-center gap-2 rounded-md border border-border bg-[color:var(--surface)]/60 px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-[color:var(--surface)] " +
               focusRing
