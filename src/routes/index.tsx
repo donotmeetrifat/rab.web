@@ -222,18 +222,18 @@ function LandingPage() {
 
 
         {/* Features */}
-        <section id="features" className="border-t border-border py-20">
-          <div className="mb-14 max-w-2xl">
+        <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="mb-10 max-w-2xl sm:mb-14">
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               Phase 1
             </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="mt-3 text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold tracking-tight">
               Four things, done properly.
             </h2>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-2">
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
             {features.map((f) => (
-              <div key={f.title} className="bg-background p-8">
+              <div key={f.title} className="bg-background p-6 sm:p-8">
                 <h3 className="text-base font-semibold tracking-tight">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
               </div>
@@ -242,13 +242,13 @@ function LandingPage() {
         </section>
 
         {/* Install */}
-        <section id="install" className="border-t border-border py-20">
-          <div className="grid gap-12 md:grid-cols-[1fr_1.2fr] md:gap-16">
+        <section id="install" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:gap-16">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Install
               </p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="mt-3 text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold tracking-tight">
                 Four steps. One minute.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
@@ -256,7 +256,7 @@ function LandingPage() {
                 listing is on its way.
               </p>
             </div>
-            <ol className="space-y-4">
+            <ol className="space-y-3 sm:space-y-4">
               {steps.map((s, i) => (
                 <li
                   key={s}
@@ -265,7 +265,7 @@ function LandingPage() {
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--surface)] font-mono text-[11px] text-muted-foreground">
                     {i + 1}
                   </span>
-                  <span className="text-sm leading-relaxed">{s}</span>
+                  <span className="min-w-0 text-sm leading-relaxed">{s}</span>
                 </li>
               ))}
             </ol>
@@ -273,8 +273,8 @@ function LandingPage() {
         </section>
 
         {/* Principles */}
-        <section id="principles" className="border-t border-border py-20">
-          <div className="grid gap-10 md:grid-cols-3">
+        <section id="principles" className="border-t border-border py-14 sm:py-16 md:py-20">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 md:gap-10">
             {[
               ["Everything is local.", "No cloud, no backend, no account. Your data never leaves your device."],
               ["You own everything.", "Projects belong to you — not to OpenAI, not to Anthropic, not to us."],
@@ -290,13 +290,12 @@ function LandingPage() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-8 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-[10px]">
-            <Mark size={32} />
-
-            <div className="flex flex-col leading-tight">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:px-8">
+          <div className="flex min-w-0 items-center gap-[10px]">
+            <Mark size={28} />
+            <div className="flex min-w-0 flex-col leading-tight">
               <span className="text-foreground font-semibold" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
-              <span className="text-xs">A place for your AI memory.</span>
+              <span className="truncate text-xs">A place for your AI memory.</span>
             </div>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
@@ -308,6 +307,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 function Mark({ size = 28 }: { size?: number }) {
   return (
