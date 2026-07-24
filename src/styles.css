@@ -94,6 +94,37 @@
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.08);
 }
 
+@utility btn-3d-primary {
+  background-image: var(--gradient-primary);
+  box-shadow: var(--shadow-3d-primary);
+  color: var(--primary-foreground);
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out, opacity 200ms ease-out;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+@utility btn-3d-primary {
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-3d-primary-hover);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--shadow-3d-primary-active);
+  }
+  &:disabled { opacity: 0.6; }
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    top: 0;
+    height: 1px;
+    background: rgb(255 255 255 / 0.5);
+    pointer-events: none;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
