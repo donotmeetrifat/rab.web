@@ -446,6 +446,10 @@ function validateSettingsPatch(v: unknown): Partial<Settings> | null {
   if (typeof v.notificationsEnabled === "boolean") out.notificationsEnabled = v.notificationsEnabled;
   if (typeof v.autoSaveConversations === "boolean")
     out.autoSaveConversations = v.autoSaveConversations;
+  if (typeof v.saveImages === "boolean") out.saveImages = v.saveImages;
+  if (typeof v.saveAttachments === "boolean") out.saveAttachments = v.saveAttachments;
+  if (typeof v.saveConversationsManualOnly === "boolean")
+    out.saveConversationsManualOnly = v.saveConversationsManualOnly;
   if (v.sort === "newest" || v.sort === "oldest" || v.sort === "alphabetical")
     out.sort = v.sort as SortKey;
   return out;

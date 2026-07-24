@@ -59,11 +59,22 @@ async function ensureIndex(): Promise<MessageIndex> {
  * Persistence
  * ------------------------------------------------------------------ */
 
+export interface SaveConversationOptions {
+  hash?: string;
+  source: "manual" | "auto" | "initial";
+  /** Persist inline image URLs. Default true. */
+  saveImages?: boolean;
+  /** Persist attachment metadata. Default true. */
+  saveAttachments?: boolean;
+}
+
 export async function saveConversation(
   captured: CapturedConversation,
-  opts: { hash?: string; source: "manual" | "auto" | "initial" } = { source: "manual" },
+  opts: SaveConversationOptions = { source: "manual" },
 ): Promise<{ conversation: StoredConversation; changed: boolean; created: boolean }> {
   const hash = opts.hash ?? hashConversation(captured);
+  const keepImages = opts.saveImages !== false;
+  const keepAttachments = opts.saveAttachments !== false;
   const now = Date.now();
 
   const result = await db.transaction("rw", db.conversations, db.convMessages, async () => {
@@ -113,8 +124,8 @@ export async function saveConversation(
       content: m.content,
       markdown: m.markdown,
       order: m.order,
-      images: m.images,
-      attachments: m.attachments,
+      images: keepImages ? m.images : [],
+      attachments: keepAttachments ? m.attachments : [],
       metadata: m.metadata,
       createdAt: now,
     }));

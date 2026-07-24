@@ -168,16 +168,43 @@ export function OptionsApp() {
           </select>
         </Section>
 
-        <Section title="Notifications" description="Show a system notification when Memlace captures a memory in the background.">
-          <label className="inline-flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={settings.notificationsEnabled}
-              onChange={(e) => updateSettings({ notificationsEnabled: e.target.checked })}
-              className="h-4 w-4 accent-[color:var(--color-primary)]"
+        <Section
+          title="Conversation capture"
+          description="Control what Memlace records when you save an AI chat. Everything stays on this device — nothing is uploaded."
+        >
+          <div className="space-y-3">
+            <Toggle
+              label="Auto-save conversations"
+              hint="Silently keep saved chats in sync with the AI website as you talk. When off, use the “Save to Memlace” button on the page."
+              checked={settings.autoSaveConversations}
+              disabled={settings.saveConversationsManualOnly}
+              onChange={(v) => updateSettings({ autoSaveConversations: v })}
             />
-            Enable capture notifications
-          </label>
+            <Toggle
+              label="Save images"
+              hint="Store URLs of images that appear in messages so they render inside Memlace. The image files themselves stay on the provider’s servers."
+              checked={settings.saveImages}
+              onChange={(v) => updateSettings({ saveImages: v })}
+            />
+            <Toggle
+              label="Save attachments"
+              hint="Store filenames and metadata for files you attached in the chat. File contents are not downloaded."
+              checked={settings.saveAttachments}
+              onChange={(v) => updateSettings({ saveAttachments: v })}
+            />
+            <Toggle
+              label="Show save notifications"
+              hint="Get a small system notification whenever a chat is saved to Memlace."
+              checked={settings.notificationsEnabled}
+              onChange={(v) => updateSettings({ notificationsEnabled: v })}
+            />
+            <Toggle
+              label="Save only manually selected chats"
+              hint="Strict privacy mode: Memlace will never save a conversation automatically, even if auto-save is on. Only the “Save to Memlace” button will store anything."
+              checked={settings.saveConversationsManualOnly}
+              onChange={(v) => updateSettings({ saveConversationsManualOnly: v })}
+            />
+          </div>
         </Section>
 
         <Section title="Keyboard shortcuts" description="Trigger Memlace anywhere without leaving the page.">
@@ -305,6 +332,40 @@ function BackupStat({ label, value }: { label: string; value: number | string })
   );
 }
 
+
+function Toggle({
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label
+      className={`flex items-start gap-3 rounded-lg border border-border bg-background/60 p-3 transition-colors ${
+        disabled ? "opacity-60" : "hover:bg-background"
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-4 w-4 accent-[color:var(--color-primary)]"
+      />
+      <span className="flex-1">
+        <span className="block text-sm font-medium text-foreground">{label}</span>
+        {hint && <span className="mt-0.5 block text-xs text-muted-foreground">{hint}</span>}
+      </span>
+    </label>
+  );
+}
 
 function Kbd({ children }: { children: ReactNode }) {
   return (

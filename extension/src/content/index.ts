@@ -8,21 +8,26 @@
  * trip to the background worker required. The background is only notified
  * for optional notifications and popup badge updates.
  */
-import type { RuntimeMessage } from "@/types";
+import type { RuntimeMessage, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
 import { saveConversation } from "@/services/conversations";
-import { loadSettings, subscribeSettings } from "@/services/settings";
+import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
 
-let autoSave = false;
-loadSettings().then((s) => { autoSave = s.autoSaveConversations; });
-subscribeSettings((s) => { autoSave = s.autoSaveConversations; });
+let currentSettings: Settings = DEFAULT_SETTINGS;
+loadSettings().then((s) => { currentSettings = s; });
+subscribeSettings((s) => { currentSettings = s; });
 
 const manager = new ProviderManager(buildAdapters(), {
-  isAutoSaveEnabled: () => autoSave,
+  isAutoSaveEnabled: () =>
+    currentSettings.autoSaveConversations && !currentSettings.saveConversationsManualOnly,
   onConversationChanged: async ({ conversation, hash, reason }) => {
+    // Respect manual-only guard for auto-triggered saves (initial + auto).
+    if (reason !== "manual" && currentSettings.saveConversationsManualOnly) return;
     const { created } = await saveConversation(conversation, {
       hash,
       source: reason,
+      saveImages: currentSettings.saveImages,
+      saveAttachments: currentSettings.saveAttachments,
     });
     try {
       await chrome.runtime.sendMessage({
