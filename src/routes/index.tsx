@@ -414,9 +414,9 @@ function PreviewFrame() {
         {/* Sidebar */}
         <aside className="bg-background p-3 sm:p-4" aria-label="Workspace sidebar">
 
-          <div className="mb-4 flex items-center gap-2.5">
-            <Mark size={24} />
-            <span className="text-[13px] font-semibold text-foreground" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
+          <div className="mb-4 flex items-center gap-2">
+            <img src={memlaceWordmark.url} alt="Memlace" className="block h-5 w-auto" />
+
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
               <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
