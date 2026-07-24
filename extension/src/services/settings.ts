@@ -6,19 +6,34 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: "system",
   defaultProvider: "chatgpt",
   shortcutCapture: "Alt+Shift+S",
-  shortcutOpenPopup: "Alt+M",
+  shortcutOpenPopup: "Alt+Shift+P",
   telemetryEnabled: false,
-  version: "0.1.0",
+  notificationsEnabled: true,
+  sort: "newest",
+  version: "0.2.0",
 };
 
 export async function loadSettings(): Promise<Settings> {
-  const stored = await chrome.storage.local.get(KEY);
-  const value = stored[KEY] as Partial<Settings> | undefined;
-  return { ...DEFAULT_SETTINGS, ...(value ?? {}) };
+  try {
+    const stored = await chrome.storage.local.get(KEY);
+    const value = stored[KEY] as Partial<Settings> | undefined;
+    return { ...DEFAULT_SETTINGS, ...(value ?? {}) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export async function saveSettings(next: Settings): Promise<void> {
-  await chrome.storage.local.set({ [KEY]: next });
+  try {
+    await chrome.storage.local.set({ [KEY]: next });
+  } catch {
+    // storage full or unavailable — swallow so UI doesn't crash
+  }
+}
+
+export async function resetSettings(): Promise<Settings> {
+  await saveSettings(DEFAULT_SETTINGS);
+  return DEFAULT_SETTINGS;
 }
 
 export function subscribeSettings(cb: (s: Settings) => void): () => void {

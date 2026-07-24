@@ -11,7 +11,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Memlace",
+    "default_title": "Memlace — Alt+Shift+P",
     "default_popup": "src/popup/index.html",
     "default_icon": {
       "16": "icons/icon-16.png",
@@ -28,13 +28,34 @@
   "side_panel": {
     "default_path": "src/sidepanel/index.html"
   },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+P",
+        "mac": "Alt+Shift+P"
+      },
+      "description": "Open Memlace"
+    },
+    "capture-selection": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Save current selection to Memlace"
+    },
+    "open-side-panel": {
+      "description": "Open the Memlace side panel"
+    }
+  },
   "permissions": [
     "storage",
     "tabs",
     "activeTab",
     "scripting",
     "contextMenus",
-    "sidePanel"
+    "sidePanel",
+    "notifications",
+    "clipboardWrite"
   ],
   "host_permissions": [
     "https://chat.openai.com/*",
