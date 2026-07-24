@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
+import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
