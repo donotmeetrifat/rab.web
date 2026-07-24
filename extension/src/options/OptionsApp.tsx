@@ -169,21 +169,6 @@ export function OptionsApp() {
         </Section>
 
         <Section
-          title="Notifications"
-          description="Show a system notification when Memlace captures a memory in the background."
-        >
-          <label className="inline-flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={settings.notificationsEnabled}
-              onChange={(e) => updateSettings({ notificationsEnabled: e.target.checked })}
-              className="h-4 w-4 accent-[color:var(--color-primary)]"
-            />
-            Enable capture notifications
-          </label>
-        </Section>
-
-        <Section
           title="Conversation capture"
           description="Control what Memlace records when you save an AI chat. Everything stays on this device — nothing is uploaded."
         >
