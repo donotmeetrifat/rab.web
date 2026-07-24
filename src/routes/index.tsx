@@ -156,10 +156,15 @@ function LandingPage() {
         {/* Hero */}
         <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--surface)] px-3 py-1 text-xs text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              A place for your AI memory.
+            <div className="hero-pill mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-foreground/80">
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-primary"
+                style={{ animation: "pill-dot 2.4s cubic-bezier(0.4,0,0.6,1) infinite" }}
+                aria-hidden
+              />
+              <span className="tracking-tight">A place for your AI memory.</span>
             </div>
+
             <h1 className="text-balance text-[clamp(2.25rem,8vw,4.5rem)] font-semibold leading-[1.05] tracking-tight">
               Your AI memory,
               <br />
