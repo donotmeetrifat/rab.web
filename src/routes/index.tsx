@@ -217,9 +217,12 @@ function LandingPage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Mark />
-            <span>Universal AI Workspace</span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-foreground font-semibold tracking-tight">Memlace</span>
+              <span className="text-xs">A place for your AI memory.</span>
+            </div>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
             Local · Private · Free
@@ -232,8 +235,11 @@ function LandingPage() {
 
 function Mark() {
   return (
-    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground">
-      <div className="h-2.5 w-2.5 rounded-[3px] bg-primary" />
+    <div
+      aria-label="Memlace"
+      className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary font-semibold text-primary-foreground text-[13px] leading-none tracking-tight"
+    >
+      M
     </div>
   );
 }
