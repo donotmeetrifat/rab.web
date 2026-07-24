@@ -3,8 +3,7 @@
  * transitions work via CSS. Paths from simple-icons where available;
  * OpenAI mark reproduced from the official brand asset.
  */
-import type { ReactNode, SVGProps } from "react";
-import * as React from "react";
+import type { ReactElement, ReactNode, SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement> & { title?: string };
 
@@ -63,7 +62,7 @@ export const CopilotIcon = (p: IconProps) => (
 export type BrandEntry = {
   name: string;
   color: string;
-  Icon: (p: IconProps) => React.ReactElement;
+  Icon: (p: IconProps) => ReactElement;
 };
 
 export const BRANDS: BrandEntry[] = [
