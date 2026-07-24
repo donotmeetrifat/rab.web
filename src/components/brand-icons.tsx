@@ -62,7 +62,7 @@ export const CopilotIcon = (p: IconProps) => (
 export type BrandEntry = {
   name: string;
   color: string;
-  Icon: (p: IconProps) => JSX.Element;
+  Icon: (p: IconProps) => React.ReactElement;
 };
 
 export const BRANDS: BrandEntry[] = [
