@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
+import memlaceWordmark from "@/assets/memlace-wordmark.png.asset.json";
 import { BRANDS } from "@/components/brand-icons";
 
 
@@ -89,38 +90,17 @@ function LandingPage() {
           }}
         >
           <img
-            src={memlaceLogo.url}
-            alt=""
-            aria-hidden="true"
-            width={34}
-            height={34}
+            src={memlaceWordmark.url}
+            alt="Memlace"
+            height={40}
             style={{
-              width: "34px",
-              height: "34px",
+              height: "40px",
+              width: "auto",
               display: "block",
               margin: 0,
               padding: 0,
-              flexShrink: 0,
             }}
           />
-          <span
-            className="transition-colors duration-150"
-            style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 700,
-              fontSize: "28px",
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
-              color: "#111827",
-              display: "inline-block",
-              margin: 0,
-              padding: 0,
-              whiteSpace: "nowrap",
-              transform: "translateY(6px)",
-            }}
-          >
-            Memlace
-          </span>
         </a>
 
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
