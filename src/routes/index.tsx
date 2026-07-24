@@ -1,6 +1,60 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
+
+/** Shared focus-ring class — visible only on keyboard focus. */
+const focusRing =
+  "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+/**
+ * Roving tabindex hook. Only the active item is tabbable; ArrowUp/Down (or
+ * ArrowLeft/Right when horizontal) moves within the group, Home/End jump to
+ * ends, Enter/Space activates. Tab exits the group entirely.
+ */
+function useRovingIndex(count: number, initial = 0, orientation: "vertical" | "horizontal" = "vertical") {
+  const [index, setIndex] = useState(initial);
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const focusAt = useCallback((i: number) => {
+    setIndex(i);
+    // Focus asynchronously so React commits tabIndex first.
+    requestAnimationFrame(() => refs.current[i]?.focus());
+  }, []);
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>, onActivate?: (i: number) => void) => {
+      const next = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+      const prev = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+      if (e.key === next) {
+        e.preventDefault();
+        focusAt((index + 1) % count);
+      } else if (e.key === prev) {
+        e.preventDefault();
+        focusAt((index - 1 + count) % count);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        focusAt(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        focusAt(count - 1);
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate?.(index);
+      }
+    },
+    [count, focusAt, index, orientation],
+  );
+
+  const getItemProps = (i: number) => ({
+    ref: (el: HTMLButtonElement | null) => {
+      refs.current[i] = el;
+    },
+    tabIndex: i === index ? 0 : -1,
+    onFocus: () => setIndex(i),
+  });
+
+  return { index, setIndex, onKeyDown, getItemProps };
+}
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
