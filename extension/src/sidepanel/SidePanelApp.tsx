@@ -418,6 +418,7 @@ export function SidePanelApp() {
           </div>
         ) : (
           <>
+        <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
           <h1 className="text-sm font-semibold truncate">{headerTitle}</h1>
           {provider && (
             <span className="ml-2 text-[10px] text-muted-foreground">On {provider.name}</span>
