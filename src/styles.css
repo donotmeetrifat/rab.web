@@ -198,6 +198,18 @@
     font-feature-settings: "cv11", "ss01", "ss03";
   }
 
+  /* Global keyboard-only focus baseline. Uses the primary ring, is offset
+     from the element, and stays visible on any surface. `.btn-3d-primary`
+     provides its own richer ring and overrides this. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
   ::selection {
     background: color-mix(in oklab, var(--primary) 20%, transparent);
     color: var(--foreground);
