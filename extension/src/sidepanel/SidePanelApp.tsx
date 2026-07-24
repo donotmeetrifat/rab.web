@@ -223,6 +223,16 @@ export function SidePanelApp() {
       : NAV.find((n) => n.id === activeView)?.label ?? "Workspace";
 
   const visibleMemories = useMemo(() => memories.slice(0, visibleCount), [memories, visibleCount]);
+  const filteredConversations = useMemo(() => {
+    const q = convQuery.toLowerCase().trim();
+    if (!q) return conversations;
+    return conversations.filter(
+      (c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.model ?? "").toLowerCase().includes(q) ||
+        c.provider.toLowerCase().includes(q),
+    );
+  }, [conversations, convQuery]);
   const selectedIds = useMemo(() => Array.from(selection), [selection]);
   const allSelected = selectedIds.length > 0 && selectedIds.length === memories.length;
 
