@@ -107,11 +107,16 @@ function LandingPage() {
               <button
                 onClick={download}
                 disabled={state === "loading"}
-                className="inline-flex h-11 items-center justify-center rounded-[10px] bg-foreground px-5 text-sm font-medium text-background shadow-[var(--shadow-soft)] transition-all duration-150 hover:opacity-90 disabled:opacity-60"
+                style={{
+                  backgroundImage: "var(--gradient-primary)",
+                  boxShadow: "var(--shadow-3d-primary)",
+                }}
+                className="group/dl inline-flex h-12 translate-y-0 items-center justify-center rounded-[12px] px-6 text-sm font-semibold tracking-tight text-primary-foreground transition-all duration-200 will-change-transform hover:-translate-y-0.5 hover:[box-shadow:var(--shadow-3d-primary-hover)] active:translate-y-0 active:[box-shadow:var(--shadow-3d-primary-active)] disabled:opacity-60 disabled:hover:translate-y-0"
               >
+                <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/50 blur-[0.5px]" aria-hidden />
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
-                <span className="ml-2 text-background/60">·</span>
-                <span className="ml-2 text-background/70">.zip</span>
+                <span className="ml-2 text-primary-foreground/60">·</span>
+                <span className="ml-1 text-primary-foreground/80">.zip</span>
               </button>
               <a
                 href="#install"
