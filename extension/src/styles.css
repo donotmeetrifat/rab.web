@@ -42,9 +42,41 @@
   * {
     border-color: var(--color-border);
   }
+
+  :focus-visible {
+    outline: none;
+  }
 }
 
 @utility scroll-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
+}
+
+@keyframes memlace-skeleton {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.skeleton {
+  animation: memlace-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes memlace-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: memlace-fade-in 180ms ease-out both;
+}
+
+@keyframes memlace-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: memlace-scale-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 }

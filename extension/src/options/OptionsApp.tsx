@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
+import { useToast } from "@/components/Toast";
 import { useMemlace } from "@/store/useMemlace";
+import { useThemeSync } from "@/hooks/useThemeSync";
 import { PROVIDERS } from "@/lib/providers";
-import { exportAll, importAll, storageEstimate } from "@/services/memories";
+import { counts, exportAll, importAll, storageEstimate } from "@/services/memories";
 import type { ProviderId, Settings } from "@/types";
 
 function formatBytes(n: number): string {
@@ -14,41 +16,42 @@ function formatBytes(n: number): string {
 }
 
 export function OptionsApp() {
+  useThemeSync();
+  const toast = useToast();
+
   const bootstrap = useMemlace((s) => s.bootstrap);
   const settings = useMemlace((s) => s.settings);
   const updateSettings = useMemlace((s) => s.updateSettings);
+  const resetSettings = useMemlace((s) => s.resetSettings);
+
   const [storage, setStorage] = useState<{ usage: number; quota: number } | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [stats, setStats] = useState<{ projects: number; memories: number; trashed: number } | null>(null);
 
   useEffect(() => {
     bootstrap();
-    storageEstimate().then(setStorage);
+    void storageEstimate().then(setStorage);
+    void counts().then(setStats);
   }, [bootstrap]);
 
-  const setTheme = (theme: Settings["theme"]) => {
-    updateSettings({ theme });
-    document.documentElement.classList.toggle(
-      "dark",
-      theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches),
-    );
+  const refreshStats = async () => {
+    setStorage(await storageEstimate());
+    setStats(await counts());
   };
 
-  useEffect(() => {
-    setTheme(settings.theme);
-    // only when settings.theme changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.theme]);
-
   const doExport = async () => {
-    const json = await exportAll();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `memlace-export-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setMessage("Export downloaded.");
+    try {
+      const json = await exportAll();
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `memlace-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Export downloaded");
+    } catch (err) {
+      toast.error("Export failed", err instanceof Error ? err.message : undefined);
+    }
   };
 
   const doImport = () => {
@@ -60,10 +63,14 @@ export function OptionsApp() {
       if (!file) return;
       try {
         const text = await file.text();
-        const { projects, memories } = await importAll(text);
-        setMessage(`Imported ${projects} project(s) and ${memories} memor${memories === 1 ? "y" : "ies"}.`);
+        const { projects, memories, skipped } = await importAll(text);
+        toast.success(
+          `Imported ${projects} project${projects === 1 ? "" : "s"} and ${memories} memor${memories === 1 ? "y" : "ies"}`,
+          skipped > 0 ? `${skipped} invalid record${skipped === 1 ? "" : "s"} skipped` : undefined,
+        );
+        await refreshStats();
       } catch (err) {
-        setMessage(err instanceof Error ? `Import failed: ${err.message}` : "Import failed.");
+        toast.error("Import failed", err instanceof Error ? err.message : "Invalid JSON");
       }
     };
     input.click();
@@ -71,10 +78,29 @@ export function OptionsApp() {
 
   const clearAll = async () => {
     if (!window.confirm("This deletes all Memlace data on this device. Continue?")) return;
-    const { db } = await import("@/lib/db");
-    await db.delete();
-    window.location.reload();
+    try {
+      const { db } = await import("@/lib/db");
+      await db.delete();
+      toast.success("All data deleted");
+      window.setTimeout(() => window.location.reload(), 500);
+    } catch (err) {
+      toast.error("Delete failed", err instanceof Error ? err.message : undefined);
+    }
   };
+
+  const doResetSettings = async () => {
+    if (!window.confirm("Reset all settings to defaults? Your memories are kept.")) return;
+    await resetSettings();
+    toast.success("Settings reset");
+  };
+
+  const openShortcuts = () => {
+    chrome.tabs?.create?.({ url: "chrome://extensions/shortcuts" });
+  };
+
+  const storagePct = storage && storage.quota
+    ? Math.min(100, Math.round((storage.usage / storage.quota) * 100))
+    : 0;
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -89,19 +115,13 @@ export function OptionsApp() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
-        {message && (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
-            {message}
-          </div>
-        )}
-
-        <Section title="Theme" description="Choose how Memlace looks in the popup, side panel, and this page.">
+        <Section title="Appearance" description="Choose how Memlace looks in the popup, side panel, and this page.">
           <div className="flex gap-2">
             {(["light", "dark", "system"] as const).map((t) => (
               <Button
                 key={t}
                 variant={settings.theme === t ? "primary" : "secondary"}
-                onClick={() => setTheme(t)}
+                onClick={() => updateSettings({ theme: t })}
               >
                 {t[0].toUpperCase() + t.slice(1)}
               </Button>
@@ -121,85 +141,114 @@ export function OptionsApp() {
           </select>
         </Section>
 
-        <Section title="Shortcuts" description="Trigger Memlace anywhere without leaving the page.">
+        <Section title="Notifications" description="Show a system notification when Memlace captures a memory in the background.">
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={settings.notificationsEnabled}
+              onChange={(e) => updateSettings({ notificationsEnabled: e.target.checked })}
+              className="h-4 w-4 accent-[color:var(--color-primary)]"
+            />
+            Enable capture notifications
+          </label>
+        </Section>
+
+        <Section title="Keyboard shortcuts" description="Trigger Memlace anywhere without leaving the page.">
           <dl className="grid grid-cols-[1fr_auto] gap-y-2 gap-x-6 text-sm max-w-md">
-            <dt className="text-muted-foreground">Capture selection</dt>
-            <dd><Kbd>{settings.shortcutCapture}</Kbd></dd>
-            <dt className="text-muted-foreground">Open popup</dt>
+            <dt className="text-muted-foreground">Open Memlace</dt>
             <dd><Kbd>{settings.shortcutOpenPopup}</Kbd></dd>
+            <dt className="text-muted-foreground">Save selection</dt>
+            <dd><Kbd>{settings.shortcutCapture}</Kbd></dd>
           </dl>
-          <p className="mt-2 text-xs text-muted-foreground">
-            You can rebind the popup shortcut in <code>chrome://extensions/shortcuts</code>.
-          </p>
+          <div className="mt-3">
+            <Button variant="secondary" onClick={openShortcuts}>
+              Customize shortcuts
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Opens <code>chrome://extensions/shortcuts</code> where you can rebind or clear any command.
+            </p>
+          </div>
+        </Section>
+
+        <Section title="Storage" description="Everything stays on this device — nothing is ever uploaded.">
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <Stat label="Projects" value={stats?.projects ?? "—"} />
+            <Stat label="Memories" value={stats?.memories ?? "—"} />
+            <Stat label="Trashed" value={stats?.trashed ?? "—"} />
+          </div>
+          {storage && storage.quota > 0 && (
+            <div className="mt-4">
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>Used {formatBytes(storage.usage)}</span>
+                <span>of {formatBytes(storage.quota)} ({storagePct}%)</span>
+              </div>
+              <div
+                className="mt-1 h-2 rounded-full bg-muted overflow-hidden"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={storagePct}
+              >
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#2563eb,#0ea5e9)] transition-[width] duration-500"
+                  style={{ width: `${storagePct}%` }}
+                />
+              </div>
+            </div>
+          )}
         </Section>
 
         <Section title="Import & export" description="Move your memories between devices as a JSON file.">
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={doExport}>Export data</Button>
+            <Button variant="primary" onClick={doExport}>Export data</Button>
             <Button variant="secondary" onClick={doImport}>Import data</Button>
           </div>
         </Section>
 
-        <Section title="Privacy" description="Memlace stores everything on this device. Nothing is sent to a server.">
-          <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4">
-            <li>All memories live in IndexedDB on your machine.</li>
-            <li>Settings live in <code>chrome.storage.local</code>.</li>
-            <li>No analytics, no accounts, no cloud sync.</li>
-          </ul>
-        </Section>
-
-        <Section title="Storage" description="Local usage on this device.">
-          {storage ? (
-            <div className="max-w-md">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                <span>{formatBytes(storage.usage)} used</span>
-                <span>{formatBytes(storage.quota)} available</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full bg-primary"
-                  style={{ width: `${Math.min(100, storage.quota ? (storage.usage / storage.quota) * 100 : 0)}%` }}
-                />
-              </div>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">Storage estimate unavailable.</p>
-          )}
-          <div className="mt-4">
-            <Button variant="danger" onClick={clearAll}>Delete all local data</Button>
+        <Section title="Danger zone" description="These actions can't be undone.">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={doResetSettings}>Reset settings</Button>
+            <Button variant="danger" onClick={clearAll}>Delete all data</Button>
           </div>
         </Section>
 
-        <footer className="pt-6 border-t border-border text-xs text-muted-foreground">
-          Memlace · Version {settings.version} · Local · Private · Free
-        </footer>
+        <p className="text-[11px] text-muted-foreground pt-4 border-t border-border">
+          Memlace v{settings.version} · Local-first · No telemetry
+        </p>
       </main>
     </div>
   );
 }
 
 function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
+  title, description, children,
+}: { title: string; description?: string; children: ReactNode }) {
   return (
-    <section>
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
-      <div className="mt-3">{children}</div>
+    <section className="rounded-2xl border border-border bg-surface p-5">
+      <header className="mb-4">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+      </header>
+      {children}
     </section>
   );
 }
 
-function Kbd({ children }: { children: React.ReactNode }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <kbd className="inline-flex items-center rounded border border-border bg-surface px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+    <div className="rounded-lg border border-border bg-background px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-lg font-semibold tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function Kbd({ children }: { children: ReactNode }) {
+  return (
+    <kbd className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[11px] font-mono">
       {children}
     </kbd>
   );
 }
+
+export type { Settings };

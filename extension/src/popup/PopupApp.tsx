@@ -1,27 +1,47 @@
-import { useEffect, useMemo, useState } from "react";
-import { Search, Settings2, PanelRight, Plus, Sparkles, Pin, Star, FolderOpen } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Settings2,
+  PanelRight,
+  Plus,
+  Sparkles,
+  Pin,
+  FolderOpen,
+  Keyboard,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
 import { Empty } from "@/components/Empty";
 import { MemoryRow } from "@/components/MemoryRow";
+import { MemoryListSkeleton } from "@/components/Skeleton";
+import { useToast } from "@/components/Toast";
 import { useMemlace } from "@/store/useMemlace";
 import { useActiveTab } from "@/hooks/useActiveTab";
+import { useThemeSync } from "@/hooks/useThemeSync";
 import { providerMeta } from "@/lib/providers";
 import { listMemories } from "@/services/memories";
 import type { Memory } from "@/types";
 
+const PENDING_KEY = "memlace.pendingCapture";
+
 export function PopupApp() {
+  useThemeSync();
+  const toast = useToast();
+
   const bootstrap = useMemlace((s) => s.bootstrap);
   const ready = useMemlace((s) => s.ready);
   const projects = useMemlace((s) => s.projects);
   const addMemory = useMemlace((s) => s.addMemory);
   const toggleFavorite = useMemlace((s) => s.toggleFavorite);
+  const togglePinMemory = useMemlace((s) => s.togglePinMemory);
   const trashMemory = useMemlace((s) => s.trashMemory);
 
   const [query, setQuery] = useState("");
   const [pinned, setPinned] = useState<Memory[]>([]);
   const [recent, setRecent] = useState<Memory[]>([]);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
   const active = useActiveTab();
   const provider = providerMeta(active.provider);
 
@@ -29,28 +49,41 @@ export function PopupApp() {
     bootstrap();
   }, [bootstrap]);
 
-  useEffect(() => {
-    if (!ready) return;
-    let cancelled = false;
-    (async () => {
+  const loadLists = useCallback(async () => {
+    setBusy(true);
+    try {
       const [fav, all] = await Promise.all([
-        listMemories({ favorite: true, trashed: false }),
-        listMemories({ trashed: false }),
+        listMemories({ view: "favorites" }, "newest"),
+        listMemories({ view: "recent" }, "newest"),
       ]);
-      if (cancelled) return;
       setPinned(fav.slice(0, 3));
-      setRecent(all.slice(0, 6));
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, projects.length]);
+      setRecent(all.slice(0, 8));
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   useEffect(() => {
-    chrome.storage.local.get("memlace.pendingCapture").then((v) => {
-      const p = v["memlace.pendingCapture"] as typeof pending | undefined;
+    if (!ready) return;
+    void loadLists();
+  }, [ready, loadLists, projects.length]);
+
+  useEffect(() => {
+    chrome.storage.local.get(PENDING_KEY).then((v) => {
+      const p = v[PENDING_KEY] as typeof pending | undefined;
       if (p && p.text) setPending(p);
     });
+    const onChange = (
+      changes: { [k: string]: chrome.storage.StorageChange },
+      area: chrome.storage.AreaName,
+    ) => {
+      if (area !== "local" || !changes[PENDING_KEY]) return;
+      const next = changes[PENDING_KEY].newValue as typeof pending | undefined;
+      setPending(next?.text ? next : null);
+    };
+    chrome.storage.onChanged.addListener(onChange);
+    return () => chrome.storage.onChanged.removeListener(onChange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -71,43 +104,61 @@ export function PopupApp() {
         await chrome.sidePanel.open({ tabId: tab.id });
         window.close();
       }
-    } catch {
-      // no-op
+    } catch (err) {
+      toast.error("Could not open side panel", err instanceof Error ? err.message : undefined);
     }
   };
 
-  const openOptions = () => {
-    if (chrome.runtime?.openOptionsPage) chrome.runtime.openOptionsPage();
-  };
+  const openOptions = () => chrome.runtime?.openOptionsPage?.();
 
   const savePendingCapture = async () => {
     if (!pending) return;
-    const title = pending.title?.slice(0, 80) || pending.text.slice(0, 60);
-    await addMemory({
-      title,
-      content: pending.text,
-      provider: active.provider,
-      sourceUrl: pending.url || null,
-    });
-    await chrome.storage.local.remove("memlace.pendingCapture");
+    try {
+      const title = pending.title?.slice(0, 80) || pending.text.slice(0, 60);
+      await addMemory({
+        title,
+        content: pending.text,
+        provider: active.provider,
+        sourceUrl: pending.url || null,
+      });
+      await chrome.storage.local.remove(PENDING_KEY);
+      setPending(null);
+      toast.success("Memory saved", "Available across popup and side panel.");
+      void loadLists();
+    } catch (err) {
+      toast.error("Save failed", err instanceof Error ? err.message : undefined);
+    }
+  };
+
+  const dismissPending = async () => {
+    await chrome.storage.local.remove(PENDING_KEY);
     setPending(null);
   };
 
   const captureFromPage = async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id) return;
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => window.getSelection()?.toString().trim() ?? "",
-    });
-    const text = results[0]?.result ?? "";
-    if (!text) return;
-    await addMemory({
-      title: (tab.title ?? "Captured note").slice(0, 80),
-      content: text,
-      provider: active.provider,
-      sourceUrl: tab.url ?? null,
-    });
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return;
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => window.getSelection()?.toString().trim() ?? "",
+      });
+      const text = results[0]?.result ?? "";
+      if (!text) {
+        toast.info("Nothing selected", "Highlight text on the page first.");
+        return;
+      }
+      await addMemory({
+        title: (tab.title ?? "Captured note").slice(0, 80),
+        content: text,
+        provider: active.provider,
+        sourceUrl: tab.url ?? null,
+      });
+      toast.success("Memory saved");
+      void loadLists();
+    } catch (err) {
+      toast.error("Capture failed", err instanceof Error ? err.message : undefined);
+    }
   };
 
   const pinnedProjects = projects.filter((p) => p.pinned).slice(0, 4);
@@ -128,7 +179,7 @@ export function PopupApp() {
             type="button"
             onClick={openSidePanel}
             aria-label="Open side panel"
-            className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+            className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             <PanelRight className="h-4 w-4" />
           </button>
@@ -136,7 +187,7 @@ export function PopupApp() {
             type="button"
             onClick={openOptions}
             aria-label="Open settings"
-            className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+            className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             <Settings2 className="h-4 w-4" />
           </button>
@@ -145,37 +196,36 @@ export function PopupApp() {
 
       <div className="px-3 pt-2.5">
         <label className="relative block">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
           <input
             type="search"
             placeholder="Search memories, projects, tags…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search memories"
             className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
           />
         </label>
       </div>
 
       {pending && (
-        <div className="mx-3 mt-2.5 rounded-lg border border-primary/30 bg-primary/5 p-2.5">
+        <div className="mx-3 mt-2.5 rounded-lg border border-primary/30 bg-primary/5 p-2.5 animate-fade-in">
           <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
             <Sparkles className="h-3.5 w-3.5" /> New capture ready
           </div>
           <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{pending.text}</p>
           <div className="mt-2 flex gap-1.5">
             <Button size="sm" variant="primary" onClick={savePendingCapture}>Save memory</Button>
-            <Button size="sm" variant="ghost" onClick={() => { chrome.storage.local.remove("memlace.pendingCapture"); setPending(null); }}>
-              Dismiss
-            </Button>
+            <Button size="sm" variant="ghost" onClick={dismissPending}>Dismiss</Button>
           </div>
         </div>
       )}
 
       <div className="flex-1 overflow-y-auto scroll-thin px-3 py-2.5 space-y-4">
-        {pinnedProjects.length + recentProjects.length > 0 && (
-          <section>
+        {(pinnedProjects.length + recentProjects.length > 0) && (
+          <section aria-labelledby="popup-projects">
             <div className="flex items-center justify-between mb-1.5">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 id="popup-projects" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Projects
               </h3>
               <button
@@ -205,9 +255,9 @@ export function PopupApp() {
         )}
 
         {pinned.length > 0 && (
-          <section>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              Pinned memories
+          <section aria-labelledby="popup-pinned">
+            <h3 id="popup-pinned" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Favorites
             </h3>
             <ul className="space-y-1.5">
               {pinned.map((m) => (
@@ -215,6 +265,7 @@ export function PopupApp() {
                   key={m.id}
                   memory={m}
                   onToggleFavorite={toggleFavorite}
+                  onTogglePin={togglePinMemory}
                   onTrash={trashMemory}
                 />
               ))}
@@ -222,9 +273,9 @@ export function PopupApp() {
           </section>
         )}
 
-        <section>
+        <section aria-labelledby="popup-recent">
           <div className="flex items-center justify-between mb-1.5">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 id="popup-recent" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               {query ? "Results" : "Recent"}
             </h3>
             <Button size="sm" variant="ghost" onClick={captureFromPage}>
@@ -232,7 +283,9 @@ export function PopupApp() {
               Capture
             </Button>
           </div>
-          {filtered.length === 0 ? (
+          {busy && !recent.length ? (
+            <MemoryListSkeleton rows={4} />
+          ) : filtered.length === 0 ? (
             <Empty
               icon={<FolderOpen className="h-5 w-5" />}
               title={query ? "No matches" : "No memories yet."}
@@ -256,26 +309,22 @@ export function PopupApp() {
                   key={m.id}
                   memory={m}
                   onToggleFavorite={toggleFavorite}
+                  onTogglePin={togglePinMemory}
                   onTrash={trashMemory}
                 />
               ))}
             </ul>
           )}
         </section>
-
-        {pinned.length === 0 && recent.length > 0 && (
-          <div className="flex items-center gap-2 rounded-lg border border-dashed border-border p-2.5">
-            <Star className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-            <p className="text-[11px] text-muted-foreground">
-              Star a memory to pin it here for quick access.
-            </p>
-          </div>
-        )}
       </div>
 
-      <footer className="border-t border-border px-3 py-2 text-[10px] text-muted-foreground flex items-center justify-between">
-        <span className="font-mono uppercase tracking-widest">Local · Private</span>
-        <span>Alt+Shift+S · Capture</span>
+      <footer className="border-t border-border px-3 py-2 flex items-center justify-between text-[10px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <Keyboard className="h-3 w-3" />
+          <kbd className="rounded bg-muted px-1 py-0.5 font-mono">Alt+Shift+S</kbd>
+          capture
+        </span>
+        <span>Local · Private</span>
       </footer>
     </div>
   );

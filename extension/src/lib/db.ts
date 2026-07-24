@@ -7,11 +7,40 @@ class MemlaceDB extends Dexie {
 
   constructor() {
     super("memlace");
+
+    // v1 — original schema
     this.version(1).stores({
       projects: "id, name, pinned, archived, updatedAt",
       memories:
         "id, projectId, provider, favorite, trashed, createdAt, updatedAt, *tags",
     });
+
+    // v2 — adds pinned/archived on memories, favorite/icon on projects
+    this.version(2)
+      .stores({
+        projects: "id, name, pinned, favorite, archived, updatedAt",
+        memories:
+          "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table<Memory>("memories")
+          .toCollection()
+          .modify((m) => {
+            if (typeof m.pinned !== "boolean") m.pinned = false;
+            if (typeof m.archived !== "boolean") m.archived = false;
+            if (typeof m.trashedAt !== "number" && m.trashedAt !== null) {
+              m.trashedAt = m.trashed ? m.updatedAt : null;
+            }
+          });
+        await tx
+          .table<Project>("projects")
+          .toCollection()
+          .modify((p) => {
+            if (typeof p.favorite !== "boolean") p.favorite = false;
+            if (typeof p.icon !== "string") p.icon = "folder";
+          });
+      });
   }
 }
 
