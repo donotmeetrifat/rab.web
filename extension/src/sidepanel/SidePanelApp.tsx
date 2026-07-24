@@ -419,16 +419,28 @@ export function SidePanelApp() {
               <MessagesSquare className="h-4 w-4 text-primary" />
               <h1 className="text-sm font-semibold">Conversations</h1>
               <span className="ml-2 text-[10px] text-muted-foreground">
-                {conversations.length} saved
+                {debouncedConvQuery ||
+                convFilters.providers.length ||
+                convFilters.dateFrom ||
+                convFilters.dateTo
+                  ? `${filteredConversations.length} of ${convTotal}`
+                  : `${convTotal} saved`}
               </span>
               <div className="ml-auto flex items-center gap-2">
-                <Button size="sm" variant="ghost" onClick={loadConversations}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true })
+                  }
+                >
                   Refresh
                 </Button>
               </div>
             </header>
-            <div className="px-4 pt-3">
+            <div className="px-4 pt-3 space-y-2">
               <ConversationSearch value={convQuery} onChange={setConvQuery} />
+              <ConversationFilters value={convFilters} onChange={setConvFilters} />
             </div>
             <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
               <div className="overflow-y-auto scroll-thin px-4 py-3">
@@ -437,14 +449,15 @@ export function SidePanelApp() {
                   loading={convLoading}
                   activeId={selectedConv?.id ?? null}
                   onOpen={(c) => setSelectedConv(c)}
-                  query={convQuery || undefined}
+                  query={debouncedConvQuery || undefined}
+                  snippets={conversationSnippets}
                   onDelete={async (c) => {
-                    if (!window.confirm(`Delete conversation “${c.title}”?`))
+                    if (!window.confirm(`Delete conversation "${c.title}"?`))
                       return;
                     await deleteConversation(c.id);
                     if (selectedConv?.id === c.id) setSelectedConv(null);
                     toast.success("Conversation deleted");
-                    void loadConversations();
+                    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
                   }}
                 />
               </div>
@@ -455,7 +468,7 @@ export function SidePanelApp() {
                     onClose={() => setSelectedConv(null)}
                     onDeleted={() => {
                       setSelectedConv(null);
-                      void loadConversations();
+                      void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
                     }}
                   />
                 ) : (
