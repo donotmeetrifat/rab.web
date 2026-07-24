@@ -367,7 +367,57 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+        {section === "conversations" ? (
+          <div className="flex flex-col h-full min-h-0">
+            <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+              <MessagesSquare className="h-4 w-4 text-primary" />
+              <h1 className="text-sm font-semibold">Conversations</h1>
+              <span className="ml-2 text-[10px] text-muted-foreground">
+                {conversations.length} saved
+              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <Button size="sm" variant="ghost" onClick={loadConversations}>
+                  Refresh
+                </Button>
+              </div>
+            </header>
+            <div className="px-4 pt-3">
+              <ConversationSearch value={convQuery} onChange={setConvQuery} />
+            </div>
+            <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+              <div className="overflow-y-auto scroll-thin px-4 py-3">
+                <ConversationList
+                  conversations={filteredConversations}
+                  loading={convLoading}
+                  activeId={selectedConv?.id ?? null}
+                  onOpen={(c) => setSelectedConv(c)}
+                  query={convQuery || undefined}
+                  onDelete={async (c) => {
+                    if (!window.confirm(`Delete conversation “${c.title}”?`))
+                      return;
+                    await deleteConversation(c.id);
+                    if (selectedConv?.id === c.id) setSelectedConv(null);
+                    toast.success("Conversation deleted");
+                    void loadConversations();
+                  }}
+                />
+              </div>
+              <aside className="hidden md:flex flex-col border-l border-border bg-surface min-w-0">
+                {selectedConv ? (
+                  <ConversationDetail
+                    conversation={selectedConv}
+                    onClose={() => setSelectedConv(null)}
+                  />
+                ) : (
+                  <div className="flex-1 grid place-items-center text-xs text-muted-foreground px-6 text-center">
+                    Select a conversation to view its messages here.
+                  </div>
+                )}
+              </aside>
+            </div>
+          </div>
+        ) : (
+          <>
           <h1 className="text-sm font-semibold truncate">{headerTitle}</h1>
           {provider && (
             <span className="ml-2 text-[10px] text-muted-foreground">On {provider.name}</span>
