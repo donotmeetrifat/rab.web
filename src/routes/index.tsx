@@ -80,7 +80,8 @@ function LandingPage() {
           style={{ display: "flex", alignItems: "center", justifyContent: "flex-start", gap: "12px", margin: 0, padding: 0, lineHeight: 1, textDecoration: "none" }}
         >
           <span className="brand-mark" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", lineHeight: 0 }}>
-            <Mark size={36} />
+            <span className="md:hidden"><Mark size={32} /></span>
+            <span className="hidden md:inline-flex"><Mark size={36} /></span>
           </span>
           <span
             className="transition-colors duration-150"
