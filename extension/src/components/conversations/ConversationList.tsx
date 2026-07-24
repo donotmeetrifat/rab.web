@@ -3,6 +3,7 @@ import { ConversationCard } from "./ConversationCard";
 import { ConversationEmptyState } from "./ConversationEmptyState";
 import { MemoryListSkeleton } from "@/components/Skeleton";
 import type { ReactNode } from "react";
+import type { ConvSnippet } from "@/services/conversations";
 
 export function ConversationList({
   conversations,
@@ -13,6 +14,7 @@ export function ConversationList({
   query,
   compact = false,
   emptyAction,
+  snippets,
 }: {
   conversations: StoredConversation[];
   loading?: boolean;
@@ -22,6 +24,7 @@ export function ConversationList({
   query?: string;
   compact?: boolean;
   emptyAction?: ReactNode;
+  snippets?: Map<string, ConvSnippet | null>;
 }) {
   if (loading && conversations.length === 0) {
     return <MemoryListSkeleton rows={compact ? 3 : 5} />;
@@ -39,6 +42,8 @@ export function ConversationList({
           onOpen={onOpen}
           onDelete={onDelete}
           compact={compact}
+          query={query}
+          snippet={snippets?.get(c.id) ?? null}
         />
       ))}
     </ul>
