@@ -93,8 +93,3 @@ export function useHotkey(key: string, handler: () => void, enabled = true) {
     return () => window.removeEventListener("keydown", onKey);
   }, [key, handler, enabled]);
 }
-
-export function useState2<T>(initial: T): [T, (v: T) => void] {
-  const [v, set] = useState(initial);
-  return [v, set];
-}
