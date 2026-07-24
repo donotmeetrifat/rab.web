@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowRight, Search, Command } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { ArrowRight, Search, Command, X, Sparkles, Layers, Repeat } from "lucide-react";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
@@ -333,6 +333,34 @@ function PreviewFrame() {
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
   const [announce, setAnnounce] = useState("");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // First-run onboarding: show once per browser, persisted via localStorage.
+  // Read after mount to avoid an SSR/hydration mismatch.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("uaw:onboarded") !== "1") setShowOnboarding(true);
+    } catch {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const dismissOnboarding = useCallback(() => {
+    setShowOnboarding(false);
+    try {
+      localStorage.setItem("uaw:onboarded", "1");
+    } catch {
+      /* storage blocked — session-only dismiss is fine */
+    }
+    setAnnounce("Onboarding dismissed");
+  }, []);
+
+  const replayOnboarding = useCallback(() => {
+    try {
+      localStorage.removeItem("uaw:onboarded");
+    } catch { /* noop */ }
+    setShowOnboarding(true);
+  }, []);
 
   const project = useMemo(
     () => PROJECTS.find((p) => p.id === activeProjectId) ?? PROJECTS[0],
@@ -371,7 +399,7 @@ function PreviewFrame() {
       role="region"
       aria-label="Universal AI Workspace popup preview"
       aria-describedby="popup-shortcuts"
-      className="group/frame overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
+      className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
     >
       {/* Live region for keyboard/mouse selection changes */}
       <span className="sr-only" aria-live="polite" aria-atomic="true">
@@ -386,12 +414,25 @@ function PreviewFrame() {
         <span className="ml-4 font-mono text-[11px] text-muted-foreground">
           extension · popup
         </span>
-        <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span className="relative flex h-1.5 w-1.5" aria-hidden>
-            <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+        <div className="ml-auto flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <button
+            type="button"
+            onClick={replayOnboarding}
+            className={
+              "inline-flex items-center gap-1 rounded-md border border-transparent px-1.5 py-0.5 transition-colors hover:border-border hover:text-foreground " +
+              focusRing
+            }
+          >
+            <Sparkles className="h-2.5 w-2.5" aria-hidden />
+            Tour
+          </button>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5" aria-hidden>
+              <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+            </span>
+            Live
           </span>
-          Live
         </div>
       </div>
 
@@ -619,6 +660,8 @@ function PreviewFrame() {
           />
         </section>
       </div>
+
+      {showOnboarding && <OnboardingOverlay onDismiss={dismissOnboarding} />}
     </div>
   );
 }
@@ -704,5 +747,184 @@ function Key({ children }: { children: React.ReactNode }) {
     <kbd className="inline-flex min-w-[1.25rem] items-center justify-center rounded border border-border bg-[color:var(--surface)] px-1 py-0.5 font-mono text-[10px] normal-case text-foreground">
       {children}
     </kbd>
+  );
+}
+
+/* ------------------------------ Onboarding ------------------------------- */
+
+type Step = {
+  icon: typeof Layers;
+  eyebrow: string;
+  title: string;
+  body: string;
+};
+
+const ONBOARDING_STEPS: Step[] = [
+  {
+    icon: Layers,
+    eyebrow: "Step 1 · Capture",
+    title: "Your chats live in your Projects",
+    body: "Every conversation you have — in ChatGPT, Claude, Gemini, or anywhere else — is quietly saved into the Project you choose. Nothing leaves your machine.",
+  },
+  {
+    icon: Repeat,
+    eyebrow: "Step 2 · Switch",
+    title: "Continue in another AI, anytime",
+    body: "Open any chat and press Continue in… to pick a different provider. Your workspace hands off the conversation so the new AI picks up mid-thought.",
+  },
+  {
+    icon: Sparkles,
+    eyebrow: "Step 3 · Keep context",
+    title: "Context travels with you",
+    body: "The relevant history — project notes, prior messages, references — is packaged into the new chat automatically. Same brain, different assistant.",
+  },
+];
+
+function OnboardingOverlay({ onDismiss }: { onDismiss: () => void }) {
+  const [step, setStep] = useState(0);
+  const primaryRef = useRef<HTMLButtonElement>(null);
+  const total = ONBOARDING_STEPS.length;
+  const isLast = step === total - 1;
+  const current = ONBOARDING_STEPS[step];
+  const Icon = current.icon;
+
+  // Focus the primary CTA on mount and step change so screen readers announce
+  // the fresh content and keyboard users stay oriented.
+  useEffect(() => {
+    primaryRef.current?.focus();
+  }, [step]);
+
+  // Escape dismisses.
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onDismiss();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
+  const next = () => (isLast ? onDismiss() : setStep((s) => s + 1));
+  const back = () => setStep((s) => Math.max(0, s - 1));
+
+  return (
+    <div
+      className="absolute inset-0 z-20 flex items-center justify-center px-4 py-6 animate-fade-in"
+      role="presentation"
+    >
+      <button
+        type="button"
+        aria-label="Skip onboarding"
+        onClick={onDismiss}
+        className="absolute inset-0 cursor-default bg-foreground/40 backdrop-blur-sm"
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        aria-describedby="onboarding-body"
+        className="relative w-full max-w-md animate-scale-in rounded-2xl border border-border bg-background p-6 shadow-[0_20px_60px_-20px_oklch(0_0_0/0.35)]"
+      >
+        <div className="flex items-start gap-4">
+          <div
+            aria-hidden
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+          >
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {current.eyebrow}
+            </p>
+            <h2 id="onboarding-title" className="mt-1 text-lg font-semibold tracking-tight">
+              {current.title}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Dismiss onboarding"
+            className={
+              "ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-[color:var(--surface)] hover:text-foreground " +
+              focusRing
+            }
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+
+        <p
+          id="onboarding-body"
+          key={step}
+          className="mt-4 animate-fade-in text-sm leading-relaxed text-muted-foreground"
+        >
+          {current.body}
+        </p>
+
+        <div role="tablist" aria-label="Onboarding progress" className="mt-6 flex items-center gap-1.5">
+          {ONBOARDING_STEPS.map((_, i) => {
+            const active = i === step;
+            return (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-label={`Go to step ${i + 1}`}
+                onClick={() => setStep(i)}
+                className={
+                  "h-1.5 rounded-full transition-all duration-300 " +
+                  focusRing +
+                  " " +
+                  (active ? "w-6 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground/40")
+                }
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={onDismiss}
+            className={
+              "text-xs text-muted-foreground transition-colors hover:text-foreground " +
+              focusRing
+            }
+          >
+            Skip
+          </button>
+          <div className="flex items-center gap-2">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={back}
+                className={
+                  "inline-flex h-9 items-center rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-[color:var(--surface)] " +
+                  focusRing
+                }
+              >
+                Back
+              </button>
+            )}
+            <button
+              ref={primaryRef}
+              type="button"
+              onClick={next}
+              className={
+                "inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-medium text-primary-foreground shadow-[0_1px_0_oklch(1_0_0/0.2)_inset,0_4px_12px_-4px_oklch(0.53_0.19_285/0.5)] transition-all duration-200 hover:-translate-y-px " +
+                focusRing
+              }
+            >
+              {isLast ? "Get started" : "Next"}
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
