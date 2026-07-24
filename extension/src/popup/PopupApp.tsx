@@ -58,10 +58,13 @@ export function PopupApp() {
   const [tab, setTab] = useState<Tab>("memories");
   const [pinned, setPinned] = useState<Memory[]>([]);
   const [recent, setRecent] = useState<Memory[]>([]);
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
+  const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
+  const [convCount, setConvCount] = useState(0);
   const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const debouncedQuery = useDebounced(query, 160);
 
   const active = useActiveTab();
   const provider = providerMeta(active.provider);
