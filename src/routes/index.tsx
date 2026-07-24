@@ -403,8 +403,8 @@ function PreviewFrame() {
                       role="menuitemradio"
                       aria-checked={active}
                       aria-current={active ? "page" : undefined}
-                      onClick={() => selectNav(i)}
-                      {...navRoving.getItemProps(i)}
+                      onClick={() => setActiveNav(item)}
+
                       className={
                         "group/nav flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all duration-200 " +
                         focusRing +
