@@ -108,7 +108,7 @@ function LandingPage() {
             style={{
               fontFamily: "Inter, sans-serif",
               fontWeight: 700,
-              fontSize: "24px",
+              fontSize: "28px",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               color: "#111827",
