@@ -489,10 +489,7 @@ function PreviewFrame() {
               type="button"
               onClick={cycleProvider}
               aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
-              className={
-                "btn-3d-primary group/cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold " +
-                focusRing
-              }
+              className={button3dClass("sm", `group/cta shrink-0 gap-1.5 ${focusRing}`)}
             >
               <span className="relative">
                 Continue in{" "}
