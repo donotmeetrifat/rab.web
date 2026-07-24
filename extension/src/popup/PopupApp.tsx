@@ -43,8 +43,11 @@ export function PopupApp() {
   const trashMemory = useMemlace((s) => s.trashMemory);
 
   const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("memories");
   const [pinned, setPinned] = useState<Memory[]>([]);
   const [recent, setRecent] = useState<Memory[]>([]);
+  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
