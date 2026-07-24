@@ -392,8 +392,8 @@ function PreviewFrame() {
               role="menu"
               aria-label="Sections"
               className="space-y-0.5 text-sm"
-              onKeyDown={(e) => navRoving.onKeyDown(e, selectNav)}
             >
+
               {NAV.map((item, i) => {
                 const active = item === activeNav;
                 return (
