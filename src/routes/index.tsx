@@ -553,17 +553,17 @@ function PreviewFrame() {
 
         {/* Main pane */}
         <section
-          className="relative bg-background p-6"
+          className="relative bg-background p-4 sm:p-6"
           aria-labelledby="active-project-heading"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div key={project.id} className="animate-fade-in">
+          <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap sm:gap-4">
+            <div key={project.id} className="min-w-0 animate-fade-in">
               <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 Project · {project.chats.length} chats
               </p>
               <h3
                 id="active-project-heading"
-                className="mt-1 text-lg font-semibold tracking-tight"
+                className="mt-1 truncate text-lg font-semibold tracking-tight"
               >
                 {project.name}
               </h3>
@@ -589,6 +589,7 @@ function PreviewFrame() {
               />
             </button>
           </div>
+
 
           <ul
             aria-label={`Chats in ${project.name}`}
