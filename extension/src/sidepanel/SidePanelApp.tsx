@@ -116,6 +116,31 @@ export function SidePanelApp() {
   const [movingId, setMovingId] = useState<string | null>(null);
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
+  // Conversations
+  const [section, setSection] = useState<"memories" | "conversations">("memories");
+  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [convLoading, setConvLoading] = useState(false);
+  const [convQuery, setConvQuery] = useState("");
+  const [selectedConv, setSelectedConv] = useState<StoredConversation | null>(null);
+
+  const loadConversations = useCallback(async () => {
+    setConvLoading(true);
+    try {
+      const rows = await listConversations();
+      setConversations(rows);
+      setSelectedConv((prev) =>
+        prev ? rows.find((r) => r.id === prev.id) ?? null : null,
+      );
+    } finally {
+      setConvLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    void loadConversations();
+  }, [ready, loadConversations]);
+
   useEffect(() => {
     bootstrap();
   }, [bootstrap]);
