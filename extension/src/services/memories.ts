@@ -105,11 +105,12 @@ export async function deleteMemoryHard(id: string): Promise<void> {
 }
 
 export async function emptyTrash(): Promise<number> {
-  const trashed = await db.memories.where("trashed").equals(1).toArray();
-  const ids = trashed.filter((m) => m.trashed).map((m) => m.id);
-  await db.memories.bulkDelete(ids);
+  const all = await db.memories.toArray();
+  const ids = all.filter((m) => m.trashed).map((m) => m.id);
+  if (ids.length) await db.memories.bulkDelete(ids);
   return ids.length;
 }
+
 
 export async function exportAll(): Promise<string> {
   const [projects, memories] = await Promise.all([
