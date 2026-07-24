@@ -21,6 +21,7 @@ import {
   getConversationMessages,
 } from "@/services/conversations";
 import { ProviderBadge } from "./ProviderBadge";
+import { ContinueButton } from "./ContinueButton";
 import { Skeleton } from "@/components/Skeleton";
 import { Button } from "@/components/Button";
 import { useToast } from "@/components/Toast";
