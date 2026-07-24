@@ -412,9 +412,10 @@ function PreviewFrame() {
         </div>
       </div>
 
-      <div className="grid gap-px bg-border md:grid-cols-[240px_1fr]">
+      <div className="grid gap-px bg-border sm:grid-cols-[220px_1fr] md:grid-cols-[240px_1fr]">
         {/* Sidebar */}
-        <aside className="bg-background p-4" aria-label="Workspace sidebar">
+        <aside className="bg-background p-3 sm:p-4" aria-label="Workspace sidebar">
+
           <div className="mb-4 flex items-center gap-2.5">
             <Mark size={24} />
             <span className="text-[13px] font-semibold text-foreground" style={{ letterSpacing: "-0.02em" }}>Memlace</span>
