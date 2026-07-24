@@ -251,6 +251,16 @@ export function PopupApp() {
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Universal search (Ctrl+K)"
+            title="Universal search — Ctrl+K"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-surface px-1.5 text-[10px] text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
+          >
+            <Search className="h-3 w-3" aria-hidden />
+            <kbd className="font-sans">⌘K</kbd>
+          </button>
+          <button
+            type="button"
             onClick={openSidePanel}
             aria-label="Open side panel"
             className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
