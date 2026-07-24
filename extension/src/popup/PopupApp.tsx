@@ -231,8 +231,15 @@ export function PopupApp() {
   const pinnedProjects = projects.filter((p) => p.pinned).slice(0, 4);
   const recentProjects = projects.filter((p) => !p.pinned).slice(0, 4);
 
+  useHotkey("mod+k", () => setPaletteOpen((v) => !v));
+
   return (
     <div className="flex h-[560px] w-[380px] flex-col bg-background text-foreground">
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onOpenWorkspace={openSidePanel}
+      />
       <header className="flex items-center gap-2 border-b border-border px-3 py-2.5">
         <Logo size={22} />
         <div className="flex flex-col leading-tight">
