@@ -37,6 +37,8 @@ import {
   type ConvFiltersState,
 } from "@/components/conversations/ConversationFilters";
 import { useDebounced } from "@/hooks/useDebounced";
+import { useHotkey } from "@/components/Dialog";
+import { CommandPalette } from "@/components/CommandPalette";
 import type { Memory } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
@@ -64,6 +66,7 @@ export function PopupApp() {
   const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const debouncedQuery = useDebounced(query, 160);
 
   const active = useActiveTab();
@@ -228,8 +231,15 @@ export function PopupApp() {
   const pinnedProjects = projects.filter((p) => p.pinned).slice(0, 4);
   const recentProjects = projects.filter((p) => !p.pinned).slice(0, 4);
 
+  useHotkey("mod+k", () => setPaletteOpen((v) => !v));
+
   return (
     <div className="flex h-[560px] w-[380px] flex-col bg-background text-foreground">
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onOpenWorkspace={openSidePanel}
+      />
       <header className="flex items-center gap-2 border-b border-border px-3 py-2.5">
         <Logo size={22} />
         <div className="flex flex-col leading-tight">
@@ -239,6 +249,16 @@ export function PopupApp() {
           </span>
         </div>
         <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Universal search (Ctrl+K)"
+            title="Universal search — Ctrl+K"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-surface px-1.5 text-[10px] text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60"
+          >
+            <Search className="h-3 w-3" aria-hidden />
+            <kbd className="font-sans">⌘K</kbd>
+          </button>
           <button
             type="button"
             onClick={openSidePanel}

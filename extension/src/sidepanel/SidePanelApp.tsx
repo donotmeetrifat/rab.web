@@ -46,6 +46,8 @@ import {
   type ConvFiltersState,
 } from "@/components/conversations/ConversationFilters";
 import { useDebounced } from "@/hooks/useDebounced";
+import { useHotkey } from "@/components/Dialog";
+import { CommandPalette } from "@/components/CommandPalette";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
@@ -142,6 +144,8 @@ export function SidePanelApp() {
   const [convQuery, setConvQuery] = useState("");
   const [selectedConv, setSelectedConv] = useState<StoredConversation | null>(null);
   const debouncedConvQuery = useDebounced(convQuery, 180);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  useHotkey("mod+k", () => setPaletteOpen((v) => !v));
 
   const runConvSearch = useCallback(
     async (q: string, filters: ConvFiltersState, opts: { showLoading?: boolean } = {}) => {
@@ -279,6 +283,7 @@ export function SidePanelApp() {
 
   return (
     <div className="grid h-dvh w-dvw grid-cols-[220px_1fr] bg-background text-foreground">
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <aside className="flex flex-col border-r border-border bg-surface min-w-0">
         <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
           <Logo size={22} />
