@@ -660,6 +660,8 @@ function PreviewFrame() {
           />
         </section>
       </div>
+
+      {showOnboarding && <OnboardingOverlay onDismiss={dismissOnboarding} />}
     </div>
   );
 }
