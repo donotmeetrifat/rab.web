@@ -417,6 +417,10 @@ export function SidePanelApp() {
                   <ConversationDetail
                     conversation={selectedConv}
                     onClose={() => setSelectedConv(null)}
+                    onDeleted={() => {
+                      setSelectedConv(null);
+                      void loadConversations();
+                    }}
                   />
                 ) : (
                   <div className="flex-1 grid place-items-center text-xs text-muted-foreground px-6 text-center">
