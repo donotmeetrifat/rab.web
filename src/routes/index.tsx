@@ -414,12 +414,25 @@ function PreviewFrame() {
         <span className="ml-4 font-mono text-[11px] text-muted-foreground">
           extension · popup
         </span>
-        <div className="ml-auto flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span className="relative flex h-1.5 w-1.5" aria-hidden>
-            <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+        <div className="ml-auto flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <button
+            type="button"
+            onClick={replayOnboarding}
+            className={
+              "inline-flex items-center gap-1 rounded-md border border-transparent px-1.5 py-0.5 transition-colors hover:border-border hover:text-foreground " +
+              focusRing
+            }
+          >
+            <Sparkles className="h-2.5 w-2.5" aria-hidden />
+            Tour
+          </button>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5" aria-hidden>
+              <span className="absolute inset-0 animate-ping rounded-full bg-primary/60" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-primary" />
+            </span>
+            Live
           </span>
-          Live
         </div>
       </div>
 
