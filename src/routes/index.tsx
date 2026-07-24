@@ -283,33 +283,8 @@ function PreviewFrame() {
   const [activeNav, setActiveNav] = useState("Projects");
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // First-run onboarding: show once per browser, persisted via localStorage.
-  // Read after mount to avoid an SSR/hydration mismatch.
-  useEffect(() => {
-    try {
-      if (localStorage.getItem("uaw:onboarded") !== "1") setShowOnboarding(true);
-    } catch {
-      setShowOnboarding(true);
-    }
-  }, []);
 
-  const dismissOnboarding = useCallback(() => {
-    setShowOnboarding(false);
-    try {
-      localStorage.setItem("uaw:onboarded", "1");
-    } catch {
-      /* storage blocked — session-only dismiss is fine */
-    }
-  }, []);
-
-  const replayOnboarding = useCallback(() => {
-    try {
-      localStorage.removeItem("uaw:onboarded");
-    } catch { /* noop */ }
-    setShowOnboarding(true);
-  }, []);
 
   const project = useMemo(
     () => PROJECTS.find((p) => p.id === activeProjectId) ?? PROJECTS[0],
