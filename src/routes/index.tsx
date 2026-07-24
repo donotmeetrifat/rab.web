@@ -581,38 +581,17 @@ function PreviewFrame() {
 
           <ul
             aria-label={`Chats in ${project.name}`}
-            className="mt-5 space-y-1.5"
-            onKeyDown={(e) => chatRoving.onKeyDown(e, (i) => setAnnounce(`Opening ${project.chats[i].title}`))}
+            className="mt-5 space-y-1.5 [contain:layout_paint]"
+            onKeyDown={(e) => chatRoving.onKeyDown(e, openChat)}
           >
             {project.chats.map((c, i) => (
-              <li key={`${project.id}-${c.title}`} role="none">
-                <button
-                  type="button"
-                  onClick={() => setAnnounce(`Opening ${c.title}`)}
-                  aria-label={`${c.title}, from ${c.provider}, ${c.when}`}
-                  {...chatRoving.getItemProps(i)}
-                  style={{
-                    animationDelay: `${i * 55}ms`,
-                    animationFillMode: "backwards",
-                  }}
-                  className={
-                    "group/row flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left transition-all duration-200 animate-fade-in hover:-translate-y-px hover:border-primary/30 hover:bg-[color:var(--surface)] hover:shadow-[0_2px_10px_-6px_oklch(0_0_0/0.15)] " +
-                    focusRing
-                  }
-                >
-                  <span className="flex min-w-0 items-center gap-3">
-                    <ProviderChip name={c.provider} />
-                    <span className="truncate text-sm">{c.title}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    <span className="font-mono text-[11px] text-muted-foreground">{c.when}</span>
-                    <ArrowRight
-                      aria-hidden
-                      className="h-3 w-3 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover/row:translate-x-0 group-hover/row:opacity-100 group-focus-visible/row:translate-x-0 group-focus-visible/row:opacity-100"
-                    />
-                  </span>
-                </button>
-              </li>
+              <ChatRow
+                key={`${project.id}-${c.title}`}
+                chat={c}
+                index={i}
+                itemProps={chatRoving.getItemProps(i)}
+                onOpen={openChat}
+              />
             ))}
           </ul>
 
