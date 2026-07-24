@@ -66,6 +66,7 @@ export function PopupApp() {
   const [convLoading, setConvLoading] = useState(false);
   const [pending, setPending] = useState<{ text: string; url: string; title: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const debouncedQuery = useDebounced(query, 160);
 
   const active = useActiveTab();
