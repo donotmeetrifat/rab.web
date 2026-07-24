@@ -399,7 +399,7 @@ function PreviewFrame() {
       role="region"
       aria-label="Universal AI Workspace popup preview"
       aria-describedby="popup-shortcuts"
-      className="group/frame overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
+      className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
     >
       {/* Live region for keyboard/mouse selection changes */}
       <span className="sr-only" aria-live="polite" aria-atomic="true">
