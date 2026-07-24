@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Command } from "lucide-react";
+import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
@@ -105,13 +106,13 @@ function LandingPage() {
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <button
+              <Button3D
+                size="lg"
                 onClick={download}
                 disabled={state === "loading"}
-                className="btn-3d-primary inline-flex h-12 items-center justify-center rounded-[12px] px-6 text-sm font-semibold tracking-tight"
               >
                 {state === "loading" ? "Preparing…" : "Download for Chrome"}
-              </button>
+              </Button3D>
               <a
                 href="#install"
                 className="inline-flex h-11 items-center justify-center rounded-[10px] border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-[color:var(--surface)]"
@@ -488,10 +489,7 @@ function PreviewFrame() {
               type="button"
               onClick={cycleProvider}
               aria-label={`Continue in ${PROVIDERS[providerIdx]}. Press to cycle provider.`}
-              className={
-                "btn-3d-primary group/cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold " +
-                focusRing
-              }
+              className={button3dClass("sm", `group/cta shrink-0 gap-1.5 ${focusRing}`)}
             >
               <span className="relative">
                 Continue in{" "}
