@@ -153,7 +153,7 @@ export function ContinueButton({ conversation, messages }: Props) {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => handleContinue(p.id)}
+                    onClick={() => handleSelectProvider(p.id)}
                     disabled={pending !== null}
                     className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-muted disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                   >
@@ -169,7 +169,7 @@ export function ContinueButton({ conversation, messages }: Props) {
                         {p.name}
                       </span>
                       <span className="block text-[10px] text-muted-foreground truncate">
-                        Copy · open new chat
+                        Preview context · open new chat
                       </span>
                     </span>
                     {isPending ? (
@@ -186,6 +186,23 @@ export function ContinueButton({ conversation, messages }: Props) {
           </ul>
         </div>
       )}
+
+      {preview && (
+        <ContextPreview
+          open
+          target={preview.target}
+          targetName={
+            CONTINUATION_PROVIDERS.find((p) => p.id === preview.target)?.name ?? preview.target
+          }
+          loading={preview.loading}
+          pkg={preview.pkg}
+          error={preview.error}
+          onCancel={() => setPreview(null)}
+          onContinue={handleConfirmContinue}
+        />
+      )}
     </div>
   );
+}
+
 }
