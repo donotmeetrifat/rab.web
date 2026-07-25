@@ -404,6 +404,34 @@ export function SidePanelApp() {
             <Play className="h-3.5 w-3.5" />
             AI Center
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("checklist")}
+            aria-current={section === "checklist" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "checklist"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Rocket className="h-3.5 w-3.5" />
+            Get started
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("help")}
+            aria-current={section === "help" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "help"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            Help
+          </button>
         </nav>
 
 
