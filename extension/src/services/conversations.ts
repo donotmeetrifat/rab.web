@@ -164,6 +164,11 @@ export async function saveConversation(
       }
     })();
   }
+  if (result.created) {
+    void import("@/services/onboarding").then((m) =>
+      m.markChecklist("savedConversation"),
+    );
+  }
   return result;
 }
 

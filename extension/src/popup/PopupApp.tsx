@@ -39,6 +39,9 @@ import {
 import { useDebounced } from "@/hooks/useDebounced";
 import { useHotkey } from "@/components/Dialog";
 import { CommandPalette } from "@/components/CommandPalette";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { WhatsNew } from "@/components/onboarding/WhatsNew";
+import { markChecklist } from "@/services/onboarding";
 import type { Memory } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
@@ -68,6 +71,9 @@ export function PopupApp() {
   const [busy, setBusy] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const debouncedQuery = useDebounced(query, 160);
+  useEffect(() => {
+    if (debouncedQuery.trim().length > 1) void markChecklist("usedSearch");
+  }, [debouncedQuery]);
 
   const active = useActiveTab();
   const provider = providerMeta(active.provider);
@@ -195,6 +201,7 @@ export function PopupApp() {
       await chrome.storage.local.remove(PENDING_KEY);
       setPending(null);
       toast.success("Memory saved", "Available across popup and side panel.");
+      void markChecklist("savedConversation");
       void loadLists();
     } catch (err) {
       toast.error("Save failed", err instanceof Error ? err.message : undefined);
@@ -226,6 +233,7 @@ export function PopupApp() {
         sourceUrl: tab.url ?? null,
       });
       toast.success("Memory saved");
+      void markChecklist("savedConversation");
       void loadLists();
     } catch (err) {
       toast.error("Capture failed", err instanceof Error ? err.message : undefined);
@@ -239,6 +247,8 @@ export function PopupApp() {
 
   return (
     <div className="flex h-[560px] w-[380px] flex-col bg-background text-foreground">
+      <OnboardingFlow />
+      <WhatsNew />
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}

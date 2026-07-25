@@ -105,7 +105,7 @@ export function AISettingsPanel() {
             type="checkbox"
             className="mt-0.5 h-4 w-4 accent-[color:var(--color-primary)]"
             checked={s.enabled}
-            onChange={(e) => update({ enabled: e.target.checked })}
+            onChange={(e) => { update({ enabled: e.target.checked }); if (e.target.checked) void import("@/services/onboarding").then((m) => m.markChecklist("enabledAI")); }}
           />
           <span>
             <span className="block text-sm font-medium">Enable AI features</span>

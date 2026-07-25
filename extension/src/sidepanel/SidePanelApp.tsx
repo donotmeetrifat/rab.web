@@ -20,6 +20,8 @@ import {
   Brain,
   Sparkles,
   Play,
+  Rocket,
+  HelpCircle,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -55,6 +57,11 @@ import { KnowledgePanel } from "@/components/knowledge/KnowledgePanel";
 import { AICenter } from "@/components/ai/AICenter";
 import { AskMemlacePanel } from "@/components/ai/AskMemlacePanel";
 import { scheduleKnowledgeBackfill } from "@/knowledge";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { WhatsNew } from "@/components/onboarding/WhatsNew";
+import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
+import { HelpCenter } from "@/components/HelpCenter";
+import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
@@ -143,7 +150,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center">("memories");
+  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help">("memories");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
@@ -153,6 +160,12 @@ export function SidePanelApp() {
   const debouncedConvQuery = useDebounced(convQuery, 180);
   const [paletteOpen, setPaletteOpen] = useState(false);
   useHotkey("mod+k", () => setPaletteOpen((v) => !v));
+  useEffect(() => {
+    if (paletteOpen) void markChecklist("usedSearch");
+  }, [paletteOpen]);
+  useEffect(() => {
+    if (debouncedConvQuery.trim().length > 1) void markChecklist("usedSearch");
+  }, [debouncedConvQuery]);
 
   const runConvSearch = useCallback(
     async (q: string, filters: ConvFiltersState, opts: { showLoading?: boolean } = {}) => {
@@ -298,6 +311,8 @@ export function SidePanelApp() {
 
   return (
     <div className="grid h-dvh w-dvw grid-cols-[220px_1fr] bg-background text-foreground">
+      <OnboardingFlow />
+      <WhatsNew />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <aside className="flex flex-col border-r border-border bg-surface min-w-0">
         <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
@@ -402,6 +417,34 @@ export function SidePanelApp() {
             <Play className="h-3.5 w-3.5" />
             AI Center
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("checklist")}
+            aria-current={section === "checklist" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "checklist"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Rocket className="h-3.5 w-3.5" />
+            Get started
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("help")}
+            aria-current={section === "help" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "help"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            Help
+          </button>
         </nav>
 
 
@@ -476,7 +519,11 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "ai-center" ? (
+        {section === "checklist" ? (
+          <ChecklistPanel onJump={() => setPaletteOpen(true)} />
+        ) : section === "help" ? (
+          <HelpCenter />
+        ) : section === "ai-center" ? (
           <AICenter />
         ) : section === "ask" ? (
           <AskMemlacePanel
@@ -854,6 +901,7 @@ export function SidePanelApp() {
           onClose={() => setProjectDialog(null)}
           onCreate={async (input) => {
             await addProject(input);
+            void markChecklist("createdProject");
             toast.success("Project created");
             setProjectDialog(null);
           }}

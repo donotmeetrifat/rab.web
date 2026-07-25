@@ -73,6 +73,7 @@ export function ContinueButton({ conversation, messages }: Props) {
             : `${built.includedMessages} messages`,
         ];
         toast.success(`Opened ${adapter.name}`, `${parts.join(" · ")}. Paste to continue.`);
+        void import("@/services/onboarding").then((m) => m.markChecklist("continuedElsewhere"));
       } catch (err) {
         toast.error(
           "Continue failed",
