@@ -4,9 +4,9 @@
  * duplicate detection, importance/learning scoring.
  */
 import { db } from "@/lib/db";
-import { listConversations, getConversation } from "@/services/conversations";
+import { getConversation } from "@/services/conversations";
 import { listProjects } from "@/services/memories";
-import { findRelatedConversations } from "@/knowledge/search";
+import { findRelatedConversations, getKnowledgeForConversation } from "@/knowledge/search";
 import { getSummary, summarizeConversation } from "./SummaryEngine";
 import { embedConversation, semanticNeighbors } from "./EmbeddingEngine";
 import type { AIConversationSummary } from "./types";
