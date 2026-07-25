@@ -35,15 +35,18 @@ export async function getRelatedConversations(
   }
   // Fill from knowledge-engine facets when needed.
   if (combined.size < limit) {
-    const facet = await findRelatedConversations(conversationId, limit);
-    for (const f of facet) {
-      if (combined.has(f.conversationId)) continue;
-      combined.set(f.conversationId, {
-        conversationId: f.conversationId,
-        title: f.title,
-        score: f.score / 10,
-        reason: "shared-tech",
-      });
+    const knowledge = await getKnowledgeForConversation(conversationId);
+    if (knowledge) {
+      const facet = await findRelatedConversations(knowledge.id, limit);
+      for (const f of facet) {
+        if (combined.has(f.record.conversationId)) continue;
+        combined.set(f.record.conversationId, {
+          conversationId: f.record.conversationId,
+          title: f.record.title,
+          score: f.score / 10,
+          reason: "shared-tech",
+        });
+      }
     }
   }
   return [...combined.values()]
