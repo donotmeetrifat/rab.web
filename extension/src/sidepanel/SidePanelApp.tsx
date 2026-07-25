@@ -356,6 +356,20 @@ export function SidePanelApp() {
               </span>
             )}
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("knowledge")}
+            aria-current={section === "knowledge" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "knowledge"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Brain className="h-3.5 w-3.5" />
+            Knowledge
+          </button>
         </nav>
 
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
