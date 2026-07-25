@@ -71,6 +71,9 @@ export function PopupApp() {
   const [busy, setBusy] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const debouncedQuery = useDebounced(query, 160);
+  useEffect(() => {
+    if (debouncedQuery.trim().length > 1) void markChecklist("usedSearch");
+  }, [debouncedQuery]);
 
   const active = useActiveTab();
   const provider = providerMeta(active.provider);
@@ -198,6 +201,7 @@ export function PopupApp() {
       await chrome.storage.local.remove(PENDING_KEY);
       setPending(null);
       toast.success("Memory saved", "Available across popup and side panel.");
+      void markChecklist("savedConversation");
       void loadLists();
     } catch (err) {
       toast.error("Save failed", err instanceof Error ? err.message : undefined);
@@ -229,6 +233,7 @@ export function PopupApp() {
         sourceUrl: tab.url ?? null,
       });
       toast.success("Memory saved");
+      void markChecklist("savedConversation");
       void loadLists();
     } catch (err) {
       toast.error("Capture failed", err instanceof Error ? err.message : undefined);
