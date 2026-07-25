@@ -34,20 +34,26 @@ export interface ProviderAdapter {
   observeChanges(onChange: () => void): () => void;
 
   /**
-   * Inject the "Save to Memlace" UI. Idempotent — safe to call repeatedly.
-   * Returns a disposer that removes the button.
+   * Inject the tiny "Invisible Auto Memory" status indicator. Idempotent —
+   * safe to call repeatedly. Returns a disposer that removes the indicator.
+   * The indicator is non-interactive by contract: users never press Save.
    */
-  injectButton(handlers: SaveButtonHandlers): () => void;
+  injectIndicator(handlers: IndicatorHandlers): () => void;
 
   /** Tear down every listener/observer/DOM node this adapter created. */
   cleanup(): void;
 }
 
-export type SaveButtonState = "idle" | "saving" | "saved" | "updated" | "error";
+/**
+ * States surfaced by the Invisible Auto Memory indicator.
+ * - `watching` — monitoring the active conversation, nothing pending
+ * - `syncing`  — quiet window elapsed, writing to local storage
+ * - `synced`   — most recent snapshot persisted (transient badge)
+ * - `error`    — last save failed; still monitoring
+ */
+export type WatchState = "watching" | "syncing" | "synced" | "error";
 
-export interface SaveButtonHandlers {
-  /** Invoked when the user clicks the button. */
-  onSave: () => Promise<void> | void;
-  /** Adapter calls this to update the button label/state. */
-  getState: () => SaveButtonState;
+export interface IndicatorHandlers {
+  /** Adapter reads the current state via this getter on mount. */
+  getState: () => WatchState;
 }
