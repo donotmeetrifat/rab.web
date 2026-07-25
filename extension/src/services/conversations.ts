@@ -214,6 +214,8 @@ export async function deleteConversation(id: string): Promise<void> {
   onConversationDeleted(id).catch((err) =>
     console.warn("[memlace] knowledge cleanup failed", err),
   );
+  void import("@/services/projectBrain").then((m) => m.invalidateProjectBrain()).catch(() => {});
+
 }
 
 /* ------------------------------------------------------------------ *
