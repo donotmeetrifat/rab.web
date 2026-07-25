@@ -901,6 +901,7 @@ export function SidePanelApp() {
           onClose={() => setProjectDialog(null)}
           onCreate={async (input) => {
             await addProject(input);
+            void markChecklist("createdProject");
             toast.success("Project created");
             setProjectDialog(null);
           }}
