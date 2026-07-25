@@ -17,7 +17,7 @@ import {
   saveOnboarding,
   MEMLACE_VERSION,
 } from "@/services/onboarding";
-import wordmark from "@/../public/wordmark.png";
+import { Logo } from "@/components/Logo";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
 
