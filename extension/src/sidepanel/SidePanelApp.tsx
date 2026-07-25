@@ -443,7 +443,19 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "conversations" ? (
+        {section === "knowledge" ? (
+          <KnowledgePanel
+            onOpenConversation={async (convId) => {
+              const conv = await import("@/services/conversations").then((m) =>
+                m.getConversation(convId),
+              );
+              if (conv) {
+                setSection("conversations");
+                setSelectedConv(conv);
+              }
+            }}
+          />
+        ) : section === "conversations" ? (
           <div className="flex flex-col h-full min-h-0">
             <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
               <MessagesSquare className="h-4 w-4 text-primary" />
