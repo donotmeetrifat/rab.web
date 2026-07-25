@@ -2,6 +2,9 @@ import type { ProviderId } from "@/types";
 import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderAdapter";
 import type { CapturedConversation, CapturedMessage } from "./types";
 import { debounce } from "./dom";
+import { consumePendingHandoff } from "@/lib/handoff";
+import type { ContinuationProviderId } from "@/lib/continuation";
+
 
 /**
  * Shared skeleton for provider adapters. Owns the parts that are identical
@@ -153,7 +156,16 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     ensureStylesInjected();
     this.indicatorEl = el;
     this.applyIndicatorState(this.handlers?.getState() ?? "watching");
+    void this.showHandoffReminder();
   }
+
+  protected async showHandoffReminder(): Promise<void> {
+    const pending = await consumePendingHandoff(this.id as ContinuationProviderId);
+    if (!pending) return;
+    showFloatingReminder(pending.message);
+  }
+
+
 
   protected applyIndicatorState(state: WatchState): void {
     if (!this.indicatorEl) return;
@@ -285,3 +297,47 @@ function ensureStylesInjected(): void {
   `;
   (document.head || document.documentElement).appendChild(style);
 }
+
+/* ---------------- Handoff reminder (post-Continue tooltip) ---------------- */
+
+const REMINDER_ID = "memlace-handoff-reminder";
+
+function showFloatingReminder(message: string): void {
+  if (document.getElementById(REMINDER_ID)) return;
+  const el = document.createElement("div");
+  el.id = REMINDER_ID;
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-live", "polite");
+  el.textContent = message;
+  Object.assign(el.style, {
+    position: "fixed",
+    right: "16px",
+    bottom: "48px",
+    zIndex: "2147483000",
+    padding: "8px 12px",
+    borderRadius: "10px",
+    font: '500 12px/1.3 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif',
+    color: "#F8FAFC",
+    background: "rgba(15, 23, 42, 0.92)",
+    boxShadow: "0 6px 20px rgba(15, 23, 42, 0.25)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    opacity: "0",
+    transform: "translateY(6px)",
+    transition: "opacity 200ms ease, transform 200ms ease",
+    pointerEvents: "none",
+    maxWidth: "260px",
+  } as Partial<CSSStyleDeclaration>);
+
+  document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.opacity = "1";
+    el.style.transform = "translateY(0)";
+  });
+  setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translateY(6px)";
+    setTimeout(() => el.remove(), 250);
+  }, 6000);
+}
+

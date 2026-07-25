@@ -6,7 +6,9 @@ export type ContinuationProviderId =
   | "gemini"
   | "deepseek"
   | "copilot"
-  | "perplexity";
+  | "perplexity"
+  | "aistudio";
+
 
 export type InputMethod =
   | "clipboard"       // open new chat; user pastes
@@ -74,6 +76,13 @@ export const CONTINUATION_ADAPTERS: Record<ContinuationProviderId, ContinuationA
     queryUrl: (prompt) =>
       `https://www.perplexity.ai/search/new?q=${encodeURIComponent(prompt)}`,
   },
+  aistudio: {
+    id: "aistudio",
+    name: "AI Studio",
+    newChatUrl: "https://aistudio.google.com/prompts/new_chat",
+    inputMethod: "clipboard",
+    maxChars: 32000,
+  },
 };
 
 export const CONTINUATION_PROVIDERS: ContinuationAdapter[] = [
@@ -83,7 +92,9 @@ export const CONTINUATION_PROVIDERS: ContinuationAdapter[] = [
   CONTINUATION_ADAPTERS.deepseek,
   CONTINUATION_ADAPTERS.copilot,
   CONTINUATION_ADAPTERS.perplexity,
+  CONTINUATION_ADAPTERS.aistudio,
 ];
+
 
 const PROVIDER_LABEL: Record<ProviderId, string> = {
   chatgpt: "ChatGPT",
