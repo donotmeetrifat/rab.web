@@ -17,6 +17,7 @@ import {
   Check,
   ChevronDown,
   MessagesSquare,
+  Brain,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -48,6 +49,8 @@ import {
 import { useDebounced } from "@/hooks/useDebounced";
 import { useHotkey } from "@/components/Dialog";
 import { CommandPalette } from "@/components/CommandPalette";
+import { KnowledgePanel } from "@/components/knowledge/KnowledgePanel";
+import { scheduleKnowledgeBackfill } from "@/knowledge";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
@@ -136,7 +139,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations">("memories");
+  const [section, setSection] = useState<"memories" | "conversations" | "knowledge">("memories");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
