@@ -178,7 +178,7 @@ interface CollectArgs {
 
 function collectItems(args: CollectArgs): ContextItem[] {
   const items: ContextItem[] = [];
-  const now = Date.now();
+  
   const { conversation, messages, knowledge, summary, decisions, goals, sessionSiblings, projectName } = args;
 
   // Project header — cheap anchor for the receiving AI.
