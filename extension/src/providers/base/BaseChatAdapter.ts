@@ -156,7 +156,16 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     ensureStylesInjected();
     this.indicatorEl = el;
     this.applyIndicatorState(this.handlers?.getState() ?? "watching");
+    void this.showHandoffReminder();
   }
+
+  protected async showHandoffReminder(): Promise<void> {
+    const pending = await consumePendingHandoff(this.id as ContinuationProviderId);
+    if (!pending) return;
+    showFloatingReminder(pending.message);
+  }
+
+
 
   protected applyIndicatorState(state: WatchState): void {
     if (!this.indicatorEl) return;
