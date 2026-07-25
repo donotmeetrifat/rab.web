@@ -64,6 +64,7 @@ import { WhatsNew } from "@/components/onboarding/WhatsNew";
 import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
 import { HelpCenter } from "@/components/HelpCenter";
 import { Diagnostics } from "@/components/Diagnostics";
+import { ProjectHome } from "@/components/projects/ProjectHome";
 import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
@@ -646,8 +647,27 @@ export function SidePanelApp() {
               </aside>
             </div>
           </div>
+        ) : activeView === "projects" && activeProject ? (
+          <ProjectHome
+            project={activeProject}
+            onOpenConversation={(c) => {
+              setSection("conversations");
+              setSelectedConv(c);
+            }}
+            onSearchProject={(q) => {
+              setPaletteOpen(true);
+              // The palette reads its own state; a naive prefill is enough:
+              setTimeout(() => setSearch(q), 0);
+            }}
+            onAskMemlace={() => setSection("ask")}
+            onContinueAnywhere={(c) => {
+              setSection("conversations");
+              setSelectedConv(c);
+            }}
+          />
         ) : (
           <>
+
         <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
           <h1 className="text-sm font-semibold truncate">{headerTitle}</h1>
           {provider && (

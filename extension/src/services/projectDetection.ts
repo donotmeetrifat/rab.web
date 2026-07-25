@@ -67,3 +67,21 @@ export async function overrideProject(
   map[conversationId] = { projectId, reason: "user", ts: Date.now() };
   await writeMap(map);
 }
+
+/** Return every conversation id detected/overridden into the given project. */
+export async function conversationsForProject(projectId: string): Promise<string[]> {
+  const map = await readMap();
+  const out: string[] = [];
+  for (const [convId, entry] of Object.entries(map)) {
+    if (entry?.projectId === projectId) out.push(convId);
+  }
+  return out;
+}
+
+/** Full mapping — useful for reverse indexes. */
+export async function allProjectMappings(): Promise<
+  Record<string, { projectId: string | null; reason: string; ts: number }>
+> {
+  return readMap();
+}
+

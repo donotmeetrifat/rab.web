@@ -147,7 +147,19 @@ export async function saveConversation(
     // primary save always completes instantly.
     onConversationSaved(result.conversation)
       .then(() => detectProjectFor(result.conversation))
+      .then(async () => {
+        // Project Brain (Phase 12.5) — invalidate cached view-models so
+        // the next open recomputes from the freshest data. Cheap:
+        // versions map only, no DB reads.
+        try {
+          const { invalidateProjectBrain } = await import("@/services/projectBrain");
+          invalidateProjectBrain();
+        } catch {
+          /* module not yet loaded — safe to ignore */
+        }
+      })
       .catch((err) => console.warn("[memlace] background pipeline failed", err));
+
     // Optional AI enrichment (Phase 8). Never blocks the save, never
     // runs unless the user opted in via AI settings.
     void (async () => {
@@ -202,6 +214,8 @@ export async function deleteConversation(id: string): Promise<void> {
   onConversationDeleted(id).catch((err) =>
     console.warn("[memlace] knowledge cleanup failed", err),
   );
+  void import("@/services/projectBrain").then((m) => m.invalidateProjectBrain()).catch(() => {});
+
 }
 
 /* ------------------------------------------------------------------ *
