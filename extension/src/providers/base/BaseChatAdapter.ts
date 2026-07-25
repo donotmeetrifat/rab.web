@@ -1,23 +1,27 @@
 import type { ProviderId } from "@/types";
-import type { ProviderAdapter, SaveButtonHandlers, SaveButtonState } from "./ProviderAdapter";
+import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderAdapter";
 import type { CapturedConversation, CapturedMessage } from "./types";
 import { debounce } from "./dom";
 
 /**
  * Shared skeleton for provider adapters. Owns the parts that are identical
- * across every AI site: MutationObserver plumbing, save-button lifecycle,
+ * across every AI site: MutationObserver plumbing, indicator lifecycle,
  * state-machine wiring, and CSS injection. Provider modules subclass this
  * and implement the site-specific hooks below.
+ *
+ * The Invisible Auto Memory replaces the old "Save to Memlace" button with
+ * a passive status pill. Users never click anything — the ProviderManager
+ * decides when to snapshot based on a quiet window after DOM mutations.
  */
 export abstract class BaseChatAdapter implements ProviderAdapter {
   abstract readonly id: ProviderId;
   abstract readonly name: string;
 
   protected observer: MutationObserver | null = null;
-  protected buttonReinjectObserver: MutationObserver | null = null;
+  protected reinjectObserver: MutationObserver | null = null;
   protected stateListener: ((e: Event) => void) | null = null;
-  protected buttonEl: HTMLButtonElement | null = null;
-  protected handlers: SaveButtonHandlers | null = null;
+  protected indicatorEl: HTMLDivElement | null = null;
+  protected handlers: IndicatorHandlers | null = null;
 
   /* ---------------- Provider-specific hooks ---------------- */
 
@@ -27,9 +31,12 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   protected abstract readonly messageSelector: string;
   /** Preferred observer roots; first match wins, falls back to body. */
   protected readonly observeRootSelectors: string[] = ["main", "body"];
-  /** Debounce for change notifications. Providers can override. */
-  protected readonly changeDebounceMs: number = 900;
-  /** DOM id for the injected button. Must be unique per provider. */
+  /** Debounce for change notifications (raw mutations → onChange). */
+  protected readonly changeDebounceMs: number = 250;
+  /**
+   * DOM id for the indicator. Historically named `buttonId` — kept for
+   * backward compatibility with existing provider adapters. Must be unique.
+   */
   protected abstract readonly buttonId: string;
 
   abstract getConversationId(): string | null;
@@ -37,20 +44,6 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   abstract getMessages(): CapturedMessage[];
   /** Provider-specific model detection. Default: none. */
   protected getModel(): string | null { return null; }
-  /**
-   * Provider-specific toolbar hunt. Return the element to inject the pill
-   * button into, or null for the floating fallback. Default: null.
-   */
-  protected findComposerToolbar(): HTMLElement | null { return null; }
-  /**
-   * Given the toolbar and the button, decide where to place it. Default:
-   * before the last child (usually the send button), else append.
-   */
-  protected placeButton(toolbar: HTMLElement, btn: HTMLButtonElement): void {
-    const last = toolbar.lastElementChild;
-    if (last) toolbar.insertBefore(btn, last);
-    else toolbar.appendChild(btn);
-  }
 
   /* ---------------- ProviderAdapter surface ---------------- */
 
@@ -85,104 +78,91 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     this.observer?.disconnect();
     this.observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
-        const t = m.target as HTMLElement;
-        if (t && t.id === this.buttonId) continue;
+        // Ignore self-mutations (indicator DOM updates would otherwise loop).
+        const t = m.target as HTMLElement | null;
+        if (t && (t.id === this.buttonId || t.closest?.(`#${this.buttonId}`))) continue;
         debounced();
         return;
       }
     });
-    this.observer.observe(target, { subtree: true, childList: true, characterData: true });
+    this.observer.observe(target, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
     return () => this.observer?.disconnect();
   }
 
-  injectButton(handlers: SaveButtonHandlers): () => void {
+  injectIndicator(handlers: IndicatorHandlers): () => void {
     this.handlers = handlers;
-    this.mountButton();
+    this.mountIndicator();
 
-    this.buttonReinjectObserver?.disconnect();
-    this.buttonReinjectObserver = new MutationObserver(() => {
-      if (!document.getElementById(this.buttonId)) this.mountButton();
+    this.reinjectObserver?.disconnect();
+    this.reinjectObserver = new MutationObserver(() => {
+      if (!document.getElementById(this.buttonId)) this.mountIndicator();
     });
-    this.buttonReinjectObserver.observe(document.body, {
-      subtree: true, childList: true,
-    });
+    this.reinjectObserver.observe(document.body, { subtree: true, childList: true });
 
     this.stateListener = (e: Event) => {
-      const detail = (e as CustomEvent<SaveButtonState>).detail;
-      this.applyButtonState(detail);
+      const detail = (e as CustomEvent<WatchState>).detail;
+      this.applyIndicatorState(detail);
     };
-    window.addEventListener("memlace:save-state", this.stateListener);
+    window.addEventListener("memlace:watch-state", this.stateListener);
 
     return () => {
-      this.buttonReinjectObserver?.disconnect();
-      this.buttonReinjectObserver = null;
+      this.reinjectObserver?.disconnect();
+      this.reinjectObserver = null;
       if (this.stateListener) {
-        window.removeEventListener("memlace:save-state", this.stateListener);
+        window.removeEventListener("memlace:watch-state", this.stateListener);
         this.stateListener = null;
       }
-      this.buttonEl?.remove();
-      this.buttonEl = null;
+      this.indicatorEl?.remove();
+      this.indicatorEl = null;
     };
   }
 
   cleanup(): void {
     this.observer?.disconnect();
     this.observer = null;
-    this.buttonReinjectObserver?.disconnect();
-    this.buttonReinjectObserver = null;
+    this.reinjectObserver?.disconnect();
+    this.reinjectObserver = null;
     if (this.stateListener) {
-      window.removeEventListener("memlace:save-state", this.stateListener);
+      window.removeEventListener("memlace:watch-state", this.stateListener);
       this.stateListener = null;
     }
-    this.buttonEl?.remove();
-    this.buttonEl = null;
+    this.indicatorEl?.remove();
+    this.indicatorEl = null;
     this.handlers = null;
   }
 
-  /* ---------------- Button internals ---------------- */
+  /* ---------------- Indicator internals ---------------- */
 
-  protected mountButton(): void {
+  protected mountIndicator(): void {
     if (document.getElementById(this.buttonId)) return;
 
-    const toolbarHost = this.findComposerToolbar();
-    const btn = document.createElement("button");
-    btn.id = this.buttonId;
-    btn.type = "button";
-    btn.setAttribute("aria-label", "Save conversation to Memlace");
-    btn.setAttribute("data-memlace", "save-btn");
-    btn.setAttribute("data-provider", this.id);
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      void this.handlers?.onSave();
-    });
+    const el = document.createElement("div");
+    el.id = this.buttonId;
+    el.className = "memlace-indicator";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.setAttribute("data-memlace", "indicator");
+    el.setAttribute("data-provider", this.id);
+    el.innerHTML = INDICATOR_MARKUP;
 
-    if (toolbarHost) {
-      btn.className = "memlace-save-btn memlace-save-btn--native";
-      btn.innerHTML = BUTTON_MARKUP;
-      this.placeButton(toolbarHost, btn);
-    } else {
-      btn.className = "memlace-save-btn memlace-save-btn--floating";
-      btn.innerHTML = BUTTON_MARKUP;
-      Object.assign(btn.style, FLOATING_BASE_STYLES);
-      document.body.appendChild(btn);
-    }
-
+    document.body.appendChild(el);
     ensureStylesInjected();
-    this.buttonEl = btn;
-    this.applyButtonState(this.handlers?.getState() ?? "idle");
+    this.indicatorEl = el;
+    this.applyIndicatorState(this.handlers?.getState() ?? "watching");
   }
 
-  protected applyButtonState(state: SaveButtonState): void {
-    if (!this.buttonEl) return;
-    const label = this.buttonEl.querySelector<HTMLSpanElement>(".memlace-btn-label");
-    const icon = this.buttonEl.querySelector<HTMLSpanElement>(".memlace-btn-icon");
+  protected applyIndicatorState(state: WatchState): void {
+    if (!this.indicatorEl) return;
+    const label = this.indicatorEl.querySelector<HTMLSpanElement>(".memlace-indicator-label");
     const cfg = STATE_MAP[state];
     if (label) label.textContent = cfg.text;
-    if (icon) icon.innerHTML = cfg.iconSvg;
-    this.buttonEl.dataset.state = state;
-    this.buttonEl.setAttribute("aria-busy", state === "saving" ? "true" : "false");
-    this.buttonEl.title = cfg.tooltip;
+    this.indicatorEl.dataset.state = state;
+    this.indicatorEl.setAttribute("aria-label", `Memlace: ${cfg.text}`);
+    this.indicatorEl.title = cfg.tooltip;
   }
 }
 
@@ -200,11 +180,11 @@ export function firstMatching(selectors: string[]): Element | null {
  *  import from BaseChatAdapter. Single implementation lives in `./hash`. */
 export { fnv1a as hashString } from "./hash";
 
-
 /**
  * Walk up from `start` looking for a container that holds at least
- * `minButtons` <button> children (direct or one level deep). Used to find a
- * composer toolbar without depending on brittle per-site classnames.
+ * `minButtons` <button> children (direct or one level deep). Retained for
+ * provider adapters that may still want toolbar discovery (unused by the
+ * indicator itself, which is always floating).
  */
 export function findToolbarByButtonCluster(
   start: Element | null,
@@ -221,90 +201,87 @@ export function findToolbarByButtonCluster(
   return start.parentElement as HTMLElement | null;
 }
 
-type StateConfig = { text: string; iconSvg: string; tooltip: string };
+/* ---------------- Indicator visuals ---------------- */
 
-const ICON_BOOKMARK =
-  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h10v13l-5-3-5 3v-13z"/></svg>';
-const ICON_SPINNER =
-  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="memlace-spin"><path d="M10 2.5a7.5 7.5 0 1 1-7.5 7.5" opacity=".9"/></svg>';
-const ICON_CHECK =
-  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>';
-const ICON_RETRY =
-  '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 10a5.5 5.5 0 1 1-1.6-3.9"/><path d="M15.5 4v3.5H12"/></svg>';
+type StateConfig = { text: string; tooltip: string };
 
-const STATE_MAP: Record<SaveButtonState, StateConfig> = {
-  idle:    { text: "Save to Memlace", iconSvg: ICON_BOOKMARK, tooltip: "Save this conversation to Memlace" },
-  saving:  { text: "Saving…",         iconSvg: ICON_SPINNER,  tooltip: "Saving conversation…" },
-  saved:   { text: "Saved ✓",         iconSvg: ICON_CHECK,    tooltip: "Saved to Memlace" },
-  updated: { text: "Updated ✓",       iconSvg: ICON_CHECK,    tooltip: "Updated in Memlace" },
-  error:   { text: "Retry",           iconSvg: ICON_RETRY,    tooltip: "Save failed — click to retry" },
+const STATE_MAP: Record<WatchState, StateConfig> = {
+  watching: { text: "Watching",  tooltip: "Memlace is watching this conversation" },
+  syncing:  { text: "Syncing",   tooltip: "Saving the latest snapshot…" },
+  synced:   { text: "Synced",    tooltip: "Latest snapshot saved locally" },
+  error:    { text: "Error",     tooltip: "Last save failed — will retry on next change" },
 };
 
-const BUTTON_MARKUP = `
-  <span class="memlace-btn-icon" aria-hidden="true">${ICON_BOOKMARK}</span>
-  <span class="memlace-btn-label">Save to Memlace</span>
+const INDICATOR_MARKUP = `
+  <span class="memlace-indicator-dot" aria-hidden="true"></span>
+  <span class="memlace-indicator-label">Watching</span>
 `;
 
-const FLOATING_BASE_STYLES: Partial<CSSStyleDeclaration> = {
-  position: "fixed",
-  right: "20px",
-  bottom: "104px",
-  zIndex: "2147483000",
-};
-
-const STYLE_ID = "memlace-save-btn-styles";
+const STYLE_ID = "memlace-indicator-styles";
 function ensureStylesInjected(): void {
   if (document.getElementById(STYLE_ID)) return;
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = `
-    .memlace-save-btn {
+    .memlace-indicator {
       all: unset;
       box-sizing: border-box;
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 2147483000;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
+      height: 22px;
+      padding: 0 9px 0 8px;
+      border-radius: 9999px;
+      font: 500 11px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      color: rgba(15, 23, 42, 0.72);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: saturate(180%) blur(10px);
+      -webkit-backdrop-filter: saturate(180%) blur(10px);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      opacity: 0.72;
+      pointer-events: none;
       user-select: none;
-      font: 500 13px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-      transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 120ms ease;
+      transition: opacity 200ms ease, color 200ms ease, background 200ms ease, border-color 200ms ease;
     }
-    .memlace-save-btn:focus-visible { outline: 2px solid #2563EB; outline-offset: 2px; }
-    .memlace-save-btn .memlace-btn-icon { display: inline-flex; align-items: center; justify-content: center; }
-    .memlace-save-btn .memlace-spin { animation: memlace-spin 900ms linear infinite; transform-origin: 50% 50%; }
-    @keyframes memlace-spin { to { transform: rotate(360deg); } }
-
-    .memlace-save-btn--native {
-      height: 32px; padding: 0 10px; margin: 0 4px;
-      border-radius: 9999px; color: inherit; background: transparent;
-      border: 1px solid rgba(0,0,0,0.12);
+    .memlace-indicator:hover { opacity: 1; }
+    .memlace-indicator .memlace-indicator-dot {
+      width: 6px; height: 6px; border-radius: 9999px;
+      background: currentColor;
+      box-shadow: 0 0 0 0 currentColor;
     }
-    .memlace-save-btn--native:hover { background: rgba(0,0,0,0.05); }
+    .memlace-indicator[data-state="watching"] { color: #64748B; }
+    .memlace-indicator[data-state="watching"] .memlace-indicator-dot {
+      animation: memlace-pulse 2.4s ease-in-out infinite;
+    }
+    .memlace-indicator[data-state="syncing"] { color: #2563EB; opacity: 0.95; }
+    .memlace-indicator[data-state="syncing"] .memlace-indicator-dot {
+      animation: memlace-pulse 900ms ease-in-out infinite;
+    }
+    .memlace-indicator[data-state="synced"] { color: #059669; opacity: 0.95; }
+    .memlace-indicator[data-state="error"] { color: #B91C1C; opacity: 0.95; }
+    @keyframes memlace-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+      50%      { box-shadow: 0 0 0 4px rgba(0,0,0,0); opacity: 0.55; }
+    }
     @media (prefers-color-scheme: dark) {
-      .memlace-save-btn--native { border-color: rgba(255,255,255,0.16); color: rgba(255,255,255,0.92); }
-      .memlace-save-btn--native:hover { background: rgba(255,255,255,0.08); }
+      .memlace-indicator {
+        color: rgba(226, 232, 240, 0.75);
+        background: rgba(15, 23, 42, 0.55);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+      .memlace-indicator[data-state="watching"] { color: #94A3B8; }
+      .memlace-indicator[data-state="syncing"]  { color: #60A5FA; }
+      .memlace-indicator[data-state="synced"]   { color: #34D399; }
+      .memlace-indicator[data-state="error"]    { color: #FCA5A5; }
     }
-    .memlace-save-btn--native[data-state="saved"],
-    .memlace-save-btn--native[data-state="updated"] {
-      color: #047857; border-color: rgba(4,120,87,0.35); background: rgba(16,185,129,0.10);
+    @media (prefers-reduced-motion: reduce) {
+      .memlace-indicator, .memlace-indicator .memlace-indicator-dot { animation: none !important; transition: none !important; }
     }
-    .memlace-save-btn--native[data-state="saving"] {
-      color: #2563EB; border-color: rgba(37,99,235,0.35); background: rgba(37,99,235,0.08);
-    }
-    .memlace-save-btn--native[data-state="error"] {
-      color: #B91C1C; border-color: rgba(185,28,28,0.35); background: rgba(220,38,38,0.08);
-    }
-
-    .memlace-save-btn--floating {
-      height: 40px; padding: 0 14px; border-radius: 10px;
-      color: #FFFFFF; background: #2563EB; border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 10px 24px rgba(37,99,235,0.28), 0 2px 4px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.24);
-    }
-    .memlace-save-btn--floating:hover { transform: translateY(-1px); }
-    .memlace-save-btn--floating[data-state="saving"]  { background: #1D4ED8; }
-    .memlace-save-btn--floating[data-state="saved"],
-    .memlace-save-btn--floating[data-state="updated"] { background: #059669; }
-    .memlace-save-btn--floating[data-state="error"]   { background: #DC2626; }
   `;
   (document.head || document.documentElement).appendChild(style);
 }
