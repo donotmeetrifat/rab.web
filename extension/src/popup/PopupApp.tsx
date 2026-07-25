@@ -29,6 +29,7 @@ import {
   type ConvSnippet,
 } from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
+import { TimelineList } from "@/components/conversations/TimelineList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
 import {
   ConversationFilters,
