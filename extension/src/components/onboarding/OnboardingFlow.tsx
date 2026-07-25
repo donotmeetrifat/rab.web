@@ -118,12 +118,9 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
         <div className="px-6 py-6 min-h-[260px]">
           {step === 0 && (
             <div className="text-center space-y-3">
-              <img
-                src={wordmark}
-                alt="Memlace"
-                className="mx-auto h-8 object-contain"
-                onError={(e) => ((e.currentTarget.style.display = "none"))}
-              />
+              <div className="mx-auto flex justify-center">
+                <Logo size={36} />
+              </div>
               <h2 className="text-lg font-semibold">Welcome to Memlace</h2>
               <p className="text-sm text-muted-foreground">
                 A place for your AI memory. Save conversations across every
