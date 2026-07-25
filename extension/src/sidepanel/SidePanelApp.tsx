@@ -374,7 +374,36 @@ export function SidePanelApp() {
             <Brain className="h-3.5 w-3.5" />
             Knowledge
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("ask")}
+            aria-current={section === "ask" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "ask"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Ask Memlace
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("ai-center")}
+            aria-current={section === "ai-center" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "ai-center"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Play className="h-3.5 w-3.5" />
+            AI Center
+          </button>
         </nav>
+
 
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
