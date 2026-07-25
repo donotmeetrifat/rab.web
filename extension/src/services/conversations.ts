@@ -142,6 +142,27 @@ export async function saveConversation(
     onConversationSaved(result.conversation).catch((err) =>
       console.warn("[memlace] knowledge indexing failed", err),
     );
+    // Optional AI enrichment (Phase 8). Never blocks the save, never
+    // runs unless the user opted in via AI settings.
+    void (async () => {
+      try {
+        const { getSettings } = await import("@/ai/AIManager");
+        const s = await getSettings();
+        if (!s.enabled || !s.autoEnrich) return;
+        const { aiQueue } = await import("@/ai/AIQueue");
+        const { enrichConversation } = await import("@/ai/MemoryEngine");
+        await aiQueue.enqueue({
+          kind: "memory",
+          label: `Enrich: ${result.conversation.title || "(untitled)"}`,
+          conversationId: result.conversation.id,
+          estInputTokens: 4000,
+          estOutputTokens: 900,
+          runner: async () => enrichConversation(result.conversation.id),
+        });
+      } catch (err) {
+        console.warn("[memlace] ai enrichment skipped", err);
+      }
+    })();
   }
   return result;
 }
