@@ -5,14 +5,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/Button";
 import { useToast } from "@/components/Toast";
 import {
-  DEFAULT_AI_SETTINGS,
   loadAISettings,
   saveAISettings,
   clearAIKey,
 } from "@/ai/AISettings";
-import { validateKey, providerLabel } from "@/ai/AIManager";
-import { isLocalProvider } from "@/ai/CostEstimator";
-import type { AISettings, AIProviderId } from "@/ai/types";
+import { DEFAULT_AI_SETTINGS, type AISettings, type AIProviderId } from "@/ai/types";
 import {
   createAnthropic, createCustom, createGemini, createLMStudio,
   createOllama, createOpenAI, createOpenRouter,
