@@ -7,6 +7,8 @@ import type {
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
 import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
+import { detectProjectFor } from "@/services/projectDetection";
+import { invalidateReadiness } from "@/services/contextReadiness";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
