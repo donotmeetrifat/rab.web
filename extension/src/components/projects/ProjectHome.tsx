@@ -234,7 +234,7 @@ export function ProjectHome({
                             className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline truncate max-w-full"
                           >
                             <ExternalLink className="h-3 w-3 shrink-0" />
-                            <span className="truncate">{l.text || l.url}</span>
+                            <span className="truncate">{l.url}</span>
                           </a>
                         </li>
                       ))}
