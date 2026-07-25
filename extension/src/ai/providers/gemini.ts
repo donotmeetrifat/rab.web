@@ -65,7 +65,7 @@ export function createGemini(cfg: ProviderConfig): AIProvider {
     },
     async embed(req) {
       if (!cfg.apiKey) throw new ProviderError("Missing Google API key");
-      const model = req.model ?? cfg.embeddingModel || "text-embedding-004";
+      const model = req.model ?? (cfg.embeddingModel || "text-embedding-004");
       const input = Array.isArray(req.input) ? req.input : [req.input];
 
       interface Resp {

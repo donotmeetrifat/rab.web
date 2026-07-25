@@ -32,7 +32,7 @@ export function createOllama(cfg: ProviderConfig): AIProvider {
       return buildGenerateResult("ollama", out.model, out.text, out.usage);
     },
     async embed(req) {
-      const model = req.model ?? cfg.embeddingModel || "nomic-embed-text";
+      const model = req.model ?? (cfg.embeddingModel || "nomic-embed-text");
       const input = Array.isArray(req.input) ? req.input : [req.input];
       const vectors: number[][] = [];
       for (const text of input) {
