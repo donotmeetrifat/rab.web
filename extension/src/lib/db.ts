@@ -11,6 +11,11 @@ import type {
   KnowledgeKeywordRow,
   KnowledgeRelationship,
 } from "@/knowledge/types";
+import type {
+  AIConversationSummary,
+  AIEmbeddingRow,
+  AIPromptCacheRow,
+} from "@/ai/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
@@ -21,6 +26,9 @@ class MemlaceDB extends Dexie {
   entities!: Table<KnowledgeEntityRow, string>;
   keywords!: Table<KnowledgeKeywordRow, string>;
   relationships!: Table<KnowledgeRelationship, string>;
+  aiSummaries!: Table<AIConversationSummary, string>;
+  aiEmbeddings!: Table<AIEmbeddingRow, string>;
+  aiPromptCache!: Table<AIPromptCacheRow, string>;
 
   constructor() {
     super("memlace");
