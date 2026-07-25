@@ -38,16 +38,16 @@ export async function search(query: string, limit = 15): Promise<UnifiedHit[]> {
 
   // Always fold in keyword hits — semantic ranking sometimes misses exact
   // library names, and offline users get results either way.
-  const kw = await searchKnowledge(q, limit);
+  const kw = await searchKnowledge(q);
   const seen = new Set(results.map((r) => r.conversationId));
-  for (const h of kw) {
-    if (seen.has(h.conversationId)) continue;
+  for (const h of kw.slice(0, limit)) {
+    if (seen.has(h.record.conversationId)) continue;
     results.push({
-      conversationId: h.conversationId,
-      title: h.title,
+      conversationId: h.record.conversationId,
+      title: h.record.title,
       score: h.score / 100,
       source: "keyword",
-      snippet: h.matches?.slice(0, 2).join(" · "),
+      snippet: h.matchedIn.join(" · "),
     });
   }
   return results.sort((a, b) => b.score - a.score).slice(0, limit);
