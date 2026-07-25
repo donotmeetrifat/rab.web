@@ -120,7 +120,7 @@ let backfillPromise: Promise<{ scanned: number; indexed: number }> | null = null
 
 export function backfillKnowledge(): Promise<{ scanned: number; indexed: number }> {
   if (backfillPromise) return backfillPromise;
-  backfillPromise = (async () => {
+  const run = (async () => {
     const conversations = await db.conversations.toArray();
     let indexed = 0;
     for (const c of conversations) {
@@ -133,9 +133,9 @@ export function backfillKnowledge(): Promise<{ scanned: number; indexed: number 
     }
     return { scanned: conversations.length, indexed };
   })();
-  try {
-    return await backfillPromise;
-  } finally {
+  backfillPromise = run;
+  run.finally(() => {
     backfillPromise = null;
-  }
+  });
+  return run;
 }
