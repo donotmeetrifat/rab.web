@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Memlace — A place for your AI memory",
   "short_name": "Memlace",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A private, local-first workspace for your AI conversations across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot.",
   "icons": {
     "16": "icons/icon-16.png",

@@ -22,6 +22,7 @@ import {
   Play,
   Rocket,
   HelpCircle,
+  Activity,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -61,6 +62,7 @@ import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { WhatsNew } from "@/components/onboarding/WhatsNew";
 import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
 import { HelpCenter } from "@/components/HelpCenter";
+import { Diagnostics } from "@/components/Diagnostics";
 import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
@@ -150,7 +152,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help">("memories");
+  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("memories");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
@@ -445,6 +447,20 @@ export function SidePanelApp() {
             <HelpCircle className="h-3.5 w-3.5" />
             Help
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("diagnostics")}
+            aria-current={section === "diagnostics" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "diagnostics"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Activity className="h-3.5 w-3.5" />
+            Diagnostics
+          </button>
         </nav>
 
 
@@ -521,6 +537,8 @@ export function SidePanelApp() {
       <main className="flex flex-col min-w-0">
         {section === "checklist" ? (
           <ChecklistPanel onJump={() => setPaletteOpen(true)} />
+        ) : section === "diagnostics" ? (
+          <Diagnostics />
         ) : section === "help" ? (
           <HelpCenter />
         ) : section === "ai-center" ? (
