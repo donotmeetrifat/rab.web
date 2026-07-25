@@ -6,7 +6,9 @@ export type ContinuationProviderId =
   | "gemini"
   | "deepseek"
   | "copilot"
-  | "perplexity";
+  | "perplexity"
+  | "aistudio";
+
 
 export type InputMethod =
   | "clipboard"       // open new chat; user pastes
