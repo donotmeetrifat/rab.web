@@ -135,7 +135,14 @@ export async function saveConversation(
     return { conversation, changed: true, created: !existing };
   });
 
-  if (result.changed) invalidateIndex();
+  if (result.changed) {
+    invalidateIndex();
+    // Fire-and-forget knowledge indexing. Failures are logged only —
+    // knowledge is derived data, never blocks the primary save.
+    onConversationSaved(result.conversation).catch((err) =>
+      console.warn("[memlace] knowledge indexing failed", err),
+    );
+  }
   return result;
 }
 
@@ -159,6 +166,9 @@ export async function deleteConversation(id: string): Promise<void> {
     await db.conversations.delete(id);
   });
   invalidateIndex();
+  onConversationDeleted(id).catch((err) =>
+    console.warn("[memlace] knowledge cleanup failed", err),
+  );
 }
 
 /* ------------------------------------------------------------------ *
