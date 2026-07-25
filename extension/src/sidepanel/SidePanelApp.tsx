@@ -18,6 +18,8 @@ import {
   ChevronDown,
   MessagesSquare,
   Brain,
+  Sparkles,
+  Play,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -50,6 +52,8 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { useHotkey } from "@/components/Dialog";
 import { CommandPalette } from "@/components/CommandPalette";
 import { KnowledgePanel } from "@/components/knowledge/KnowledgePanel";
+import { AICenter } from "@/components/ai/AICenter";
+import { AskMemlacePanel } from "@/components/ai/AskMemlacePanel";
 import { scheduleKnowledgeBackfill } from "@/knowledge";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
