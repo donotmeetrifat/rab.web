@@ -11,6 +11,11 @@ import type {
   KnowledgeKeywordRow,
   KnowledgeRelationship,
 } from "@/knowledge/types";
+import type {
+  AIConversationSummary,
+  AIEmbeddingRow,
+  AIPromptCacheRow,
+} from "@/ai/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
@@ -21,6 +26,9 @@ class MemlaceDB extends Dexie {
   entities!: Table<KnowledgeEntityRow, string>;
   keywords!: Table<KnowledgeKeywordRow, string>;
   relationships!: Table<KnowledgeRelationship, string>;
+  aiSummaries!: Table<AIConversationSummary, string>;
+  aiEmbeddings!: Table<AIEmbeddingRow, string>;
+  aiPromptCache!: Table<AIPromptCacheRow, string>;
 
   constructor() {
     super("memlace");
@@ -83,6 +91,26 @@ class MemlaceDB extends Dexie {
       entities: "id, knowledgeId, type, name, [type+name]",
       keywords: "id, knowledgeId, term",
       relationships: "id, fromId, toId, kind",
+    });
+
+    // v5 — AI Intelligence Layer (Phase 8). Everything AI-derived lives
+    // in its own tables so a user who never enables AI incurs zero cost
+    // and zero storage beyond the empty schema definitions.
+    this.version(5).stores({
+      projects: "id, name, pinned, favorite, archived, updatedAt",
+      memories:
+        "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      conversations:
+        "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
+      convMessages: "id, conversationId, order, role",
+      knowledge:
+        "id, &conversationId, provider, hash, updatedAt, *entities, *keywords, *technologies, *languages, *topics",
+      entities: "id, knowledgeId, type, name, [type+name]",
+      keywords: "id, knowledgeId, term",
+      relationships: "id, fromId, toId, kind",
+      aiSummaries: "id, conversationId, provider, model, hash, updatedAt",
+      aiEmbeddings: "id, [scope+conversationId], conversationId, provider, model, hash, createdAt",
+      aiPromptCache: "&hash, provider, model, createdAt",
     });
   }
 }

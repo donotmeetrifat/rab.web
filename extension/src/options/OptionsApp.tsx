@@ -12,6 +12,7 @@ import {
   importAll,
   storageEstimate,
 } from "@/services/memories";
+import { AISettingsPanel } from "@/components/ai/AISettingsPanel";
 import type { ProviderId, Settings } from "@/types";
 
 function formatBytes(n: number): string {
@@ -206,6 +207,14 @@ export function OptionsApp() {
             />
           </div>
         </Section>
+
+        <Section
+          title="AI Intelligence"
+          description="Optional. Off by default. When enabled, prompts go directly from your browser to the provider you choose — never to Memlace."
+        >
+          <AISettingsPanel />
+        </Section>
+
 
         <Section title="Keyboard shortcuts" description="Trigger Memlace anywhere without leaving the page.">
           <dl className="grid grid-cols-[1fr_auto] gap-y-2 gap-x-6 text-sm max-w-md">
