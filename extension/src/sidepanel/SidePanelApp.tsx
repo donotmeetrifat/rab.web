@@ -160,6 +160,12 @@ export function SidePanelApp() {
   const debouncedConvQuery = useDebounced(convQuery, 180);
   const [paletteOpen, setPaletteOpen] = useState(false);
   useHotkey("mod+k", () => setPaletteOpen((v) => !v));
+  useEffect(() => {
+    if (paletteOpen) void markChecklist("usedSearch");
+  }, [paletteOpen]);
+  useEffect(() => {
+    if (debouncedConvQuery.trim().length > 1) void markChecklist("usedSearch");
+  }, [debouncedConvQuery]);
 
   const runConvSearch = useCallback(
     async (q: string, filters: ConvFiltersState, opts: { showLoading?: boolean } = {}) => {
