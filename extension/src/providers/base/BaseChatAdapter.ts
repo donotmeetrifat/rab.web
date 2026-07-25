@@ -327,7 +327,8 @@ function showFloatingReminder(message: string): void {
     transition: "opacity 200ms ease, transform 200ms ease",
     pointerEvents: "none",
     maxWidth: "260px",
-  } as CSSStyleDeclaration);
+  } as Partial<CSSStyleDeclaration>);
+
   document.body.appendChild(el);
   requestAnimationFrame(() => {
     el.style.opacity = "1";
