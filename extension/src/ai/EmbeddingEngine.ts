@@ -12,7 +12,7 @@
  */
 import { db, uid } from "@/lib/db";
 import { fnv1a } from "@/providers/base/hash";
-import { getConversation, listConversationMessages, listConversations } from "@/services/conversations";
+import { getConversation, getConversationMessages, listConversations } from "@/services/conversations";
 import { embed, getSettings, isAIEnabled } from "./AIManager";
 import { getSummary } from "./SummaryEngine";
 import { estimateTokens } from "./TokenCounter";
@@ -54,7 +54,7 @@ export async function embedConversation(conversationId: string, force = false): 
   if (!conv) return null;
 
   const sum = await getSummary(conversationId);
-  const messages = await listConversationMessages(conversationId);
+  const messages = await getConversationMessages(conversationId);
   const transcript = messages
     .sort((a, b) => a.order - b.order)
     .map((m) => `${m.role}: ${(m.content || m.markdown || "").slice(0, 500)}`)

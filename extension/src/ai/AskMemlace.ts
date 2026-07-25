@@ -6,7 +6,7 @@
  * transcript slice into the prompt, and ask the model to answer citing
  * conversation ids. Nothing leaves the machine except the prompt itself.
  */
-import { getConversation, listConversationMessages } from "@/services/conversations";
+import { getConversation, getConversationMessages } from "@/services/conversations";
 import { getSettings } from "./AIManager";
 import { runPrompt, serializeConversation } from "./PromptEngine";
 import { search } from "./SemanticSearch";
@@ -48,7 +48,7 @@ async function buildContextBlock(convIds: string[], budget: number): Promise<str
     let block = `--- [${id}] ${conv.title} (${conv.provider}) ---\n`;
     if (sum?.shortSummary) block += `Summary: ${sum.shortSummary}\n`;
     if (sum?.takeaways?.length) block += `Takeaways: ${sum.takeaways.slice(0, 5).join(" • ")}\n`;
-    const messages = await listConversationMessages(id);
+    const messages = await getConversationMessages(id);
     const perConv = Math.max(400, Math.floor((budget - used) / Math.max(1, convIds.length)));
     block += serializeConversation(conv, messages.slice(-6), { maxTokens: perConv });
     const cost = estimateTokens(block);

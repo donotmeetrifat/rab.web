@@ -4,7 +4,7 @@
  * calling it twice on an unchanged conversation returns the cached row.
  */
 import { db, uid } from "@/lib/db";
-import { getConversation, listConversationMessages } from "@/services/conversations";
+import { getConversation, getConversationMessages } from "@/services/conversations";
 import { getSettings } from "./AIManager";
 import { runPrompt, serializeConversation, tryParseJson } from "./PromptEngine";
 import { estimateTokens } from "./TokenCounter";
@@ -57,7 +57,7 @@ export async function summarizeConversation(
   const existing = await db.aiSummaries.where("conversationId").equals(conversationId).first();
   if (existing && !opts.force && existing.hash === conv.hash) return existing;
 
-  const messages = await listConversationMessages(conversationId);
+  const messages = await getConversationMessages(conversationId);
   const settings = await getSettings();
   opts.onProgress?.(0.1);
 

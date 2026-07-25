@@ -3,7 +3,7 @@
  * Reuses the summary row if one already exists.
  */
 import { db } from "@/lib/db";
-import { getConversation, listConversationMessages } from "@/services/conversations";
+import { getConversation, getConversationMessages } from "@/services/conversations";
 import { runPrompt, serializeConversation } from "./PromptEngine";
 import { getSummary, summarizeConversation } from "./SummaryEngine";
 
@@ -16,7 +16,7 @@ export async function generateTitle(
 
   const conv = await getConversation(conversationId);
   if (!conv) return null;
-  const messages = await listConversationMessages(conversationId);
+  const messages = await getConversationMessages(conversationId);
   const body = serializeConversation(conv, messages, { maxTokens: 1200 });
 
   const result = await runPrompt({
