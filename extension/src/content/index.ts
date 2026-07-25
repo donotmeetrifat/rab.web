@@ -1,12 +1,16 @@
 /**
  * Memlace content script. Runs on every supported AI provider page.
- * Bootstraps the ProviderManager which loads the correct adapter, observes
- * DOM changes, and injects the "Save to Memlace" button.
  *
- * Storage happens in this same context (IndexedDB is available in content
- * scripts and shared across the extension), so saves are direct — no round
- * trip to the background worker required. The background is only notified
- * for optional notifications and popup badge updates.
+ * Invisible Auto Memory: the ProviderManager watches the active conversation,
+ * waits for the AI response to finish streaming (quiet DOM window), hashes
+ * the result, and persists to IndexedDB automatically. The user never
+ * presses Save — a tiny status pill on the page reflects Watching / Syncing
+ * / Synced / Error.
+ *
+ * Storage happens in this content-script context (IndexedDB is available
+ * here and shared across the extension), so saves are direct and durable
+ * as soon as the transaction commits — surviving browser crashes. The
+ * background worker is only notified for optional toast notifications.
  */
 import type { RuntimeMessage, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
@@ -18,13 +22,16 @@ loadSettings().then((s) => { currentSettings = s; });
 subscribeSettings((s) => { currentSettings = s; });
 
 const manager = new ProviderManager(buildAdapters(), {
-  isAutoSaveEnabled: () =>
-    currentSettings.autoSaveConversations && !currentSettings.saveConversationsManualOnly,
+  // Invisible Auto Memory is on by default. `autoSaveConversations` is the
+  // master kill-switch users can flip in Options; the deprecated
+  // `saveConversationsManualOnly` flag is intentionally ignored — there is
+  // no manual save path anymore.
+  isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
   onConversationChanged: async ({ conversation, hash, reason }) => {
-    // Respect manual-only guard for auto-triggered saves (initial + auto).
-    if (reason !== "manual" && currentSettings.saveConversationsManualOnly) return;
     const { created } = await saveConversation(conversation, {
       hash,
+      // `saveConversation` accepts "manual" | "auto" | "initial"; we only
+      // ever emit auto or initial from the invisible watcher.
       source: reason,
       saveImages: currentSettings.saveImages,
       saveAttachments: currentSettings.saveAttachments,
@@ -40,14 +47,15 @@ const manager = new ProviderManager(buildAdapters(), {
         },
       } satisfies RuntimeMessage);
     } catch {
-      // background may be idle — the save itself is what matters
+      // Background may be idle — the IndexedDB write is what matters.
     }
   },
 });
 
 manager.start();
 
-// Lightweight selection-capture bridge (preserved from Phase 1.5).
+// Lightweight selection-capture bridge (kept — this saves highlighted
+// snippets as Memories, a separate feature from conversation auto-save).
 function currentSelection(): string {
   const sel = window.getSelection();
   return sel ? sel.toString().trim() : "";

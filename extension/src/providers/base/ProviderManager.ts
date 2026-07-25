@@ -1,4 +1,4 @@
-import type { ProviderAdapter, SaveButtonState } from "./ProviderAdapter";
+import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderAdapter";
 import type { CapturedConversation } from "./types";
 import { hashConversation } from "./hash";
 
@@ -6,28 +6,55 @@ export interface ManagerEvents {
   onConversationChanged: (payload: {
     conversation: CapturedConversation;
     hash: string;
-    reason: "auto" | "manual" | "initial";
+    reason: "auto" | "initial";
   }) => Promise<void> | void;
+  /** Master kill-switch. Default: on. When false, the indicator still shows
+   *  "Watching" but no snapshots are written. */
   isAutoSaveEnabled: () => boolean;
 }
 
 /**
  * Owns the lifecycle of a single active provider adapter for the current page.
- * Detects SPA navigations, swaps adapters, keeps a single MutationObserver
- * chain alive, and dedupes updates by content hash.
+ *
+ * Invisible Auto Memory algorithm:
+ *   1. Adapter fires `observeChanges` on any DOM mutation.
+ *   2. Manager schedules a *quiet-window* timer (QUIET_WINDOW_MS, default
+ *      2500ms). Every subsequent mutation resets the timer.
+ *   3. When the timer finally elapses — meaning the DOM has been idle for
+ *      the full window and the AI response has stopped streaming — the
+ *      manager takes a snapshot.
+ *   4. The snapshot is hashed and compared to the last saved hash. If the
+ *      content is unchanged (scrolls, hovers, UI-only mutations, typing
+ *      indicators that disappear without new text) the save is skipped.
+ *   5. Otherwise the snapshot is persisted through the caller-supplied
+ *      `onConversationChanged`. That handler is responsible for writing to
+ *      IndexedDB — meaning the data is durable across crashes as soon as
+ *      the transaction commits.
+ *
+ * Deduplication is enforced by `(provider, providerConversationId)` inside
+ * the storage layer, so re-mounts and SPA re-hydration never create
+ * duplicates.
  */
 export class ProviderManager {
+  /** Time the DOM must remain idle before we treat the response as complete. */
+  private static readonly QUIET_WINDOW_MS = 2500;
+  /** Minimum gap between two consecutive writes for the same conversation. */
+  private static readonly WRITE_COOLDOWN_MS = 750;
+
   private adapters: ProviderAdapter[];
   private active: ProviderAdapter | null = null;
   private disposeObserver: (() => void) | null = null;
-  private disposeButton: (() => void) | null = null;
+  private disposeIndicator: (() => void) | null = null;
   private lastHash: string | null = null;
   private lastConversationId: string | null = null;
-  private saveState: SaveButtonState = "idle";
-  private pendingSaveTimer: number | null = null;
+  private lastWriteAt = 0;
+  private watchState: WatchState = "watching";
+  private quietTimer: number | null = null;
+  private stateResetTimer: number | null = null;
   private urlPollTimer: number | null = null;
   private currentUrl = "";
   private disposed = false;
+  private savingInFlight = false;
 
   constructor(adapters: ProviderAdapter[], private events: ManagerEvents) {
     this.adapters = adapters;
@@ -35,11 +62,9 @@ export class ProviderManager {
 
   start(): void {
     this.currentUrl = location.href;
-    this.reconcile("initial");
-    // Patch history APIs once to detect SPA route changes.
+    this.reconcile();
     hookHistory(() => this.onUrlMaybeChanged());
     window.addEventListener("popstate", this.onUrlMaybeChanged);
-    // Safety net for providers that mutate URL without dispatching events.
     this.urlPollTimer = window.setInterval(this.onUrlMaybeChanged, 1500);
   }
 
@@ -47,46 +72,19 @@ export class ProviderManager {
     this.disposed = true;
     window.removeEventListener("popstate", this.onUrlMaybeChanged);
     if (this.urlPollTimer !== null) clearInterval(this.urlPollTimer);
-    if (this.pendingSaveTimer !== null) clearTimeout(this.pendingSaveTimer);
+    if (this.quietTimer !== null) clearTimeout(this.quietTimer);
+    if (this.stateResetTimer !== null) clearTimeout(this.stateResetTimer);
     this.tearDownActive();
-  }
-
-  /** Force a manual save regardless of auto-save state / hash equality. */
-  async saveNow(): Promise<{ ok: boolean; error?: string }> {
-    if (!this.active) return { ok: false, error: "No supported AI page detected" };
-    const convo = this.active.getConversation();
-    if (!convo) return { ok: false, error: "No conversation on this page yet" };
-    try {
-      this.setSaveState("saving");
-      const hash = hashConversation(convo);
-      const isUpdate = this.lastHash !== null && this.lastHash !== hash;
-      await this.events.onConversationChanged({
-        conversation: convo,
-        hash,
-        reason: "manual",
-      });
-      this.lastHash = hash;
-      this.setSaveState(isUpdate ? "updated" : "saved");
-      window.setTimeout(() => this.setSaveState("idle"), 2200);
-      return { ok: true };
-    } catch (err) {
-      this.setSaveState("error");
-      window.setTimeout(() => this.setSaveState("idle"), 2600);
-      return {
-        ok: false,
-        error: err instanceof Error ? err.message : "Save failed",
-      };
-    }
   }
 
   private onUrlMaybeChanged = (): void => {
     if (this.disposed) return;
     if (location.href === this.currentUrl) return;
     this.currentUrl = location.href;
-    this.reconcile("initial");
+    this.reconcile();
   };
 
-  private reconcile(reason: "initial" | "auto"): void {
+  private reconcile(): void {
     const url = location.href;
     const next = this.adapters.find((a) => a.matches(url)) ?? null;
 
@@ -95,55 +93,63 @@ export class ProviderManager {
       this.active = next;
       this.lastHash = null;
       this.lastConversationId = null;
+      this.setWatchState("watching");
     }
 
     if (!this.active) return;
 
-    // Wait until the conversation actually renders before wiring things up.
     waitFor(
       () => this.active?.detect() === true,
-      () => this.wireActive(reason),
+      () => this.wireActive(),
     );
   }
 
-  private wireActive(reason: "initial" | "auto"): void {
+  private wireActive(): void {
     if (!this.active || this.disposed) return;
 
-    // Observer: schedule a debounced snapshot on any change.
     if (!this.disposeObserver) {
-      this.disposeObserver = this.active.observeChanges(() =>
-        this.scheduleSnapshot(),
-      );
+      this.disposeObserver = this.active.observeChanges(() => this.armQuietWindow());
     }
-    // Button: injected once; adapter keeps it alive against re-renders.
-    if (!this.disposeButton) {
-      this.disposeButton = this.active.injectButton({
-        onSave: async () => { await this.saveNow(); },
-        getState: () => this.saveState,
-      });
+    if (!this.disposeIndicator) {
+      const handlers: IndicatorHandlers = { getState: () => this.watchState };
+      this.disposeIndicator = this.active.injectIndicator(handlers);
     }
-    // Initial snapshot.
-    this.scheduleSnapshot(reason);
+    // Initial pass — capture whatever's already rendered.
+    this.armQuietWindow();
   }
 
-  private scheduleSnapshot(reason: "initial" | "auto" = "auto"): void {
-    if (this.pendingSaveTimer !== null) clearTimeout(this.pendingSaveTimer);
-    this.pendingSaveTimer = window.setTimeout(() => {
-      this.pendingSaveTimer = null;
-      this.snapshot(reason);
-    }, 700);
+  /**
+   * Reset the "response finished streaming" timer. Every DOM mutation
+   * bumps it forward, so we only fire once the page has been fully quiet
+   * for QUIET_WINDOW_MS.
+   */
+  private armQuietWindow(): void {
+    if (this.disposed) return;
+    if (this.quietTimer !== null) clearTimeout(this.quietTimer);
+    this.quietTimer = window.setTimeout(() => {
+      this.quietTimer = null;
+      void this.snapshot();
+    }, ProviderManager.QUIET_WINDOW_MS);
   }
 
-  private async snapshot(reason: "initial" | "auto"): Promise<void> {
+  private async snapshot(): Promise<void> {
     if (!this.active || this.disposed) return;
+    if (this.savingInFlight) return;
+
     const convo = this.active.getConversation();
+    // No conversation, or partial (empty) DOM — treat as UI noise and stay
+    // in "watching". Never persist an empty conversation.
     if (!convo || convo.messages.length === 0) return;
 
+    // Guard against writing a half-streamed final message: the last
+    // assistant message must have non-empty content.
+    const last = convo.messages[convo.messages.length - 1];
+    if (last.role === "assistant" && !(last.content || last.markdown || "").trim()) {
+      return;
+    }
+
     // Detect conversation switch inside the same provider.
-    if (
-      this.lastConversationId &&
-      this.lastConversationId !== convo.conversationId
-    ) {
+    if (this.lastConversationId && this.lastConversationId !== convo.conversationId) {
       this.lastHash = null;
     }
     this.lastConversationId = convo.conversationId;
@@ -151,43 +157,57 @@ export class ProviderManager {
     const hash = hashConversation(convo);
     if (hash === this.lastHash) return;
 
-    if (!this.events.isAutoSaveEnabled() && reason !== "initial") {
-      // Track hash locally so manual save reports Updated vs Saved correctly.
-      this.lastHash = hash;
-      return;
-    }
     if (!this.events.isAutoSaveEnabled()) {
+      // Kill-switch off: still track the hash so we don't re-fire on the
+      // same content once the user re-enables auto memory.
       this.lastHash = hash;
       return;
     }
 
+    // Cooldown: coalesce bursts (e.g. two mutations 100ms apart that both
+    // survived the quiet window somehow) into a single write.
+    const now = Date.now();
+    if (now - this.lastWriteAt < ProviderManager.WRITE_COOLDOWN_MS) return;
+
+    this.savingInFlight = true;
     try {
-      this.setSaveState("saving");
-      await this.events.onConversationChanged({ conversation: convo, hash, reason: "auto" });
-      const wasUpdate = this.lastHash !== null;
+      this.setWatchState("syncing");
+      await this.events.onConversationChanged({
+        conversation: convo,
+        hash,
+        reason: this.lastHash === null ? "initial" : "auto",
+      });
       this.lastHash = hash;
-      this.setSaveState(wasUpdate ? "updated" : "saved");
-      window.setTimeout(() => this.setSaveState("idle"), 1800);
-    } catch {
-      this.setSaveState("error");
-      window.setTimeout(() => this.setSaveState("idle"), 2400);
+      this.lastWriteAt = Date.now();
+      this.setWatchState("synced");
+      this.scheduleStateReset(1600);
+    } catch (err) {
+      console.warn("[memlace] auto-save failed", err);
+      this.setWatchState("error");
+      this.scheduleStateReset(3000);
+    } finally {
+      this.savingInFlight = false;
     }
   }
 
-  private setSaveState(state: SaveButtonState): void {
-    this.saveState = state;
-    // Adapter reads via handlers.getState(); notify by dispatching a custom event
-    // so the button can re-render without us holding a DOM ref here.
-    window.dispatchEvent(
-      new CustomEvent("memlace:save-state", { detail: state }),
-    );
+  private setWatchState(state: WatchState): void {
+    this.watchState = state;
+    window.dispatchEvent(new CustomEvent("memlace:watch-state", { detail: state }));
+  }
+
+  private scheduleStateReset(ms: number): void {
+    if (this.stateResetTimer !== null) clearTimeout(this.stateResetTimer);
+    this.stateResetTimer = window.setTimeout(() => {
+      this.stateResetTimer = null;
+      this.setWatchState("watching");
+    }, ms);
   }
 
   private tearDownActive(): void {
     this.disposeObserver?.();
     this.disposeObserver = null;
-    this.disposeButton?.();
-    this.disposeButton = null;
+    this.disposeIndicator?.();
+    this.disposeIndicator = null;
     this.active?.cleanup();
   }
 }
@@ -203,8 +223,7 @@ function hookHistory(onChange: () => void): void {
     return;
   }
   w.__memlaceHistoryHooked = true;
-  const fire = () =>
-    window.dispatchEvent(new Event("memlace:locationchange"));
+  const fire = () => window.dispatchEvent(new Event("memlace:locationchange"));
   const push = history.pushState;
   const replace = history.replaceState;
   history.pushState = function (...args) {
