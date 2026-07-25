@@ -17,6 +17,7 @@ import {
   Check,
   ChevronDown,
   MessagesSquare,
+  Brain,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -48,6 +49,8 @@ import {
 import { useDebounced } from "@/hooks/useDebounced";
 import { useHotkey } from "@/components/Dialog";
 import { CommandPalette } from "@/components/CommandPalette";
+import { KnowledgePanel } from "@/components/knowledge/KnowledgePanel";
+import { scheduleKnowledgeBackfill } from "@/knowledge";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
@@ -136,7 +139,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations">("memories");
+  const [section, setSection] = useState<"memories" | "conversations" | "knowledge">("memories");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
@@ -191,6 +194,13 @@ export function SidePanelApp() {
   useEffect(() => {
     bootstrap();
   }, [bootstrap]);
+
+  useEffect(() => {
+    if (!ready) return;
+    // Kick off a low-priority backfill so any conversations captured
+    // before v4 (or before knowledge indexing) get structured immediately.
+    scheduleKnowledgeBackfill();
+  }, [ready]);
 
   useEffect(() => {
     if (!ready) return;
@@ -346,6 +356,20 @@ export function SidePanelApp() {
               </span>
             )}
           </button>
+          <button
+            type="button"
+            onClick={() => setSection("knowledge")}
+            aria-current={section === "knowledge" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "knowledge"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Brain className="h-3.5 w-3.5" />
+            Knowledge
+          </button>
         </nav>
 
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
@@ -419,7 +443,19 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "conversations" ? (
+        {section === "knowledge" ? (
+          <KnowledgePanel
+            onOpenConversation={async (convId) => {
+              const conv = await import("@/services/conversations").then((m) =>
+                m.getConversation(convId),
+              );
+              if (conv) {
+                setSection("conversations");
+                setSelectedConv(conv);
+              }
+            }}
+          />
+        ) : section === "conversations" ? (
           <div className="flex flex-col h-full min-h-0">
             <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
               <MessagesSquare className="h-4 w-4 text-primary" />

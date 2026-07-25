@@ -5,24 +5,32 @@ import type {
   StoredConversation,
   StoredConvMessage,
 } from "@/types";
+import type {
+  KnowledgeRecord,
+  KnowledgeEntityRow,
+  KnowledgeKeywordRow,
+  KnowledgeRelationship,
+} from "@/knowledge/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
   memories!: Table<Memory, string>;
   conversations!: Table<StoredConversation, string>;
   convMessages!: Table<StoredConvMessage, string>;
+  knowledge!: Table<KnowledgeRecord, string>;
+  entities!: Table<KnowledgeEntityRow, string>;
+  keywords!: Table<KnowledgeKeywordRow, string>;
+  relationships!: Table<KnowledgeRelationship, string>;
 
   constructor() {
     super("memlace");
 
-    // v1 — original schema
     this.version(1).stores({
       projects: "id, name, pinned, archived, updatedAt",
       memories:
         "id, projectId, provider, favorite, trashed, createdAt, updatedAt, *tags",
     });
 
-    // v2 — adds pinned/archived on memories, favorite/icon on projects
     this.version(2)
       .stores({
         projects: "id, name, pinned, favorite, archived, updatedAt",
@@ -49,7 +57,6 @@ class MemlaceDB extends Dexie {
           });
       });
 
-    // v3 — conversation capture (provider adapters)
     this.version(3).stores({
       projects: "id, name, pinned, favorite, archived, updatedAt",
       memories:
@@ -57,6 +64,25 @@ class MemlaceDB extends Dexie {
       conversations:
         "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
       convMessages: "id, conversationId, order, role",
+    });
+
+    // v4 — Knowledge Engine (Phase 7). Aggregate arrays on `knowledge`
+    // are multiEntry-indexed so we can query by tech/keyword/entity in
+    // O(log n). `entities`/`keywords` are normalised rows for cross-
+    // conversation aggregations. `relationships` reserves the graph
+    // edges surface for future work.
+    this.version(4).stores({
+      projects: "id, name, pinned, favorite, archived, updatedAt",
+      memories:
+        "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      conversations:
+        "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
+      convMessages: "id, conversationId, order, role",
+      knowledge:
+        "id, &conversationId, provider, hash, updatedAt, *entities, *keywords, *technologies, *languages, *topics",
+      entities: "id, knowledgeId, type, name, [type+name]",
+      keywords: "id, knowledgeId, term",
+      relationships: "id, fromId, toId, kind",
     });
   }
 }
