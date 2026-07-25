@@ -220,6 +220,9 @@ export function SidePanelApp() {
     // Kick off a low-priority backfill so any conversations captured
     // before v4 (or before knowledge indexing) get structured immediately.
     scheduleKnowledgeBackfill();
+    // Silent memory-health sweep — dedupes, drops orphans, keeps the
+    // local store tidy without ever surfacing UI.
+    void import("@/services/memoryHealth").then((m) => m.scheduleMemoryHealth());
   }, [ready]);
 
   useEffect(() => {
@@ -597,22 +600,33 @@ export function SidePanelApp() {
             </div>
             <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
               <div className="overflow-y-auto scroll-thin px-4 py-3">
-                <ConversationList
-                  conversations={filteredConversations}
-                  loading={convLoading}
-                  activeId={selectedConv?.id ?? null}
-                  onOpen={(c) => setSelectedConv(c)}
-                  query={debouncedConvQuery || undefined}
-                  snippets={conversationSnippets}
-                  onDelete={async (c) => {
-                    if (!window.confirm(`Delete conversation "${c.title}"?`))
-                      return;
-                    await deleteConversation(c.id);
-                    if (selectedConv?.id === c.id) setSelectedConv(null);
-                    toast.success("Conversation deleted");
-                    void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
-                  }}
-                />
+                {(() => {
+                  const isBrowsing =
+                    !debouncedConvQuery &&
+                    convFilters.providers.length === 0 &&
+                    !convFilters.dateFrom &&
+                    !convFilters.dateTo;
+                  const commonProps = {
+                    conversations: filteredConversations,
+                    loading: convLoading,
+                    activeId: selectedConv?.id ?? null,
+                    onOpen: (c: StoredConversation) => setSelectedConv(c),
+                    query: debouncedConvQuery || undefined,
+                    snippets: conversationSnippets,
+                    onDelete: async (c: StoredConversation) => {
+                      if (!window.confirm(`Delete conversation "${c.title}"?`)) return;
+                      await deleteConversation(c.id);
+                      if (selectedConv?.id === c.id) setSelectedConv(null);
+                      toast.success("Conversation deleted");
+                      void runConvSearch(debouncedConvQuery, convFilters, { showLoading: true });
+                    },
+                  };
+                  return isBrowsing ? (
+                    <TimelineList {...commonProps} />
+                  ) : (
+                    <ConversationList {...commonProps} />
+                  );
+                })()}
               </div>
               <aside className="hidden md:flex flex-col border-l border-border bg-surface min-w-0">
                 {selectedConv ? (
