@@ -62,11 +62,7 @@ export function createAnthropic(cfg: ProviderConfig): AIProvider {
       return buildGenerateResult("anthropic", model, text, { inputTokens, outputTokens });
     },
     async embed() {
-      // Anthropic has no first-party embeddings endpoint; users should pick
-      // a different provider for embeddings.
       throw new ProviderError("Anthropic has no embeddings API — pick another provider for semantic search");
-      // eslint-disable-next-line @typescript-eslint/no-unreachable
-      return buildEmbedResult("anthropic", "", [], 0);
     },
     async validateKey() {
       if (!cfg.apiKey) return { ok: false, error: "No API key set" };
