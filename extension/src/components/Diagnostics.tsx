@@ -106,7 +106,7 @@ export function Diagnostics() {
         const res = await importAll(text, { restoreSettings: true });
         toast.success(
           "Restore complete",
-          `Memories +${res.memoriesAdded} · Chats +${res.conversationsAdded ?? 0}`,
+          `Memories +${res.memories} · Chats +${res.conversations}`,
         );
         refresh();
       } catch (err) {
