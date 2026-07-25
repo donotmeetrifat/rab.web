@@ -20,6 +20,8 @@ import {
   Brain,
   Sparkles,
   Play,
+  Rocket,
+  HelpCircle,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/Button";
@@ -55,6 +57,11 @@ import { KnowledgePanel } from "@/components/knowledge/KnowledgePanel";
 import { AICenter } from "@/components/ai/AICenter";
 import { AskMemlacePanel } from "@/components/ai/AskMemlacePanel";
 import { scheduleKnowledgeBackfill } from "@/knowledge";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { WhatsNew } from "@/components/onboarding/WhatsNew";
+import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
+import { HelpCenter } from "@/components/HelpCenter";
+import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
