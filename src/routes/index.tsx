@@ -1,11 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useMemo, useState } from "react";
 import { ArrowRight, Search, Command, Menu, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
 import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
 import memlaceWordmark from "@/assets/memlace-wordmark-v4.png.asset.json";
 import { BRANDS } from "@/components/brand-icons";
+
+const EXTENSION_VERSION = "1.0.0";
+const EXTENSION_ASSET_PATH = "/memlace-extension.zip";
+const DOWNLOAD_FILENAME = `Memlace-Chrome-Extension-v${EXTENSION_VERSION}.zip`;
+const DOWNLOAD_TIMEOUT_MS = 30_000;
 
 
 
@@ -51,28 +57,59 @@ function LandingPage() {
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const download = () => {
+  const download = useCallback(async () => {
+    if (state === "loading") return; // prevent double-click
     setState("loading");
     setError(null);
-    fetch("/memlace-extension.zip")
-      .then((res) => {
-        if (!res.ok) throw new Error(`Download failed (${res.status})`);
-        return res.blob();
-      })
-      .then((blob) => {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "memlace-extension.zip";
+    const toastId = toast.loading("Preparing download…");
 
-        a.click();
-        URL.revokeObjectURL(a.href);
-        setState("idle");
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-        setState("error");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(EXTENSION_ASSET_PATH, {
+        signal: controller.signal,
+        cache: "no-store",
       });
-  };
+      if (!res.ok) {
+        throw new Error(
+          res.status === 404
+            ? "Extension file not found. Please try again later."
+            : `Download failed (HTTP ${res.status}).`,
+        );
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = DOWNLOAD_FILENAME;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Revoke on the next tick so Safari has time to start the download.
+      setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setState("idle");
+      toast.success("Download started", {
+        id: toastId,
+        description: DOWNLOAD_FILENAME,
+      });
+    } catch (err) {
+      const message =
+        err instanceof DOMException && err.name === "AbortError"
+          ? "Download timed out. Check your connection and try again."
+          : err instanceof TypeError
+            ? "Network error. Check your connection and try again."
+            : err instanceof Error
+              ? err.message
+              : "Unknown error.";
+      setError(message);
+      setState("error");
+      toast.error("Download failed", { id: toastId, description: message });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }, [state]);
 
   const navLinks = [
     { href: "#features", label: "Features" },
