@@ -197,6 +197,13 @@ export function SidePanelApp() {
 
   useEffect(() => {
     if (!ready) return;
+    // Kick off a low-priority backfill so any conversations captured
+    // before v4 (or before knowledge indexing) get structured immediately.
+    scheduleKnowledgeBackfill();
+  }, [ready]);
+
+  useEffect(() => {
+    if (!ready) return;
     void listTags().then(setTags);
   }, [ready, memories.length]);
 
