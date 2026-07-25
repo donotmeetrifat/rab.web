@@ -6,6 +6,7 @@ import type {
 } from "@/types";
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
+import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
