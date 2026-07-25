@@ -2,6 +2,9 @@ import type { ProviderId } from "@/types";
 import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderAdapter";
 import type { CapturedConversation, CapturedMessage } from "./types";
 import { debounce } from "./dom";
+import { consumePendingHandoff } from "@/lib/handoff";
+import type { ContinuationProviderId } from "@/lib/continuation";
+
 
 /**
  * Shared skeleton for provider adapters. Owns the parts that are identical
