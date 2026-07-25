@@ -239,6 +239,8 @@ export function PopupApp() {
 
   return (
     <div className="flex h-[560px] w-[380px] flex-col bg-background text-foreground">
+      <OnboardingFlow />
+      <WhatsNew />
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
