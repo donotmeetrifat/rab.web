@@ -298,6 +298,8 @@ export function SidePanelApp() {
 
   return (
     <div className="grid h-dvh w-dvw grid-cols-[220px_1fr] bg-background text-foreground">
+      <OnboardingFlow />
+      <WhatsNew />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <aside className="flex flex-col border-r border-border bg-surface min-w-0">
         <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
