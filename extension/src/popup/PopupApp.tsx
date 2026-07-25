@@ -39,6 +39,9 @@ import {
 import { useDebounced } from "@/hooks/useDebounced";
 import { useHotkey } from "@/components/Dialog";
 import { CommandPalette } from "@/components/CommandPalette";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
+import { WhatsNew } from "@/components/onboarding/WhatsNew";
+import { markChecklist } from "@/services/onboarding";
 import type { Memory } from "@/types";
 
 const PENDING_KEY = "memlace.pendingCapture";
