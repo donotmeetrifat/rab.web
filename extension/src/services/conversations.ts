@@ -9,6 +9,7 @@ import { hashConversation } from "@/providers/base/hash";
 import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
 import { detectProjectFor } from "@/services/projectDetection";
 import { invalidateReadiness } from "@/services/contextReadiness";
+import { invalidateContext } from "@/context";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
@@ -140,6 +141,7 @@ export async function saveConversation(
   if (result.changed) {
     invalidateIndex();
     invalidateReadiness(result.conversation.id);
+    invalidateContext(result.conversation.id);
     // Background pipeline: knowledge → project detection → optional AI
     // enrichment. Each step is fire-and-forget and non-blocking so the
     // primary save always completes instantly.
@@ -196,6 +198,7 @@ export async function deleteConversation(id: string): Promise<void> {
     await db.conversations.delete(id);
   });
   invalidateIndex();
+  invalidateContext(id);
   onConversationDeleted(id).catch((err) =>
     console.warn("[memlace] knowledge cleanup failed", err),
   );

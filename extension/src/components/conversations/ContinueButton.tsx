@@ -3,12 +3,13 @@ import { ArrowUpRight, Check, ChevronDown, Loader2, Send } from "lucide-react";
 import type { StoredConversation, StoredConvMessage } from "@/types";
 import {
   CONTINUATION_PROVIDERS,
-  buildContinuationContext,
   copyToClipboard,
   openProviderTab,
   type ContinuationProviderId,
 } from "@/lib/continuation";
+import { buildContextPackage, type ContextPackage } from "@/context";
 import { useToast } from "@/components/Toast";
+import { ContextPreview } from "./ContextPreview";
 
 interface Props {
   conversation: StoredConversation;
@@ -29,6 +30,12 @@ export function ContinueButton({ conversation, messages }: Props) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<ContinuationProviderId | null>(null);
   const [justSent, setJustSent] = useState<ContinuationProviderId | null>(null);
+  const [preview, setPreview] = useState<{
+    target: ContinuationProviderId;
+    loading: boolean;
+    pkg: ContextPackage | null;
+    error: string | null;
+  } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const disabled = !messages || messages.length === 0;
 
@@ -48,43 +55,67 @@ export function ContinueButton({ conversation, messages }: Props) {
     };
   }, [open]);
 
-  const handleContinue = useCallback(
+  const handleSelectProvider = useCallback(
     async (target: ContinuationProviderId) => {
       if (!messages || messages.length === 0) {
         toast.error("Nothing to continue", "This conversation has no saved messages.");
         return;
       }
-      setPending(target);
+      setOpen(false);
+      setPreview({ target, loading: true, pkg: null, error: null });
       try {
-        const built = buildContinuationContext({ target, conversation, messages });
-        await copyToClipboard(built.prompt);
-
-        const adapter = CONTINUATION_PROVIDERS.find((p) => p.id === target)!;
-        openProviderTab(adapter.newChatUrl);
-
-        setJustSent(target);
-        setTimeout(() => setJustSent(null), 1600);
-        setOpen(false);
-
-        const parts = [
-          `Context copied · ${built.chars.toLocaleString()} chars`,
-          built.truncated
-            ? `${built.includedMessages}/${built.totalMessages} messages (older trimmed)`
-            : `${built.includedMessages} messages`,
-        ];
-        toast.success(`Opened ${adapter.name}`, `${parts.join(" · ")}. Paste to continue.`);
-        void import("@/services/onboarding").then((m) => m.markChecklist("continuedElsewhere"));
-      } catch (err) {
-        toast.error(
-          "Continue failed",
-          err instanceof Error ? err.message : "Could not copy or open the target.",
+        // Context Engine build is async and runs off the render path.
+        const pkg = await buildContextPackage({ conversation, target });
+        setPreview((prev) =>
+          prev && prev.target === target ? { ...prev, loading: false, pkg } : prev,
         );
-      } finally {
-        setPending(null);
+      } catch (err) {
+        setPreview((prev) =>
+          prev && prev.target === target
+            ? {
+                ...prev,
+                loading: false,
+                error: err instanceof Error ? err.message : "Could not build context.",
+              }
+            : prev,
+        );
       }
     },
     [conversation, messages, toast],
   );
+
+  const handleConfirmContinue = useCallback(async () => {
+    if (!preview?.pkg) return;
+    const { target, pkg } = preview;
+    setPending(target);
+    try {
+      await copyToClipboard(pkg.prompt);
+      const adapter = CONTINUATION_PROVIDERS.find((p) => p.id === target)!;
+      openProviderTab(adapter.newChatUrl);
+
+      setJustSent(target);
+      setTimeout(() => setJustSent(null), 1600);
+      setPreview(null);
+
+      const parts = [
+        `Context copied · ${pkg.chars.toLocaleString()} chars`,
+        pkg.truncated
+          ? `${pkg.counts.keptMessages}/${pkg.counts.consideredMessages} messages (older trimmed)`
+          : `${pkg.counts.keptMessages} messages`,
+      ];
+      toast.success(`Opened ${adapter.name}`, `${parts.join(" · ")}. Paste to continue.`);
+      void import("@/services/onboarding").then((m) => m.markChecklist("continuedElsewhere"));
+    } catch (err) {
+      toast.error(
+        "Continue failed",
+        err instanceof Error ? err.message : "Could not copy or open the target.",
+      );
+    } finally {
+      setPending(null);
+    }
+  }, [preview, toast]);
+
+
 
   return (
     <div className="relative" ref={rootRef}>
@@ -122,7 +153,7 @@ export function ContinueButton({ conversation, messages }: Props) {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => handleContinue(p.id)}
+                    onClick={() => handleSelectProvider(p.id)}
                     disabled={pending !== null}
                     className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-muted disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                   >
@@ -138,7 +169,7 @@ export function ContinueButton({ conversation, messages }: Props) {
                         {p.name}
                       </span>
                       <span className="block text-[10px] text-muted-foreground truncate">
-                        Copy · open new chat
+                        Preview context · open new chat
                       </span>
                     </span>
                     {isPending ? (
@@ -154,6 +185,21 @@ export function ContinueButton({ conversation, messages }: Props) {
             })}
           </ul>
         </div>
+      )}
+
+      {preview && (
+        <ContextPreview
+          open
+          target={preview.target}
+          targetName={
+            CONTINUATION_PROVIDERS.find((p) => p.id === preview.target)?.name ?? preview.target
+          }
+          loading={preview.loading}
+          pkg={preview.pkg}
+          error={preview.error}
+          onCancel={() => setPreview(null)}
+          onContinue={handleConfirmContinue}
+        />
       )}
     </div>
   );
