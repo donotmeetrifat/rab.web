@@ -7,6 +7,8 @@ import type {
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
 import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
+import { detectProjectFor } from "@/services/projectDetection";
+import { invalidateReadiness } from "@/services/contextReadiness";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
@@ -137,11 +139,13 @@ export async function saveConversation(
 
   if (result.changed) {
     invalidateIndex();
-    // Fire-and-forget knowledge indexing. Failures are logged only —
-    // knowledge is derived data, never blocks the primary save.
-    onConversationSaved(result.conversation).catch((err) =>
-      console.warn("[memlace] knowledge indexing failed", err),
-    );
+    invalidateReadiness(result.conversation.id);
+    // Background pipeline: knowledge → project detection → optional AI
+    // enrichment. Each step is fire-and-forget and non-blocking so the
+    // primary save always completes instantly.
+    onConversationSaved(result.conversation)
+      .then(() => detectProjectFor(result.conversation))
+      .catch((err) => console.warn("[memlace] background pipeline failed", err));
     // Optional AI enrichment (Phase 8). Never blocks the save, never
     // runs unless the user opted in via AI settings.
     void (async () => {

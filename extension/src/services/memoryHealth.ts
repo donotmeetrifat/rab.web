@@ -1,0 +1,117 @@
+/**
+ * MemoryHealth — silent, opportunistic optimisation of the local store.
+ *
+ * Runs from `scheduleMemoryHealth()` on idle. Never surfaces UI. Every
+ * mutation is guarded so a corrupt / partial row cannot cascade.
+ *
+ * Current sweeps (cheap, O(n) with early exits):
+ *   • Orphan messages       — convMessages whose conversation is gone.
+ *   • Empty snapshots       — conversations with 0 messages AND older
+ *                             than 1h (skips in-flight captures).
+ *   • Duplicate collisions  — [provider+providerConversationId] should
+ *                             be unique by index, but historical bugs
+ *                             may have left twins. Keep the newest,
+ *                             re-parent messages, drop the older row.
+ */
+import { db } from "@/lib/db";
+import { invalidateReadiness } from "./contextReadiness";
+
+const HOUR = 60 * 60 * 1000;
+
+export interface HealthReport {
+  orphanMessages: number;
+  emptySnapshots: number;
+  duplicatesMerged: number;
+}
+
+let inflight: Promise<HealthReport> | null = null;
+
+export function runMemoryHealth(): Promise<HealthReport> {
+  if (inflight) return inflight;
+  inflight = (async () => {
+    const report: HealthReport = {
+      orphanMessages: 0,
+      emptySnapshots: 0,
+      duplicatesMerged: 0,
+    };
+    try {
+      const [convs, msgs] = await Promise.all([
+        db.conversations.toArray(),
+        db.convMessages.toArray(),
+      ]);
+      const convIds = new Set(convs.map((c) => c.id));
+
+      // 1. Orphan messages
+      const orphanIds: string[] = [];
+      for (const m of msgs) if (!convIds.has(m.conversationId)) orphanIds.push(m.id);
+      if (orphanIds.length) {
+        await db.convMessages.bulkDelete(orphanIds);
+        report.orphanMessages = orphanIds.length;
+      }
+
+      // 2. Empty snapshots older than 1h
+      const now = Date.now();
+      const emptyIds = convs
+        .filter((c) => c.messageCount === 0 && now - c.updatedAt > HOUR)
+        .map((c) => c.id);
+      if (emptyIds.length) {
+        await db.conversations.bulkDelete(emptyIds);
+        report.emptySnapshots = emptyIds.length;
+      }
+
+      // 3. Duplicate collisions
+      const byKey = new Map<string, typeof convs>();
+      for (const c of convs) {
+        if (emptyIds.includes(c.id)) continue;
+        const key = `${c.provider}::${c.providerConversationId}`;
+        const arr = byKey.get(key) ?? [];
+        arr.push(c);
+        byKey.set(key, arr);
+      }
+      for (const [, list] of byKey) {
+        if (list.length < 2) continue;
+        list.sort((a, b) => b.updatedAt - a.updatedAt);
+        const keeper = list[0];
+        const losers = list.slice(1);
+        await db.transaction(
+          "rw",
+          db.conversations,
+          db.convMessages,
+          async () => {
+            for (const l of losers) {
+              await db.convMessages
+                .where("conversationId")
+                .equals(l.id)
+                .modify({ conversationId: keeper.id });
+              await db.conversations.delete(l.id);
+            }
+          },
+        );
+        report.duplicatesMerged += losers.length;
+        invalidateReadiness(keeper.id);
+      }
+    } catch (err) {
+      console.warn("[memlace] memory health sweep failed", err);
+    }
+    return report;
+  })();
+  inflight.finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+/** Schedule a health sweep on next idle tick. Safe to call repeatedly. */
+export function scheduleMemoryHealth(): void {
+  const run = () => {
+    runMemoryHealth().catch(() => undefined);
+  };
+  const w = globalThis as unknown as {
+    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+  };
+  if (typeof w.requestIdleCallback === "function") {
+    w.requestIdleCallback(run, { timeout: 4000 });
+  } else {
+    setTimeout(run, 1500);
+  }
+}

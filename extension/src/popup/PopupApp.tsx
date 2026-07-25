@@ -29,6 +29,7 @@ import {
   type ConvSnippet,
 } from "@/services/conversations";
 import { ConversationList } from "@/components/conversations/ConversationList";
+import { TimelineList } from "@/components/conversations/TimelineList";
 import { ConversationSearch } from "@/components/conversations/ConversationSearch";
 import {
   ConversationFilters,
@@ -478,31 +479,40 @@ export function PopupApp() {
               </button>
             </div>
             <ConversationFilters value={convFilters} onChange={setConvFilters} variant="compact" />
-            <ConversationList
-              conversations={displayedConversations}
-              loading={convLoading}
-              compact
-              query={debouncedQuery || undefined}
-              snippets={conversationSnippets}
-              onOpen={(c) => {
-                if (c.url) {
-                  chrome.tabs.create({ url: c.url });
-                } else {
-                  void openSidePanel();
-                }
-              }}
-              onDelete={async (c) => {
-                if (!window.confirm(`Delete conversation "${c.title}"?`)) return;
-                await deleteConversation(c.id);
-                toast.success("Conversation deleted");
-                void runConvSearch(debouncedQuery, convFilters, true);
-              }}
-              emptyAction={
-                <Button size="sm" variant="primary" onClick={openSidePanel}>
-                  Open workspace
-                </Button>
-              }
-            />
+            {(() => {
+              const isBrowsing =
+                !debouncedQuery &&
+                convFilters.providers.length === 0 &&
+                !convFilters.dateFrom &&
+                !convFilters.dateTo;
+              const listProps = {
+                conversations: displayedConversations,
+                loading: convLoading,
+                compact: true,
+                query: debouncedQuery || undefined,
+                snippets: conversationSnippets,
+                onOpen: (c: import("@/types").StoredConversation) => {
+                  if (c.url) chrome.tabs.create({ url: c.url });
+                  else void openSidePanel();
+                },
+                onDelete: async (c: import("@/types").StoredConversation) => {
+                  if (!window.confirm(`Delete conversation "${c.title}"?`)) return;
+                  await deleteConversation(c.id);
+                  toast.success("Conversation deleted");
+                  void runConvSearch(debouncedQuery, convFilters, true);
+                },
+                emptyAction: (
+                  <Button size="sm" variant="primary" onClick={openSidePanel}>
+                    Open workspace
+                  </Button>
+                ),
+              };
+              return isBrowsing ? (
+                <TimelineList {...listProps} />
+              ) : (
+                <ConversationList {...listProps} />
+              );
+            })()}
           </section>
         )}
       </div>
