@@ -9,7 +9,9 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcutOpenPopup: "Alt+Shift+P",
   telemetryEnabled: false,
   notificationsEnabled: true,
-  autoSaveConversations: false,
+  // Invisible Auto Memory — on by default. Master kill-switch for the
+  // content-script auto-saver.
+  autoSaveConversations: true,
   saveImages: true,
   saveAttachments: true,
   saveConversationsManualOnly: false,
