@@ -4,7 +4,7 @@
  * One clean surface per project. Renders a live view-model produced by
  * `services/projectBrain.ts`; never triggers new writes or observers.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Activity,
   ArrowRight,
