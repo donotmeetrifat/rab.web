@@ -513,7 +513,11 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "ai-center" ? (
+        {section === "checklist" ? (
+          <ChecklistPanel onJump={() => setPaletteOpen(true)} />
+        ) : section === "help" ? (
+          <HelpCenter />
+        ) : section === "ai-center" ? (
           <AICenter />
         ) : section === "ask" ? (
           <AskMemlacePanel
