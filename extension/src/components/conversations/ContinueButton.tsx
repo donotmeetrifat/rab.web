@@ -204,5 +204,3 @@ export function ContinueButton({ conversation, messages }: Props) {
     </div>
   );
 }
-
-}
