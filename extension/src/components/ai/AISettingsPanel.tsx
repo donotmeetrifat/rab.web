@@ -10,6 +10,8 @@ import {
   clearAIKey,
 } from "@/ai/AISettings";
 import { DEFAULT_AI_SETTINGS, type AISettings, type AIProviderId } from "@/ai/types";
+import { validateKey, providerLabel } from "@/ai/AIManager";
+import { isLocalProvider } from "@/ai/CostEstimator";
 import {
   createAnthropic, createCustom, createGemini, createLMStudio,
   createOllama, createOpenAI, createOpenRouter,
