@@ -476,7 +476,19 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "knowledge" ? (
+        {section === "ai-center" ? (
+          <AICenter />
+        ) : section === "ask" ? (
+          <AskMemlacePanel
+            onOpenConversation={async (convId) => {
+              const conv = await import("@/services/conversations").then((m) => m.getConversation(convId));
+              if (conv) {
+                setSection("conversations");
+                setSelectedConv(conv);
+              }
+            }}
+          />
+        ) : section === "knowledge" ? (
           <KnowledgePanel
             onOpenConversation={async (convId) => {
               const conv = await import("@/services/conversations").then((m) =>
