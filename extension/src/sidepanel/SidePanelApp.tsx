@@ -65,6 +65,7 @@ import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
 import { HelpCenter } from "@/components/HelpCenter";
 import { Diagnostics } from "@/components/Diagnostics";
 import { ProjectHome } from "@/components/projects/ProjectHome";
+import { HomePanel } from "@/components/home/HomePanel";
 import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
