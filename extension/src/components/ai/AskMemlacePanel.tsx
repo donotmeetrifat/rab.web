@@ -542,12 +542,11 @@ function SourceRow({
 }
 
 function ProviderTag({ id }: { id: string }) {
-  const meta = providerMeta[id as keyof typeof providerMeta];
+  const meta = providerMeta(id as never);
   if (!meta) return null;
-  return (
-    <span className="text-[10px] text-muted-foreground">{meta.label}</span>
-  );
+  return <span className="text-[10px] text-muted-foreground">{meta.name}</span>;
 }
+
 
 /* ------------------------------------------------------------------ *
  * Memory Explorer — cheap facet cloud rendered on the empty state.
