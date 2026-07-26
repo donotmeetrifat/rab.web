@@ -6,10 +6,12 @@ import type {
 } from "@/types";
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
-import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
-import { detectProjectFor } from "@/services/projectDetection";
 import { invalidateReadiness } from "@/services/contextReadiness";
 import { invalidateContext } from "@/context";
+import {
+  dispatchConversationSaved,
+  dispatchConversationDeleted,
+} from "@/core";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
