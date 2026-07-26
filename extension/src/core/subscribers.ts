@@ -8,6 +8,11 @@
  */
 
 import { on } from "./EventBus";
+import { installChromePlatform } from "@/platform/chrome";
+
+// Install the platform adapter contract so any @memlace/core code can
+// call platform() without knowing which client it's running inside.
+installChromePlatform();
 
 on("workspace.updated", async () => {
   try {
