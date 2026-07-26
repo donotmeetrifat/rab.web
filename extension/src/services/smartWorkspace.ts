@@ -25,10 +25,7 @@ import type { KnowledgeRecord } from "@/knowledge/types";
 import { extractDecisions } from "@/context/DecisionExtractor";
 import { detectGoals } from "@/context/GoalDetector";
 import type { DetectedGoal, ExtractedDecision } from "@/context/types";
-import {
-  allProjectMappings,
-  conversationsForProject,
-} from "@/services/projectDetection";
+import { allProjectMappings } from "@/services/projectDetection";
 import { getContinueHistory } from "@/services/continueHistory";
 
 /* ------------------------------------------------------------------ *
