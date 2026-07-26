@@ -217,6 +217,7 @@ export async function deleteConversation(id: string): Promise<void> {
     console.warn("[memlace] knowledge cleanup failed", err),
   );
   void import("@/services/projectBrain").then((m) => m.invalidateProjectBrain()).catch(() => {});
+  void import("@/services/smartWorkspace").then((m) => m.invalidateWorkspace()).catch(() => {});
 
 }
 
