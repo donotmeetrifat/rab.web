@@ -37,6 +37,12 @@ class MemlaceDB extends Dexie {
   aiSummaries!: Table<AIConversationSummary, string>;
   aiEmbeddings!: Table<AIEmbeddingRow, string>;
   aiPromptCache!: Table<AIPromptCacheRow, string>;
+  piePreferences!: Table<PiePreferenceRow, string>;
+  pieDecisions!: Table<PieDecisionRow, string>;
+  pieGoals!: Table<PieGoalRow, string>;
+  pieConfidence!: Table<PieConfidenceRow, string>;
+  pieVocabulary!: Table<PieVocabularyRow, string>;
+  pieRelationships!: Table<PieRelationshipRow, string>;
 
   constructor() {
     super("memlace");
