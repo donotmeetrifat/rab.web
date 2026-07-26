@@ -123,6 +123,10 @@ export function dispatchConversationDeleted(id: string): void {
       const { onConversationDeleted } = await import("@/knowledge/engine");
       await onConversationDeleted(id);
     });
+    await runStep("graph.cleanup", async () => {
+      const { removeConversationFromGraph } = await import("@/graph");
+      await removeConversationFromGraph(id);
+    });
     emit("workspace.updated", {});
     emit("project.updated", {});
     emit("context.updated", { conversationId: id });
