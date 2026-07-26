@@ -178,12 +178,7 @@ export async function deleteConversation(id: string): Promise<void> {
   });
   invalidateIndex();
   invalidateContext(id);
-  onConversationDeleted(id).catch((err) =>
-    console.warn("[memlace] knowledge cleanup failed", err),
-  );
-  void import("@/services/projectBrain").then((m) => m.invalidateProjectBrain()).catch(() => {});
-  void import("@/services/smartWorkspace").then((m) => m.invalidateWorkspace()).catch(() => {});
-
+  dispatchConversationDeleted(id);
 }
 
 /* ------------------------------------------------------------------ *
