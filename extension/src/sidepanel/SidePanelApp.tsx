@@ -154,7 +154,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("memories");
+  const [section, setSection] = useState<"home" | "memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("home");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
