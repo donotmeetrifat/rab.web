@@ -73,8 +73,12 @@ async function collect(): Promise<Stats> {
 export function Diagnostics() {
   const toast = useToast();
   const [s, setS] = useState<Stats | null>(null);
+  const [pie, setPie] = useState<PieStats | null>(null);
   const [busy, setBusy] = useState(false);
-  const refresh = () => void collect().then(setS);
+  const refresh = () => {
+    void collect().then(setS);
+    void collectPieStats().then(setPie);
+  };
   useEffect(() => { refresh(); }, []);
 
   const backup = async () => {
