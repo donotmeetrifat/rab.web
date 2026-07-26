@@ -1,19 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import "@/core/subscribers";
 import "@/styles.css";
+import { bootstrap } from "@/bootstrap";
 import { PopupApp } from "./PopupApp";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ToastProvider } from "@/components/Toast";
 
-const container = document.getElementById("root");
-if (!container) throw new Error("Popup root missing");
-createRoot(container).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <ToastProvider>
-        <PopupApp />
-      </ToastProvider>
-    </ErrorBoundary>
-  </React.StrictMode>,
-);
+void bootstrap({
+  surface: "popup",
+  render: () => <PopupApp />,
+});
