@@ -550,6 +550,8 @@ export function SidePanelApp() {
           <AICenter />
         ) : section === "ask" ? (
           <AskMemlacePanel
+            scopedProjectId={activeProject?.id ?? null}
+            scopedProjectName={activeProject?.name ?? null}
             onOpenConversation={async (convId) => {
               const conv = await import("@/services/conversations").then((m) => m.getConversation(convId));
               if (conv) {
@@ -557,7 +559,12 @@ export function SidePanelApp() {
                 setSelectedConv(conv);
               }
             }}
+            onOpenProject={(pid) => {
+              setFilters({ view: "projects", projectId: pid });
+              setSection("memories");
+            }}
           />
+
         ) : section === "knowledge" ? (
           <KnowledgePanel
             onOpenConversation={async (convId) => {
