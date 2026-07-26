@@ -16,10 +16,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@memlace/core": ["../packages/core/src/index.ts"],
+      "@memlace/core/*": ["../packages/core/src/*"]
     },
 
     "types": ["chrome", "vite/client"]
   },
-  "include": ["src", "manifest.json", "vite.config.ts"]
+  "include": ["src", "manifest.json", "vite.config.ts", "../packages/core/src"]
 }
