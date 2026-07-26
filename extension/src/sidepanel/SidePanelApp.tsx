@@ -337,6 +337,20 @@ export function SidePanelApp() {
         </div>
 
         <nav className="p-2 space-y-0.5" aria-label="Primary">
+          <button
+            type="button"
+            onClick={() => setSection("home")}
+            aria-current={section === "home" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "home"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Home
+          </button>
           {NAV.map((item) => {
             const Icon = item.icon;
             const isActive =
