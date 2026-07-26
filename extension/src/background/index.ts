@@ -1,4 +1,5 @@
 import type { RuntimeMessage, RuntimeResponse } from "@/types";
+import "@/core/subscribers";
 import { notify } from "@/services/notifications";
 import { loadSettings } from "@/services/settings";
 

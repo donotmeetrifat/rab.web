@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import "@/core/subscribers";
 import "@/styles.css";
 import { PopupApp } from "./PopupApp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
