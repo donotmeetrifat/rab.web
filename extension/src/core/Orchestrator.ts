@@ -20,6 +20,22 @@ import type { StoredConversation } from "@/types";
 import { emit } from "./EventBus";
 import { enqueue } from "./Queue";
 
+// STATIC imports — every module in the post-save pipeline is bundled
+// into the caller's entry (content script, popup, background). This is
+// mandatory for MV3 content scripts, where dynamic `import()` chunks
+// resolve against the host page origin (chatgpt.com/…) and 404. Do NOT
+// convert these back to `await import(...)`.
+import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
+import { detectProjectFor } from "@/services/projectDetection";
+import { onConversationLearned } from "@/pie";
+import {
+  updateGraphForConversation,
+  removeConversationFromGraph,
+} from "@/graph";
+import { getSettings } from "@/ai/AIManager";
+import { aiQueue } from "@/ai/AIQueue";
+import { enrichConversation } from "@/ai/MemoryEngine";
+
 interface PipelineStat {
   step: string;
   ok: number;
@@ -44,47 +60,42 @@ async function runStep(step: string, fn: () => Promise<void>) {
     record(step, t, true);
   } catch (err) {
     record(step, t, false);
-    console.warn(`[memlace:orch] ${step} failed`, err);
+    // Secondary engines must never block the save — log and move on.
+    console.warn(`[Memlace] pipeline stage failed: ${step}`, err);
   }
 }
 
 /**
  * Fire the full post-save pipeline. Runs asynchronously; the caller's
- * DB write has already committed.
+ * DB write has already committed. Any stage that throws is isolated so
+ * the conversation stays safely stored even if downstream engines fail.
  */
 export function dispatchConversationSaved(
   conversation: StoredConversation,
   created: boolean,
   source: "manual" | "auto" | "initial",
 ): void {
-  // 1. Broadcast the primary event — cache manager listens too.
   emit("conversation.saved", { conversation, created, source });
 
-  // 2. Enqueue the heavy pipeline on the background queue. Sequential,
-  //    deduped by conversation id.
   enqueue(
     `pipeline:${conversation.id}`,
     `Pipeline: ${conversation.title || conversation.id}`,
     async () => {
       await runStep("knowledge", async () => {
-        const { onConversationSaved } = await import("@/knowledge/engine");
         await onConversationSaved(conversation);
         emit("knowledge.updated", { conversationId: conversation.id });
       });
 
       await runStep("projectDetection", async () => {
-        const { detectProjectFor } = await import("@/services/projectDetection");
         await detectProjectFor(conversation);
         emit("project.updated", { projectId: conversation.projectId });
       });
 
       await runStep("personalIntelligence", async () => {
-        const { onConversationLearned } = await import("@/pie");
         await onConversationLearned(conversation);
       });
 
       await runStep("graph", async () => {
-        const { updateGraphForConversation } = await import("@/graph");
         await updateGraphForConversation(conversation);
       });
 
@@ -96,13 +107,9 @@ export function dispatchConversationSaved(
         emit("context.updated", { conversationId: conversation.id });
       });
 
-      // Optional AI enrichment — only if user opted in.
       await runStep("aiEnrichment", async () => {
-        const { getSettings } = await import("@/ai/AIManager");
         const s = await getSettings();
         if (!s.enabled || !s.autoEnrich) return;
-        const { aiQueue } = await import("@/ai/AIQueue");
-        const { enrichConversation } = await import("@/ai/MemoryEngine");
         await aiQueue.enqueue({
           kind: "memory",
           label: `Enrich: ${conversation.title || "(untitled)"}`,
@@ -120,11 +127,9 @@ export function dispatchConversationDeleted(id: string): void {
   emit("conversation.deleted", { id });
   enqueue(`delete:${id}`, `Cleanup: ${id}`, async () => {
     await runStep("knowledge.cleanup", async () => {
-      const { onConversationDeleted } = await import("@/knowledge/engine");
       await onConversationDeleted(id);
     });
     await runStep("graph.cleanup", async () => {
-      const { removeConversationFromGraph } = await import("@/graph");
       await removeConversationFromGraph(id);
     });
     emit("workspace.updated", {});

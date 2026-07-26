@@ -12,6 +12,8 @@ import {
   dispatchConversationSaved,
   dispatchConversationDeleted,
 } from "@/core";
+// Static import — content scripts must not load onboarding as a chunk.
+import { markChecklist } from "@/services/onboarding";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
