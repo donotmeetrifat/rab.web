@@ -154,6 +154,8 @@ export async function saveConversation(
         try {
           const { invalidateProjectBrain } = await import("@/services/projectBrain");
           invalidateProjectBrain();
+          const { invalidateWorkspace } = await import("@/services/smartWorkspace");
+          invalidateWorkspace();
         } catch {
           /* module not yet loaded — safe to ignore */
         }
