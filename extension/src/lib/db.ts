@@ -188,6 +188,57 @@ class MemlaceDB extends Dexie {
 
 export const db = new MemlaceDB();
 
+/* ------------------------------------------------------------------ *
+ * Debug instrumentation (Phase 14.2) — logging only.
+ * Toggle: window.memlaceDebug = true  OR  localStorage.memlaceDebug="1"
+ * ------------------------------------------------------------------ */
+function _dbgOn(): boolean {
+  try {
+    const w = globalThis as unknown as { memlaceDebug?: boolean };
+    if (w.memlaceDebug) return true;
+  } catch { /* ignore */ }
+  try {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("memlaceDebug") === "1")
+      return true;
+  } catch { /* ignore */ }
+  return false;
+}
+function _dlog(...args: unknown[]) { if (_dbgOn()) console.log("[Memlace][db]", ...args); }
+
+db.on("ready", () => { _dlog("db.open() ready", { name: db.name, version: db.verno }); });
+db.on("versionchange", (e) => { _dlog("versionchange", e); });
+db.on("blocked", () => { _dlog("db blocked (another tab holds an older version)"); });
+// Dexie transaction lifecycle.
+// Signature: (mode, tables, transaction)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(db as any).on("txcommitted", (tx: unknown) => { _dlog("transaction committed", tx); });
+try {
+  db.use({
+    stack: "dbcore",
+    name: "memlace-tx-logger",
+    create(down) {
+      return {
+        ...down,
+        transaction(stores, mode) {
+          _dlog("transaction start", { stores, mode });
+          const tx = down.transaction(stores, mode);
+          try {
+            tx.addEventListener?.("abort", () => _dlog("transaction abort", { stores, mode }));
+            tx.addEventListener?.("complete", () => _dlog("transaction end", { stores, mode }));
+            tx.addEventListener?.("error", (ev: unknown) =>
+              _dlog("transaction error", { stores, mode, ev }),
+            );
+          } catch { /* ignore listener attach failure */ }
+          return tx;
+        },
+      };
+    },
+  });
+} catch (err) {
+  // Non-fatal — logging middleware only.
+  console.warn("[Memlace][db] failed to attach tx logger", err);
+}
+
 export function uid(prefix = "id"): string {
   const random =
     typeof crypto !== "undefined" && "randomUUID" in crypto
