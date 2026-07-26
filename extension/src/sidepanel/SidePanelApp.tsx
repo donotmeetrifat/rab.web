@@ -555,7 +555,21 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "checklist" ? (
+        {section === "home" ? (
+          <HomePanel
+            projects={projects}
+            onOpenConversation={(c) => {
+              setSection("conversations");
+              setSelectedConv(c);
+            }}
+            onOpenProject={(pid) => {
+              setFilters({ view: "projects", projectId: pid });
+              setSection("memories");
+            }}
+            onOpenSearch={() => setPaletteOpen(true)}
+            onOpenAsk={() => setSection("ask")}
+          />
+        ) : section === "checklist" ? (
           <ChecklistPanel onJump={() => setPaletteOpen(true)} />
         ) : section === "diagnostics" ? (
           <Diagnostics />
