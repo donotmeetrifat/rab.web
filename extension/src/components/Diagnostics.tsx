@@ -6,6 +6,8 @@ import { Button } from "@/components/Button";
 import { useToast } from "@/components/Toast";
 import { exportAll, importAll } from "@/services/memories";
 import { PROVIDERS } from "@/lib/providers";
+import { collectPieStats } from "@/pie";
+import type { PieStats } from "@/pie/types";
 
 type Stats = {
   memories: number;
@@ -71,8 +73,12 @@ async function collect(): Promise<Stats> {
 export function Diagnostics() {
   const toast = useToast();
   const [s, setS] = useState<Stats | null>(null);
+  const [pie, setPie] = useState<PieStats | null>(null);
   const [busy, setBusy] = useState(false);
-  const refresh = () => void collect().then(setS);
+  const refresh = () => {
+    void collect().then(setS);
+    void collectPieStats().then(setPie);
+  };
   useEffect(() => { refresh(); }, []);
 
   const backup = async () => {
@@ -118,7 +124,7 @@ export function Diagnostics() {
 
   const copyReport = async () => {
     if (!s) return;
-    const report = JSON.stringify({ version: MEMLACE_VERSION, ...s }, null, 2);
+    const report = JSON.stringify({ version: MEMLACE_VERSION, ...s, pie }, null, 2);
     await navigator.clipboard.writeText(report);
     toast.success("Diagnostics copied");
   };
@@ -163,6 +169,36 @@ export function Diagnostics() {
           ))}
         </dl>
       </section>
+
+      {pie && (
+        <section className="rounded-lg border border-border bg-surface">
+          <header className="px-4 py-2 border-b border-border">
+            <h3 className="text-sm font-semibold">Personal Intelligence</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Learned quietly from your own work. Stays on this device.
+            </p>
+          </header>
+          <dl className="divide-y divide-border">
+            {([
+              ["Preferences learned", pie.preferences],
+              ["Decisions tracked", pie.decisions],
+              ["Goals", pie.goals],
+              ["Vocabulary shortcuts", pie.vocabulary],
+              ["Connections", pie.relationships],
+              ["Confident topics", pie.confident],
+              ["Most-used AI", pie.topProvider ?? "—"],
+              ["Top language", pie.topLanguage ?? "—"],
+              ["Top framework", pie.topFramework ?? "—"],
+            ] as Array<[string, string | number]>).map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd className="font-medium text-foreground tabular-nums">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
 
       <section className="space-y-2">
         <h3 className="text-sm font-semibold">Backup</h3>
