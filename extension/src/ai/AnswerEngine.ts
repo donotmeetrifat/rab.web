@@ -578,7 +578,7 @@ export async function loadExplorer(): Promise<ExplorerFacets> {
       .limit(12)
       .toArray()
       .catch(() => [] as Memory[]),
-    allProjectMappings().catch(() => ({}) as Awaited<ReturnType<typeof allProjectMappings>>),
+    allProjectMappings().catch(() => ({}) as ProjectMappings),
   ]);
 
   const projConvCount = new Map<string, number>();
