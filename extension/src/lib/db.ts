@@ -126,6 +126,32 @@ class MemlaceDB extends Dexie {
       aiEmbeddings: "id, [scope+conversationId], conversationId, provider, model, hash, createdAt",
       aiPromptCache: "&hash, provider, model, createdAt",
     });
+
+    // v6 — Personal Intelligence Engine (Phase 12.8). Six lightweight
+    // tables of derived metadata. Never stores raw personal data — only
+    // aggregates over the user's own conversations.
+    this.version(6).stores({
+      projects: "id, name, pinned, favorite, archived, updatedAt",
+      memories:
+        "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      conversations:
+        "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
+      convMessages: "id, conversationId, order, role",
+      knowledge:
+        "id, &conversationId, provider, hash, updatedAt, *entities, *keywords, *technologies, *languages, *topics",
+      entities: "id, knowledgeId, type, name, [type+name]",
+      keywords: "id, knowledgeId, term",
+      relationships: "id, fromId, toId, kind",
+      aiSummaries: "id, conversationId, provider, model, hash, updatedAt",
+      aiEmbeddings: "id, [scope+conversationId], conversationId, provider, model, hash, createdAt",
+      aiPromptCache: "&hash, provider, model, createdAt",
+      piePreferences: "id, kind, value, score, updatedAt",
+      pieDecisions: "id, topic, active, updatedAt",
+      pieGoals: "id, key, status, updatedAt",
+      pieConfidence: "id, kind, score, updatedAt",
+      pieVocabulary: "id, short, updatedAt",
+      pieRelationships: "id, aType, a, bType, b, weight, updatedAt",
+    });
   }
 }
 
