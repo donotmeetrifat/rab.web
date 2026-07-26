@@ -144,55 +144,10 @@ export async function saveConversation(
     invalidateIndex();
     invalidateReadiness(result.conversation.id);
     invalidateContext(result.conversation.id);
-    // Background pipeline: knowledge → project detection → optional AI
-    // enrichment. Each step is fire-and-forget and non-blocking so the
-    // primary save always completes instantly.
-    onConversationSaved(result.conversation)
-      .then(() => detectProjectFor(result.conversation))
-      .then(async () => {
-        // Project Brain (Phase 12.5) — invalidate cached view-models so
-        // the next open recomputes from the freshest data. Cheap:
-        // versions map only, no DB reads.
-        try {
-          const { invalidateProjectBrain } = await import("@/services/projectBrain");
-          invalidateProjectBrain();
-          const { invalidateWorkspace } = await import("@/services/smartWorkspace");
-          invalidateWorkspace();
-        } catch {
-          /* module not yet loaded — safe to ignore */
-        }
-        // Personal Intelligence Engine (Phase 12.8). Runs after
-        // knowledge + project detection so it has the freshest signals.
-        try {
-          const { onConversationLearned } = await import("@/pie");
-          await onConversationLearned(result.conversation);
-        } catch (err) {
-          console.warn("[memlace] pie loop skipped", err);
-        }
-      })
-      .catch((err) => console.warn("[memlace] background pipeline failed", err));
-
-    // Optional AI enrichment (Phase 8). Never blocks the save, never
-    // runs unless the user opted in via AI settings.
-    void (async () => {
-      try {
-        const { getSettings } = await import("@/ai/AIManager");
-        const s = await getSettings();
-        if (!s.enabled || !s.autoEnrich) return;
-        const { aiQueue } = await import("@/ai/AIQueue");
-        const { enrichConversation } = await import("@/ai/MemoryEngine");
-        await aiQueue.enqueue({
-          kind: "memory",
-          label: `Enrich: ${result.conversation.title || "(untitled)"}`,
-          conversationId: result.conversation.id,
-          estInputTokens: 4000,
-          estOutputTokens: 900,
-          runner: async () => enrichConversation(result.conversation.id),
-        });
-      } catch (err) {
-        console.warn("[memlace] ai enrichment skipped", err);
-      }
-    })();
+    // Route the full post-save pipeline through the Orchestrator
+    // (Phase 13). Every downstream engine — knowledge, project brain,
+    // PIE, workspace, context, AI enrichment — subscribes there.
+    dispatchConversationSaved(result.conversation, result.created, opts.source);
   }
   if (result.created) {
     void import("@/services/onboarding").then((m) =>
