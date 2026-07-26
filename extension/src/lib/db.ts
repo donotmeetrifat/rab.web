@@ -16,6 +16,14 @@ import type {
   AIEmbeddingRow,
   AIPromptCacheRow,
 } from "@/ai/types";
+import type {
+  PiePreferenceRow,
+  PieDecisionRow,
+  PieGoalRow,
+  PieConfidenceRow,
+  PieVocabularyRow,
+  PieRelationshipRow,
+} from "@/pie/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
