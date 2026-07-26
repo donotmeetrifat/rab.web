@@ -16,10 +16,7 @@ import { search as unifiedSearch } from "./SemanticSearch";
 import { extractDecisions } from "@/context/DecisionExtractor";
 import type { ExtractedDecision } from "@/context/types";
 import { allProjectMappings } from "@/services/projectDetection";
-import type {
-  KnowledgeCodeBlock,
-  KnowledgeRecord,
-} from "@/knowledge/types";
+import type { KnowledgeRecord } from "@/knowledge/types";
 import type {
   Memory,
   Project,
@@ -27,6 +24,10 @@ import type {
   StoredConversation,
   StoredConvMessage,
 } from "@/types";
+
+type ProjectMappingEntry = { projectId: string | null; reason: string; ts: number };
+type ProjectMappings = Record<string, ProjectMappingEntry>;
+
 
 /* ------------------------------------------------------------------ *
  * Types
