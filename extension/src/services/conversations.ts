@@ -152,9 +152,7 @@ export async function saveConversation(
     dispatchConversationSaved(result.conversation, result.created, opts.source);
   }
   if (result.created) {
-    void import("@/services/onboarding").then((m) =>
-      m.markChecklist("savedConversation"),
-    );
+    try { void markChecklist("savedConversation"); } catch { /* ignore */ }
   }
   return result;
 }

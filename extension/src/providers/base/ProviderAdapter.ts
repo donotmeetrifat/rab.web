@@ -45,13 +45,26 @@ export interface ProviderAdapter {
 }
 
 /**
- * States surfaced by the Invisible Auto Memory indicator.
- * - `watching` — monitoring the active conversation, nothing pending
- * - `syncing`  — quiet window elapsed, writing to local storage
- * - `synced`   — most recent snapshot persisted (transient badge)
- * - `error`    — last save failed; still monitoring
+ * States surfaced by the Invisible Auto Memory indicator. The ordering
+ * reflects the real save pipeline — the pill only advances when the
+ * corresponding stage actually starts / completes.
+ *
+ *   watching   — idle, monitoring the DOM
+ *   extracting — quiet window elapsed, reading the conversation
+ *   saving     — writing the IndexedDB transaction
+ *   indexing   — DB committed, downstream engines running
+ *   synced     — verified in IndexedDB (transient badge)
+ *   skipped    — no content changes since last snapshot (transient)
+ *   error      — save failed; still monitoring
  */
-export type WatchState = "watching" | "syncing" | "synced" | "error";
+export type WatchState =
+  | "watching"
+  | "extracting"
+  | "saving"
+  | "indexing"
+  | "synced"
+  | "skipped"
+  | "error";
 
 export interface IndicatorHandlers {
   /** Adapter reads the current state via this getter on mount. */
