@@ -155,6 +155,34 @@ class MemlaceDB extends Dexie {
       pieVocabulary: "id, short, updatedAt",
       pieRelationships: "id, aType, a, bType, b, weight, updatedAt",
     });
+
+    // v7 — Memory Graph Engine (Phase 14.1). Two derived tables that
+    // materialise the semantic graph across every saved object. Safe
+    // to drop and rebuild from source tables.
+    this.version(7).stores({
+      projects: "id, name, pinned, favorite, archived, updatedAt",
+      memories:
+        "id, projectId, provider, favorite, pinned, archived, trashed, createdAt, updatedAt, trashedAt, *tags",
+      conversations:
+        "id, provider, providerConversationId, [provider+providerConversationId], updatedAt, createdAt",
+      convMessages: "id, conversationId, order, role",
+      knowledge:
+        "id, &conversationId, provider, hash, updatedAt, *entities, *keywords, *technologies, *languages, *topics",
+      entities: "id, knowledgeId, type, name, [type+name]",
+      keywords: "id, knowledgeId, term",
+      relationships: "id, fromId, toId, kind",
+      aiSummaries: "id, conversationId, provider, model, hash, updatedAt",
+      aiEmbeddings: "id, [scope+conversationId], conversationId, provider, model, hash, createdAt",
+      aiPromptCache: "&hash, provider, model, createdAt",
+      piePreferences: "id, kind, value, score, updatedAt",
+      pieDecisions: "id, topic, active, updatedAt",
+      pieGoals: "id, key, status, updatedAt",
+      pieConfidence: "id, kind, score, updatedAt",
+      pieVocabulary: "id, short, updatedAt",
+      pieRelationships: "id, aType, a, bType, b, weight, updatedAt",
+      graphNodes: "id, type, key, weight, lastSeen",
+      graphEdges: "id, a, b, aType, bType, rel, weight, lastSeen",
+    });
   }
 }
 
