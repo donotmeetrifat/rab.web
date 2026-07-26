@@ -159,6 +159,14 @@ export async function saveConversation(
         } catch {
           /* module not yet loaded — safe to ignore */
         }
+        // Personal Intelligence Engine (Phase 12.8). Runs after
+        // knowledge + project detection so it has the freshest signals.
+        try {
+          const { onConversationLearned } = await import("@/pie");
+          await onConversationLearned(result.conversation);
+        } catch (err) {
+          console.warn("[memlace] pie loop skipped", err);
+        }
       })
       .catch((err) => console.warn("[memlace] background pipeline failed", err));
 
