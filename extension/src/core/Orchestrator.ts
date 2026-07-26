@@ -83,6 +83,11 @@ export function dispatchConversationSaved(
         await onConversationLearned(conversation);
       });
 
+      await runStep("graph", async () => {
+        const { updateGraphForConversation } = await import("@/graph");
+        await updateGraphForConversation(conversation);
+      });
+
       await runStep("workspace", async () => {
         emit("workspace.updated", {});
       });
@@ -117,6 +122,10 @@ export function dispatchConversationDeleted(id: string): void {
     await runStep("knowledge.cleanup", async () => {
       const { onConversationDeleted } = await import("@/knowledge/engine");
       await onConversationDeleted(id);
+    });
+    await runStep("graph.cleanup", async () => {
+      const { removeConversationFromGraph } = await import("@/graph");
+      await removeConversationFromGraph(id);
     });
     emit("workspace.updated", {});
     emit("project.updated", {});
