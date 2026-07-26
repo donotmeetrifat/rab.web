@@ -144,11 +144,6 @@ function humanAgo(ts: number, now = Date.now()): string {
   return new Date(ts).toLocaleDateString();
 }
 
-function joinList(xs: string[], max = 3): string {
-  const trimmed = xs.slice(0, max);
-  return trimmed.join(", ") + (xs.length > max ? "…" : "");
-}
-
 function first<T>(xs: T[]): T | undefined {
   return xs.length ? xs[0] : undefined;
 }
