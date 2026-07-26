@@ -24,6 +24,7 @@ import type {
   PieVocabularyRow,
   PieRelationshipRow,
 } from "@/pie/types";
+import type { GraphNodeRow, GraphEdgeRow } from "@/graph/types";
 
 class MemlaceDB extends Dexie {
   projects!: Table<Project, string>;
