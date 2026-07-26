@@ -208,10 +208,10 @@ function _dlog(...args: unknown[]) { if (_dbgOn()) console.log("[Memlace][db]", 
 db.on("ready", () => { _dlog("db.open() ready", { name: db.name, version: db.verno }); });
 db.on("versionchange", (e) => { _dlog("versionchange", e); });
 db.on("blocked", () => { _dlog("db blocked (another tab holds an older version)"); });
-// Dexie transaction lifecycle.
-// Signature: (mode, tables, transaction)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(db as any).on("txcommitted", (tx: unknown) => { _dlog("transaction committed", tx); });
+// Dexie transaction lifecycle is observed through the DBCore middleware
+// below (start / complete / abort / error). Dexie's public `db.on` does
+// not expose a "txcommitted" event — subscribing to it throws at import
+// time and blocks the popup / side panel / options bundles from booting.
 try {
   db.use({
     stack: "dbcore",
