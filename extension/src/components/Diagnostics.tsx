@@ -6,6 +6,8 @@ import { Button } from "@/components/Button";
 import { useToast } from "@/components/Toast";
 import { exportAll, importAll } from "@/services/memories";
 import { PROVIDERS } from "@/lib/providers";
+import { collectPieStats } from "@/pie";
+import type { PieStats } from "@/pie/types";
 
 type Stats = {
   memories: number;
