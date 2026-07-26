@@ -1,19 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import "@/core/subscribers";
 import "@/styles.css";
+import { bootstrap } from "@/bootstrap";
 import { SidePanelApp } from "./SidePanelApp";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ToastProvider } from "@/components/Toast";
 
-const container = document.getElementById("root");
-if (!container) throw new Error("Side panel root missing");
-createRoot(container).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <ToastProvider>
-        <SidePanelApp />
-      </ToastProvider>
-    </ErrorBoundary>
-  </React.StrictMode>,
-);
+void bootstrap({
+  surface: "sidepanel",
+  render: () => <SidePanelApp />,
+});

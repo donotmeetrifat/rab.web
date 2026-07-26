@@ -3,6 +3,14 @@ import "@/core/subscribers";
 import { notify } from "@/services/notifications";
 import { loadSettings } from "@/services/settings";
 
+// Global error listeners — a bug in one handler must never take the SW down.
+self.addEventListener("error", (ev) => {
+  console.error("[Memlace][bg] error", (ev as ErrorEvent).error ?? (ev as ErrorEvent).message);
+});
+self.addEventListener("unhandledrejection", (ev) => {
+  console.error("[Memlace][bg] unhandledrejection", (ev as PromiseRejectionEvent).reason);
+});
+
 const CONTEXT_MENU_ID = "memlace-save-selection";
 const PENDING_KEY = "memlace.pendingCapture";
 
