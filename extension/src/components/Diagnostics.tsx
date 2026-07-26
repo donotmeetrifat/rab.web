@@ -124,7 +124,7 @@ export function Diagnostics() {
 
   const copyReport = async () => {
     if (!s) return;
-    const report = JSON.stringify({ version: MEMLACE_VERSION, ...s }, null, 2);
+    const report = JSON.stringify({ version: MEMLACE_VERSION, ...s, pie }, null, 2);
     await navigator.clipboard.writeText(report);
     toast.success("Diagnostics copied");
   };
