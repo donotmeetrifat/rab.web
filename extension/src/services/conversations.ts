@@ -154,6 +154,8 @@ export async function saveConversation(
         try {
           const { invalidateProjectBrain } = await import("@/services/projectBrain");
           invalidateProjectBrain();
+          const { invalidateWorkspace } = await import("@/services/smartWorkspace");
+          invalidateWorkspace();
         } catch {
           /* module not yet loaded — safe to ignore */
         }
@@ -215,6 +217,7 @@ export async function deleteConversation(id: string): Promise<void> {
     console.warn("[memlace] knowledge cleanup failed", err),
   );
   void import("@/services/projectBrain").then((m) => m.invalidateProjectBrain()).catch(() => {});
+  void import("@/services/smartWorkspace").then((m) => m.invalidateWorkspace()).catch(() => {});
 
 }
 

@@ -65,6 +65,7 @@ import { ChecklistPanel } from "@/components/onboarding/ChecklistPanel";
 import { HelpCenter } from "@/components/HelpCenter";
 import { Diagnostics } from "@/components/Diagnostics";
 import { ProjectHome } from "@/components/projects/ProjectHome";
+import { HomePanel } from "@/components/home/HomePanel";
 import { markChecklist } from "@/services/onboarding";
 import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
 
@@ -154,7 +155,7 @@ export function SidePanelApp() {
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("memories");
+  const [section, setSection] = useState<"home" | "memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("home");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
@@ -336,6 +337,20 @@ export function SidePanelApp() {
         </div>
 
         <nav className="p-2 space-y-0.5" aria-label="Primary">
+          <button
+            type="button"
+            onClick={() => setSection("home")}
+            aria-current={section === "home" ? "page" : undefined}
+            className={
+              "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
+              (section === "home"
+                ? "bg-primary/10 text-primary"
+                : "text-foreground/80 hover:bg-muted")
+            }
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Home
+          </button>
           {NAV.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -540,7 +555,21 @@ export function SidePanelApp() {
       </aside>
 
       <main className="flex flex-col min-w-0">
-        {section === "checklist" ? (
+        {section === "home" ? (
+          <HomePanel
+            projects={projects}
+            onOpenConversation={(c) => {
+              setSection("conversations");
+              setSelectedConv(c);
+            }}
+            onOpenProject={(pid) => {
+              setFilters({ view: "projects", projectId: pid });
+              setSection("memories");
+            }}
+            onOpenSearch={() => setPaletteOpen(true)}
+            onOpenAsk={() => setSection("ask")}
+          />
+        ) : section === "checklist" ? (
           <ChecklistPanel onJump={() => setPaletteOpen(true)} />
         ) : section === "diagnostics" ? (
           <Diagnostics />
