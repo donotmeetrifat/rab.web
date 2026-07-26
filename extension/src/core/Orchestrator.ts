@@ -83,6 +83,11 @@ export function dispatchConversationSaved(
         await onConversationLearned(conversation);
       });
 
+      await runStep("graph", async () => {
+        const { updateGraphForConversation } = await import("@/graph");
+        await updateGraphForConversation(conversation);
+      });
+
       await runStep("workspace", async () => {
         emit("workspace.updated", {});
       });
