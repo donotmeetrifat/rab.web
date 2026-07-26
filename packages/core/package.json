@@ -1,0 +1,18 @@
+{
+  "name": "@memlace/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Memlace shared core — pure TypeScript engines reusable across Chrome, Firefox, Desktop, VS Code, and mobile clients.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./adapters": "./src/adapters/index.ts",
+    "./provider-sdk": "./src/provider-sdk/index.ts",
+    "./portable": "./src/portable/index.ts",
+    "./plugins": "./src/plugins/index.ts",
+    "./local-api": "./src/local-api/index.ts"
+  }
+}
