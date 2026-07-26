@@ -270,7 +270,7 @@ export async function answerQuestion(
   let convIds = hits.map((h) => h.conversationId);
 
   // 2. Apply project scope if any.
-  const mappings = await allProjectMappings().catch(() => ({}));
+  const mappings: ProjectMappings = await allProjectMappings().catch(() => ({}));
   if (scope) {
     convIds = convIds.filter((id) => mappings[id]?.projectId === scope);
   }
