@@ -218,10 +218,13 @@ export function findToolbarByButtonCluster(
 type StateConfig = { text: string; tooltip: string };
 
 const STATE_MAP: Record<WatchState, StateConfig> = {
-  watching: { text: "Watching",  tooltip: "Memlace is watching this conversation" },
-  syncing:  { text: "Syncing",   tooltip: "Saving the latest snapshot…" },
-  synced:   { text: "Synced",    tooltip: "Latest snapshot saved locally" },
-  error:    { text: "Error",     tooltip: "Last save failed — will retry on next change" },
+  watching:   { text: "Watching",   tooltip: "Memlace is watching this conversation" },
+  extracting: { text: "Extracting", tooltip: "Reading the latest conversation…" },
+  saving:     { text: "Saving",     tooltip: "Writing to local storage…" },
+  indexing:   { text: "Indexing",   tooltip: "Updating knowledge & projects…" },
+  synced:     { text: "Synced",     tooltip: "Latest snapshot saved locally" },
+  skipped:    { text: "No changes", tooltip: "Nothing new to save" },
+  error:      { text: "Error",      tooltip: "Last save failed — will retry on next change" },
 };
 
 const INDICATOR_MARKUP = `
@@ -270,11 +273,16 @@ function ensureStylesInjected(): void {
     .memlace-indicator[data-state="watching"] .memlace-indicator-dot {
       animation: memlace-pulse 2.4s ease-in-out infinite;
     }
-    .memlace-indicator[data-state="syncing"] { color: #2563EB; opacity: 0.95; }
-    .memlace-indicator[data-state="syncing"] .memlace-indicator-dot {
+    .memlace-indicator[data-state="extracting"],
+    .memlace-indicator[data-state="saving"],
+    .memlace-indicator[data-state="indexing"] { color: #2563EB; opacity: 0.95; }
+    .memlace-indicator[data-state="extracting"] .memlace-indicator-dot,
+    .memlace-indicator[data-state="saving"] .memlace-indicator-dot,
+    .memlace-indicator[data-state="indexing"] .memlace-indicator-dot {
       animation: memlace-pulse 900ms ease-in-out infinite;
     }
     .memlace-indicator[data-state="synced"] { color: #059669; opacity: 0.95; }
+    .memlace-indicator[data-state="skipped"] { color: #64748B; opacity: 0.85; }
     .memlace-indicator[data-state="error"] { color: #B91C1C; opacity: 0.95; }
     @keyframes memlace-pulse {
       0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
@@ -287,8 +295,11 @@ function ensureStylesInjected(): void {
         border-color: rgba(255, 255, 255, 0.08);
       }
       .memlace-indicator[data-state="watching"] { color: #94A3B8; }
-      .memlace-indicator[data-state="syncing"]  { color: #60A5FA; }
+      .memlace-indicator[data-state="extracting"],
+      .memlace-indicator[data-state="saving"],
+      .memlace-indicator[data-state="indexing"] { color: #60A5FA; }
       .memlace-indicator[data-state="synced"]   { color: #34D399; }
+      .memlace-indicator[data-state="skipped"]  { color: #94A3B8; }
       .memlace-indicator[data-state="error"]    { color: #FCA5A5; }
     }
     @media (prefers-reduced-motion: reduce) {

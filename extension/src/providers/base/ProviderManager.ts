@@ -2,12 +2,16 @@ import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderA
 import type { CapturedConversation } from "./types";
 import { hashConversation } from "./hash";
 
+export type SaveOutcome =
+  | { ok: true; verified: boolean; conversationId: string }
+  | { ok: false; stage: string; error: unknown };
+
 export interface ManagerEvents {
   onConversationChanged: (payload: {
     conversation: CapturedConversation;
     hash: string;
     reason: "auto" | "initial";
-  }) => Promise<void> | void;
+  }) => Promise<SaveOutcome> | SaveOutcome;
   /** Master kill-switch. Default: on. When false, the indicator still shows
    *  "Watching" but no snapshots are written. */
   isAutoSaveEnabled: () => boolean;
@@ -136,15 +140,22 @@ export class ProviderManager {
     if (!this.active || this.disposed) return;
     if (this.savingInFlight) return;
 
+    // Stage 1: extract
+    this.setWatchState("extracting");
     const convo = this.active.getConversation();
+
     // No conversation, or partial (empty) DOM — treat as UI noise and stay
     // in "watching". Never persist an empty conversation.
-    if (!convo || convo.messages.length === 0) return;
+    if (!convo || convo.messages.length === 0) {
+      this.setWatchState("watching");
+      return;
+    }
 
     // Guard against writing a half-streamed final message: the last
     // assistant message must have non-empty content.
     const last = convo.messages[convo.messages.length - 1];
     if (last.role === "assistant" && !(last.content || last.markdown || "").trim()) {
+      this.setWatchState("watching");
       return;
     }
 
@@ -155,34 +166,75 @@ export class ProviderManager {
     this.lastConversationId = convo.conversationId;
 
     const hash = hashConversation(convo);
-    if (hash === this.lastHash) return;
+    console.debug(
+      "[Memlace] conversation detected",
+      { provider: convo.provider, messages: convo.messages.length, hash: hash.slice(0, 8) },
+    );
+
+    if (hash === this.lastHash) {
+      // No new content — flash "No changes" briefly, then return to watch.
+      this.setWatchState("skipped");
+      this.scheduleStateReset(900);
+      return;
+    }
 
     if (!this.events.isAutoSaveEnabled()) {
       // Kill-switch off: still track the hash so we don't re-fire on the
       // same content once the user re-enables auto memory.
       this.lastHash = hash;
+      this.setWatchState("watching");
       return;
     }
 
     // Cooldown: coalesce bursts (e.g. two mutations 100ms apart that both
     // survived the quiet window somehow) into a single write.
     const now = Date.now();
-    if (now - this.lastWriteAt < ProviderManager.WRITE_COOLDOWN_MS) return;
+    if (now - this.lastWriteAt < ProviderManager.WRITE_COOLDOWN_MS) {
+      this.setWatchState("watching");
+      return;
+    }
 
     this.savingInFlight = true;
+    const started = performance.now();
     try {
-      this.setWatchState("syncing");
-      await this.events.onConversationChanged({
+      console.log("[Memlace] Saving…", {
+        provider: convo.provider,
+        messages: convo.messages.length,
+      });
+      this.setWatchState("saving");
+      const outcome = await this.events.onConversationChanged({
         conversation: convo,
         hash,
         reason: this.lastHash === null ? "initial" : "auto",
       });
+      if (!outcome.ok) {
+        throw new Error(`stage:${outcome.stage}`);
+      }
+      // DB has committed. Downstream engines (knowledge, project, PIE,
+      // graph, workspace, context) fire on the Orchestrator's queue and
+      // never block us here.
+      this.setWatchState("indexing");
       this.lastHash = hash;
       this.lastWriteAt = Date.now();
-      this.setWatchState("synced");
+      const duration = Math.round(performance.now() - started);
+      if (outcome.verified) {
+        this.setWatchState("synced");
+        console.log("[Memlace] Saved successfully", {
+          conversationId: outcome.conversationId,
+          provider: convo.provider,
+          messages: convo.messages.length,
+          hash: hash.slice(0, 8),
+          ms: duration,
+        });
+      } else {
+        this.setWatchState("error");
+        console.warn("[Memlace] Storage verification failed", {
+          conversationId: outcome.conversationId,
+        });
+      }
       this.scheduleStateReset(1600);
     } catch (err) {
-      console.warn("[memlace] auto-save failed", err);
+      console.warn("[Memlace] auto-save failed", err);
       this.setWatchState("error");
       this.scheduleStateReset(3000);
     } finally {

@@ -16,38 +16,46 @@ import type { RuntimeMessage, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
 import { saveConversation } from "@/services/conversations";
 import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
+import { db } from "@/lib/db";
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
 loadSettings().then((s) => { currentSettings = s; });
 subscribeSettings((s) => { currentSettings = s; });
 
 const manager = new ProviderManager(buildAdapters(), {
-  // Invisible Auto Memory is on by default. `autoSaveConversations` is the
-  // master kill-switch users can flip in Options; the deprecated
-  // `saveConversationsManualOnly` flag is intentionally ignored — there is
-  // no manual save path anymore.
   isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
   onConversationChanged: async ({ conversation, hash, reason }) => {
-    const { created } = await saveConversation(conversation, {
-      hash,
-      // `saveConversation` accepts "manual" | "auto" | "initial"; we only
-      // ever emit auto or initial from the invisible watcher.
-      source: reason,
-      saveImages: currentSettings.saveImages,
-      saveAttachments: currentSettings.saveAttachments,
-    });
     try {
-      await chrome.runtime.sendMessage({
-        type: "CONVERSATION_SAVED",
-        payload: {
-          provider: conversation.provider,
-          title: conversation.title,
-          created,
-          source: reason,
-        },
-      } satisfies RuntimeMessage);
-    } catch {
-      // Background may be idle — the IndexedDB write is what matters.
+      const { conversation: stored, created } = await saveConversation(conversation, {
+        hash,
+        source: reason,
+        saveImages: currentSettings.saveImages,
+        saveAttachments: currentSettings.saveAttachments,
+      });
+
+      // Verify the row actually landed in IndexedDB before reporting Synced.
+      const verified = Boolean(await db.conversations.get(stored.id));
+
+      // Fire-and-forget background notification. If the SW is idle the
+      // message may fail — the IndexedDB write is what matters.
+      try {
+        await chrome.runtime.sendMessage({
+          type: "CONVERSATION_SAVED",
+          payload: {
+            provider: conversation.provider,
+            title: conversation.title,
+            created,
+            source: reason,
+          },
+        } satisfies RuntimeMessage);
+      } catch {
+        /* background idle — ignore */
+      }
+
+      return { ok: true, verified, conversationId: stored.id } as const;
+    } catch (error) {
+      console.error("[Memlace] Save stage failed", error);
+      return { ok: false, stage: "saveConversation", error } as const;
     }
   },
 });

@@ -12,6 +12,8 @@ import {
   dispatchConversationSaved,
   dispatchConversationDeleted,
 } from "@/core";
+// Static import — content scripts must not load onboarding as a chunk.
+import { markChecklist } from "@/services/onboarding";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
@@ -150,9 +152,7 @@ export async function saveConversation(
     dispatchConversationSaved(result.conversation, result.created, opts.source);
   }
   if (result.created) {
-    void import("@/services/onboarding").then((m) =>
-      m.markChecklist("savedConversation"),
-    );
+    try { void markChecklist("savedConversation"); } catch { /* ignore */ }
   }
   return result;
 }
