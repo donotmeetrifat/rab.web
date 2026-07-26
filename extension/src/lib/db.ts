@@ -44,6 +44,8 @@ class MemlaceDB extends Dexie {
   pieConfidence!: Table<PieConfidenceRow, string>;
   pieVocabulary!: Table<PieVocabularyRow, string>;
   pieRelationships!: Table<PieRelationshipRow, string>;
+  graphNodes!: Table<GraphNodeRow, string>;
+  graphEdges!: Table<GraphEdgeRow, string>;
 
   constructor() {
     super("memlace");
