@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@memlace/core": path.resolve(__dirname, "../packages/core/src"),
     },
   },
   build: {

@@ -8,6 +8,14 @@
  */
 
 import { on } from "./EventBus";
+import { installChromePlatform } from "@/platform/chrome";
+import "@/platform/providerRegistrations";
+import { installLocalApiTransport } from "@/platform/localApi";
+
+// Install the platform adapter contract so any @memlace/core code can
+// call platform() without knowing which client it's running inside.
+installChromePlatform();
+installLocalApiTransport();
 
 on("workspace.updated", async () => {
   try {
