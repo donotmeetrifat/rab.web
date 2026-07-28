@@ -78,6 +78,7 @@ export class ProviderManager {
   private static readonly TRANSIENT_STATE_TIMEOUT_MS = 10_000;
   private static readonly TRANSIENT_STATES: ReadonlySet<WatchState> = new Set<WatchState>([
     "extracting",
+    "sending",
     "saving",
     "indexing",
   ]);
