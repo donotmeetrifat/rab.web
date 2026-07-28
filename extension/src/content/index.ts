@@ -46,7 +46,7 @@ const manager = new ProviderManager(buildAdapters(), {
       detail: { reason, hash: hash.slice(0, 8) },
     });
 
-    const response = await sendToBackground({
+    const response = await dispatchSaveConversation({
       type: "SAVE_CONVERSATION",
       payload: {
         conversation,
