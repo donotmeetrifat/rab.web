@@ -66,10 +66,20 @@ export class ProviderManager {
   private watchState: WatchState = "watching";
   private quietTimer: number | null = null;
   private stateResetTimer: number | null = null;
+  private stateWatchdogTimer: number | null = null;
   private urlPollTimer: number | null = null;
   private currentUrl = "";
   private disposed = false;
   private savingInFlight = false;
+
+  /** Hard ceiling for any transient (non-terminal) watch state. Guarantees
+   *  the FSM can never remain in extracting/saving/indexing forever. */
+  private static readonly TRANSIENT_STATE_TIMEOUT_MS = 10_000;
+  private static readonly TRANSIENT_STATES: ReadonlySet<WatchState> = new Set<WatchState>([
+    "extracting",
+    "saving",
+    "indexing",
+  ]);
 
   constructor(adapters: ProviderAdapter[], private events: ManagerEvents) {
     this.adapters = adapters;
