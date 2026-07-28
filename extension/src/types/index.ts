@@ -136,6 +136,12 @@ export interface ExportPayload {
 }
 
 
+// Structural type only — full CapturedConversation lives in providers/base/types
+// and is imported by both content script and background worker. Kept loose here
+// to avoid pulling provider code into every consumer of RuntimeMessage.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CapturedConversationLike = any;
+
 export type RuntimeMessage =
   | { type: "PING" }
   | { type: "CAPTURE_SELECTION"; payload: { text: string; url: string; title: string } }
@@ -143,6 +149,20 @@ export type RuntimeMessage =
   | { type: "OPEN_POPUP" }
   | { type: "GET_ACTIVE_PROVIDER" }
   | { type: "REQUEST_SELECTION_CAPTURE" }
+  | {
+      /**
+       * Phase 14.3: content scripts NEVER write IndexedDB directly. They
+       * extract a CapturedConversation and hand it to the background service
+       * worker, which is the sole writer for the extension-origin database.
+       */
+      type: "SAVE_CONVERSATION";
+      payload: {
+        conversation: CapturedConversationLike;
+        source: "manual" | "auto" | "initial";
+        hash: string;
+        options?: { saveImages?: boolean; saveAttachments?: boolean };
+      };
+    }
   | {
       type: "CONVERSATION_SAVED";
       payload: {
@@ -152,6 +172,20 @@ export type RuntimeMessage =
         source: "manual" | "auto" | "initial";
       };
     };
+
+/** Reply shape for SAVE_CONVERSATION carried inside RuntimeResponse.data. */
+export interface SaveConversationAck {
+  verified: boolean;
+  conversationId: string;
+  created: boolean;
+  updated: boolean;
+  provider: ProviderId;
+  messageCount: number;
+  hash: string;
+  createdAt: number;
+  updatedAt: number;
+  durationMs: number;
+}
 
 export type RuntimeResponse =
   | { ok: true; data?: unknown }
