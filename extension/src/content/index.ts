@@ -17,6 +17,7 @@ import { ProviderManager, buildAdapters } from "@/providers";
 import { saveConversation } from "@/services/conversations";
 import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
 import { db } from "@/lib/db";
+import { traceStateFlow } from "@/providers/base/stateTrace";
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
 loadSettings().then((s) => { currentSettings = s; });
@@ -25,6 +26,13 @@ subscribeSettings((s) => { currentSettings = s; });
 const manager = new ProviderManager(buildAdapters(), {
   isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
   onConversationChanged: async ({ conversation, hash, reason }) => {
+    traceStateFlow("onConversationChanged() entered", "content.onConversationChanged", {
+      conversationId: conversation.conversationId,
+      provider: conversation.provider,
+      currentWatchState: "saving",
+      previousWatchState: "saving",
+      detail: { reason },
+    });
     try {
       const { conversation: stored, created } = await saveConversation(conversation, {
         hash,
@@ -32,9 +40,23 @@ const manager = new ProviderManager(buildAdapters(), {
         saveImages: currentSettings.saveImages,
         saveAttachments: currentSettings.saveAttachments,
       });
+      traceStateFlow("saveConversation() returned", "content.onConversationChanged", {
+        conversationId: stored.id,
+        provider: conversation.provider,
+        currentWatchState: "saving",
+        previousWatchState: "saving",
+        detail: { created },
+      });
 
       // Verify the row actually landed in IndexedDB before reporting Synced.
       const verified = Boolean(await db.conversations.get(stored.id));
+      traceStateFlow("Caller verification read completed", "content.onConversationChanged", {
+        conversationId: stored.id,
+        provider: conversation.provider,
+        currentWatchState: "saving",
+        previousWatchState: "saving",
+        detail: { rowExists: verified },
+      });
 
       // Fire-and-forget background notification. Must NEVER be awaited —
       // the SW's CONVERSATION_SAVED handler calls chrome.notifications,
@@ -59,6 +81,13 @@ const manager = new ProviderManager(buildAdapters(), {
 
       return { ok: true, verified, conversationId: stored.id } as const;
     } catch (error) {
+      traceStateFlow("CATCH: onConversationChanged() failed", "content.onConversationChanged", {
+        conversationId: conversation.conversationId,
+        provider: conversation.provider,
+        currentWatchState: "saving",
+        previousWatchState: "saving",
+        detail: error,
+      });
       console.error("[Memlace] Save stage failed", error);
       return { ok: false, stage: "saveConversation", error } as const;
     }
