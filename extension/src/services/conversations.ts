@@ -116,6 +116,10 @@ export async function saveConversation(
   captured: CapturedConversation,
   opts: SaveConversationOptions = { source: "manual" },
 ): Promise<{ conversation: StoredConversation; changed: boolean; created: boolean }> {
+  console.log("[Memlace saveConversation] runtime", {
+    runtimeId: chrome.runtime.id,
+    origin: globalThis.location.origin,
+  });
   const t0 = (typeof performance !== "undefined" ? performance.now() : Date.now());
   const hash = opts.hash ?? hashConversation(captured);
   const keepImages = opts.saveImages !== false;

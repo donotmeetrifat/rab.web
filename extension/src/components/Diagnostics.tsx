@@ -41,7 +41,7 @@ async function collect(): Promise<Stats> {
   ] = await Promise.all([
     db.memories.count(),
     db.projects.count(),
-    db.tags.count(),
+    db.memories.orderBy("tags").uniqueKeys().then((keys) => keys.length),
     db.conversations.count(),
     db.convMessages.count(),
     db.knowledge.count(),
@@ -49,6 +49,7 @@ async function collect(): Promise<Stats> {
     db.aiSummaries.count(),
     db.aiEmbeddings.count(),
   ]);
+  console.log("[Memlace Diagnostics] Conversation count", conversations);
   let bytesUsed: number | null = null;
   let bytesQuota: number | null = null;
   try {

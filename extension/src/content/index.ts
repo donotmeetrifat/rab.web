@@ -31,6 +31,8 @@ import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/se
 import { traceStateFlow } from "@/providers/base/stateTrace";
 import { dispatchSaveConversation } from "./saveTransport";
 
+console.log("[Memlace Content] runtime", chrome.runtime.id, window.location.origin);
+
 let currentSettings: Settings = DEFAULT_SETTINGS;
 loadSettings().then((s) => { currentSettings = s; });
 subscribeSettings((s) => { currentSettings = s; });
