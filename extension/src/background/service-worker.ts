@@ -201,19 +201,17 @@ chrome.runtime.onMessage.addListener(
               const row = await db.conversations.get(conversation.id);
               const verified = Boolean(row);
               const durationMs = Math.round(performance.now() - t0);
-              const ack: SaveConversationAck = {
+              const result: SaveConversationResult = {
+                ok: true,
                 verified,
                 conversationId: conversation.id,
                 created,
                 updated: !created && changed,
                 provider: conversation.provider,
-                messageCount: captured.messages.length,
                 hash: msg.payload.hash,
-                createdAt: conversation.createdAt,
-                updatedAt: conversation.updatedAt,
                 durationMs,
               };
-              console.log("[Memlace] Conversation saved", ack);
+              console.log("[Memlace] Conversation saved", result);
               // Fire-and-forget user notification (no longer traveling
               // back through the content script's message channel).
               if (changed) {
@@ -227,7 +225,27 @@ chrome.runtime.onMessage.addListener(
                   }).catch(() => undefined);
                 }
               }
-              sendResponse({ ok: true, data: ack });
+              // Broadcast MEMLACE_CONVERSATION_UPDATED to every open UI
+              // surface. Fire-and-forget: broadcast MUST NOT block the ack.
+              if (verified) {
+                try {
+                  void chrome.runtime
+                    .sendMessage({
+                      type: "MEMLACE_CONVERSATION_UPDATED",
+                      payload: {
+                        conversationId: conversation.id,
+                        provider: conversation.provider,
+                        projectId: conversation.projectId ?? null,
+                        updatedAt: conversation.updatedAt,
+                        created,
+                        source: msg.payload.source,
+                      },
+                    } satisfies RuntimeMessage)
+                    .catch(() => undefined);
+                } catch { /* no receivers → ignore */ }
+              }
+              sendResponse({ ok: true, data: result });
+
             } catch (err) {
               console.error("[Memlace] SAVE_CONVERSATION failed", err);
               sendResponse({
