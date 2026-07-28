@@ -8,6 +8,8 @@ import { exportAll, importAll } from "@/services/memories";
 import { PROVIDERS } from "@/lib/providers";
 import { collectPieStats } from "@/pie";
 import type { PieStats } from "@/pie/types";
+import { readLiveEventDiag, subscribeLiveEvents, type LiveEventDiag } from "@/core/liveEvents";
+
 
 type Stats = {
   memories: number;
