@@ -343,6 +343,9 @@ export class ProviderManager {
       // DB has committed. Downstream engines (knowledge, project, PIE,
       // graph, workspace, context) fire on the Orchestrator's queue and
       // never block us here.
+      // Background acknowledged the write. Reflect the persist stage briefly
+      // for user-visible continuity, then transition to indexing/synced.
+      this.setWatchState("saving");
       this.setWatchState("indexing");
       this.lastHash = hash;
       this.lastWriteAt = Date.now();
