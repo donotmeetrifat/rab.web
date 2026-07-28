@@ -1,7 +1,10 @@
-import type { RuntimeMessage, RuntimeResponse } from "@/types";
+import type { RuntimeMessage, RuntimeResponse, SaveConversationAck } from "@/types";
+import type { CapturedConversation } from "@/providers/base/types";
 import "@/core/subscribers";
 import { notify } from "@/services/notifications";
 import { loadSettings } from "@/services/settings";
+import { saveConversation } from "@/services/conversations";
+import { db } from "@/lib/db";
 
 // Global error listeners — a bug in one handler must never take the SW down.
 self.addEventListener("error", (ev) => {
