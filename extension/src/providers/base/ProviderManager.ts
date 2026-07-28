@@ -99,6 +99,7 @@ export class ProviderManager {
     if (this.urlPollTimer !== null) clearInterval(this.urlPollTimer);
     if (this.quietTimer !== null) clearTimeout(this.quietTimer);
     if (this.stateResetTimer !== null) clearTimeout(this.stateResetTimer);
+    if (this.stateWatchdogTimer !== null) clearTimeout(this.stateWatchdogTimer);
     this.tearDownActive();
   }
 
