@@ -171,6 +171,34 @@ export function Diagnostics() {
       </div>
 
       <section className="rounded-lg border border-border bg-surface">
+        <header className="px-4 py-2 border-b border-border">
+          <h3 className="text-sm font-semibold">Live Event Monitor</h3>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            MEMLACE_CONVERSATION_UPDATED broadcasts from the background.
+          </p>
+        </header>
+        <dl className="divide-y divide-border">
+          {([
+            ["Last event", live.lastEvent ?? "—"],
+            ["Last event at", live.lastEventAt ? new Date(live.lastEventAt).toLocaleTimeString() : "—"],
+            ["Last save (conversation)", live.lastConversationId ?? "—"],
+            ["Last provider", live.lastProvider ?? "—"],
+            ["Last refresh at", live.lastRefreshAt ? new Date(live.lastRefreshAt).toLocaleTimeString() : "—"],
+            ["Last broadcast at", live.lastBroadcastAt ? new Date(live.lastBroadcastAt).toLocaleTimeString() : "—"],
+            ["Cache invalidations", live.cacheInvalidations],
+            ["Events received", live.eventCount],
+            ["Current subscribers", live.subscribers],
+          ] as Array<[string, string | number]>).map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="font-medium text-foreground tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+
+      <section className="rounded-lg border border-border bg-surface">
         <dl className="divide-y divide-border">
           {rows.map(([k, v]) => (
             <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
