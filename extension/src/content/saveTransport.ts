@@ -75,12 +75,15 @@ async function sleep(ms: number): Promise<void> {
 async function sendOnce(msg: SaveMessage): Promise<RuntimeResponse> {
   try {
     // Chrome's promise-based sendMessage rejects on lastError automatically.
+    console.log("[Content] sending SAVE_CONVERSATION");
     const res = (await chrome.runtime.sendMessage(msg)) as RuntimeResponse | undefined;
+    console.log("[Content] response", res);
     if (!res) {
       return { ok: false, error: "empty response (service worker unavailable)" };
     }
     return res;
   } catch (err) {
+    console.error(err);
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
