@@ -36,18 +36,23 @@ const manager = new ProviderManager(buildAdapters(), {
       // Verify the row actually landed in IndexedDB before reporting Synced.
       const verified = Boolean(await db.conversations.get(stored.id));
 
-      // Fire-and-forget background notification. If the SW is idle the
-      // message may fail — the IndexedDB write is what matters.
+      // Fire-and-forget background notification. Must NEVER be awaited —
+      // the SW's CONVERSATION_SAVED handler calls chrome.notifications,
+      // which can stall during a cold service-worker spin-up and would
+      // otherwise pin the status pill on "Saving" indefinitely. The
+      // primary save is already durable in IndexedDB at this point.
       try {
-        await chrome.runtime.sendMessage({
-          type: "CONVERSATION_SAVED",
-          payload: {
-            provider: conversation.provider,
-            title: conversation.title,
-            created,
-            source: reason,
-          },
-        } satisfies RuntimeMessage);
+        void chrome.runtime
+          .sendMessage({
+            type: "CONVERSATION_SAVED",
+            payload: {
+              provider: conversation.provider,
+              title: conversation.title,
+              created,
+              source: reason,
+            },
+          } satisfies RuntimeMessage)
+          .catch(() => undefined);
       } catch {
         /* background idle — ignore */
       }
