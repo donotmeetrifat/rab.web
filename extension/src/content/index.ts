@@ -1,103 +1,110 @@
 /**
  * Memlace content script. Runs on every supported AI provider page.
  *
- * Invisible Auto Memory: the ProviderManager watches the active conversation,
- * waits for the AI response to finish streaming (quiet DOM window), hashes
- * the result, and persists to IndexedDB automatically. The user never
- * presses Save — a tiny status pill on the page reflects Watching / Syncing
- * / Synced / Error.
+ * ============================================================
+ *   MV3 ARCHITECTURE INVARIANT (Phase 14.3)
+ * ============================================================
+ * Content scripts run under the HOST PAGE'S ORIGIN (e.g.
+ * chatgpt.com, claude.ai). IndexedDB is origin-scoped, so any
+ * write from here lands in a database the extension UI cannot
+ * see (the extension UI runs on chrome-extension://<id>).
  *
- * Storage happens in this content-script context (IndexedDB is available
- * here and shared across the extension), so saves are direct and durable
- * as soon as the transaction commits — surviving browser crashes. The
- * background worker is only notified for optional toast notifications.
+ * Therefore this file:
+ *   • DOES observe the DOM and extract conversations.
+ *   • DOES compute hashes and detect changes.
+ *   • DOES ship the CapturedConversation to the background
+ *     service worker via chrome.runtime.sendMessage.
+ *   • DOES NOT import lib/db, services/conversations, or any
+ *     module that writes IndexedDB directly.
+ *   • DOES NOT verify persistence. The background is the sole
+ *     writer and the sole verifier.
+ *
+ * Responsibility split:
+ *   CONTENT  → observe · extract · send
+ *   BACKGROUND → persist · verify · index · dispatch
+ *   UI       → read-only
+ * ============================================================
  */
-import type { RuntimeMessage, Settings } from "@/types";
+import type { RuntimeMessage, RuntimeResponse, SaveConversationAck, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
-import { saveConversation } from "@/services/conversations";
 import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
-import { db } from "@/lib/db";
 import { traceStateFlow } from "@/providers/base/stateTrace";
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
 loadSettings().then((s) => { currentSettings = s; });
 subscribeSettings((s) => { currentSettings = s; });
 
+/**
+ * Ship the captured conversation to the background service worker, which
+ * owns the extension-origin Dexie instance. Returns the SaveOutcome shape
+ * that ProviderManager expects.
+ */
+async function sendToBackground(
+  msg: Extract<RuntimeMessage, { type: "SAVE_CONVERSATION" }>,
+): Promise<RuntimeResponse> {
+  try {
+    return await chrome.runtime.sendMessage(msg);
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "SW transport failed",
+    };
+  }
+}
+
 const manager = new ProviderManager(buildAdapters(), {
   isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
   onConversationChanged: async ({ conversation, hash, reason }) => {
-    traceStateFlow("onConversationChanged() entered", "content.onConversationChanged", {
+    traceStateFlow("content → SW SAVE_CONVERSATION dispatch", "content.onConversationChanged", {
       conversationId: conversation.conversationId,
       provider: conversation.provider,
-      currentWatchState: "saving",
-      previousWatchState: "saving",
-      detail: { reason },
+      currentWatchState: "sending",
+      previousWatchState: "extracting",
+      detail: { reason, hash: hash.slice(0, 8) },
     });
-    try {
-      const { conversation: stored, created } = await saveConversation(conversation, {
-        hash,
+
+    const response = await sendToBackground({
+      type: "SAVE_CONVERSATION",
+      payload: {
+        conversation,
         source: reason,
-        saveImages: currentSettings.saveImages,
-        saveAttachments: currentSettings.saveAttachments,
-      });
-      traceStateFlow("saveConversation() returned", "content.onConversationChanged", {
-        conversationId: stored.id,
-        provider: conversation.provider,
-        currentWatchState: "saving",
-        previousWatchState: "saving",
-        detail: { created },
-      });
+        hash,
+        options: {
+          saveImages: currentSettings.saveImages,
+          saveAttachments: currentSettings.saveAttachments,
+        },
+      },
+    });
 
-      // Verify the row actually landed in IndexedDB before reporting Synced.
-      const verified = Boolean(await db.conversations.get(stored.id));
-      traceStateFlow("Caller verification read completed", "content.onConversationChanged", {
-        conversationId: stored.id,
-        provider: conversation.provider,
-        currentWatchState: "saving",
-        previousWatchState: "saving",
-        detail: { rowExists: verified },
-      });
-
-      // Fire-and-forget background notification. Must NEVER be awaited —
-      // the SW's CONVERSATION_SAVED handler calls chrome.notifications,
-      // which can stall during a cold service-worker spin-up and would
-      // otherwise pin the status pill on "Saving" indefinitely. The
-      // primary save is already durable in IndexedDB at this point.
-      try {
-        void chrome.runtime
-          .sendMessage({
-            type: "CONVERSATION_SAVED",
-            payload: {
-              provider: conversation.provider,
-              title: conversation.title,
-              created,
-              source: reason,
-            },
-          } satisfies RuntimeMessage)
-          .catch(() => undefined);
-      } catch {
-        /* background idle — ignore */
-      }
-
-      return { ok: true, verified, conversationId: stored.id } as const;
-    } catch (error) {
-      traceStateFlow("CATCH: onConversationChanged() failed", "content.onConversationChanged", {
+    if (!response.ok) {
+      traceStateFlow("SW replied error", "content.onConversationChanged", {
         conversationId: conversation.conversationId,
         provider: conversation.provider,
-        currentWatchState: "saving",
-        previousWatchState: "saving",
-        detail: error,
+        currentWatchState: "sending",
+        previousWatchState: "sending",
+        detail: response,
       });
-      console.error("[Memlace] Save stage failed", error);
-      return { ok: false, stage: "saveConversation", error } as const;
+      return { ok: false, stage: "backgroundSave", error: response.error } as const;
     }
+
+    const ack = response.data as SaveConversationAck;
+    traceStateFlow("SW replied ok", "content.onConversationChanged", {
+      conversationId: ack.conversationId,
+      provider: conversation.provider,
+      currentWatchState: "sending",
+      previousWatchState: "sending",
+      detail: ack,
+    });
+    return { ok: true, verified: ack.verified, conversationId: ack.conversationId } as const;
   },
 });
 
 manager.start();
 
-// Lightweight selection-capture bridge (kept — this saves highlighted
-// snippets as Memories, a separate feature from conversation auto-save).
+/* -------------------------------------------------- *
+ * Lightweight selection-capture bridge (unchanged).
+ * Also goes through the background — no direct writes.
+ * -------------------------------------------------- */
 function currentSelection(): string {
   const sel = window.getSelection();
   return sel ? sel.toString().trim() : "";
