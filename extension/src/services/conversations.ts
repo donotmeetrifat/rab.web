@@ -14,6 +14,7 @@ import {
 } from "@/core";
 // Static import — content scripts must not load onboarding as a chunk.
 import { markChecklist } from "@/services/onboarding";
+import { traceStateFlow } from "@/providers/base/stateTrace";
 
 /* ------------------------------------------------------------------ *
  * In-memory message index (lazy, invalidated on write). Lets universal
@@ -120,6 +121,13 @@ export async function saveConversation(
   const keepImages = opts.saveImages !== false;
   const keepAttachments = opts.saveAttachments !== false;
   const now = Date.now();
+
+  traceStateFlow("saveConversation() entered", "saveConversation", {
+    conversationId: captured.conversationId,
+    provider: captured.provider,
+    currentWatchState: "saving",
+    previousWatchState: "saving",
+  });
 
   dlog(1, "saveConversation() entered", {
     provider: captured.provider,
@@ -247,6 +255,14 @@ export async function saveConversation(
       },
     );
 
+    traceStateFlow("IndexedDB transaction committed", "saveConversation", {
+      conversationId: result.conversation.id,
+      provider: result.conversation.provider,
+      currentWatchState: "saving",
+      previousWatchState: "saving",
+      detail: { changed: result.changed, created: result.created },
+    });
+
     dlog(8, "Transaction committed", { changed: result.changed, created: result.created });
     lastStage = 8;
 
@@ -254,6 +270,13 @@ export async function saveConversation(
     try {
       dlog(9, "Reading conversation back", { id: result.conversation.id });
       const verify = await db.conversations.get(result.conversation.id);
+      traceStateFlow("Verification read completed", "saveConversation", {
+        conversationId: result.conversation.id,
+        provider: result.conversation.provider,
+        currentWatchState: "saving",
+        previousWatchState: "saving",
+        detail: { rowExists: Boolean(verify) },
+      });
       if (!verify) {
         console.error("[Memlace][save][10] Verification FAILED — row missing", {
           id: result.conversation.id,
@@ -276,6 +299,12 @@ export async function saveConversation(
         // (Phase 13). Every downstream engine — knowledge, project brain,
         // PIE, workspace, context, AI enrichment — subscribes there.
         dispatchConversationSaved(result.conversation, result.created, opts.source);
+        traceStateFlow("dispatchConversationSaved() returned", "saveConversation", {
+          conversationId: result.conversation.id,
+          provider: result.conversation.provider,
+          currentWatchState: "saving",
+          previousWatchState: "saving",
+        });
         lastStage = 11;
       } catch (err) {
         derr(11, "Dispatching EventBus", err);
@@ -291,8 +320,22 @@ export async function saveConversation(
       changed: result.changed,
       created: result.created,
     });
+    traceStateFlow("saveConversation() returning", "saveConversation", {
+      conversationId: result.conversation.id,
+      provider: result.conversation.provider,
+      currentWatchState: "saving",
+      previousWatchState: "saving",
+      detail: { changed: result.changed, created: result.created },
+    });
     return result;
   } catch (err) {
+    traceStateFlow(`THROW: save pipeline aborted after stage ${lastStage}`, "saveConversation", {
+      conversationId: captured.conversationId,
+      provider: captured.provider,
+      currentWatchState: "saving",
+      previousWatchState: "saving",
+      detail: err,
+    });
     derr(lastStage, `save pipeline aborted after stage ${lastStage}`, err);
     throw err;
   } finally {

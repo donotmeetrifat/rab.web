@@ -1,6 +1,7 @@
 import type { IndicatorHandlers, ProviderAdapter, WatchState } from "./ProviderAdapter";
 import type { CapturedConversation } from "./types";
 import { hashConversation } from "./hash";
+import { traceStateFlow } from "./stateTrace";
 
 export type SaveOutcome =
   | { ok: true; verified: boolean; conversationId: string }
@@ -128,25 +129,75 @@ export class ProviderManager {
    * for QUIET_WINDOW_MS.
    */
   private armQuietWindow(): void {
-    if (this.disposed) return;
+    if (this.disposed) {
+      traceStateFlow("EARLY EXIT: manager disposed", "ProviderManager.armQuietWindow", {
+        conversationId: this.lastConversationId,
+        provider: this.active?.id,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
+      return;
+    }
     if (this.quietTimer !== null) clearTimeout(this.quietTimer);
+    traceStateFlow("MutationObserver → quiet window armed", "ProviderManager.armQuietWindow", {
+      conversationId: this.lastConversationId,
+      provider: this.active?.id,
+      currentWatchState: this.watchState,
+      previousWatchState: this.watchState,
+    });
     this.quietTimer = window.setTimeout(() => {
       this.quietTimer = null;
+      traceStateFlow("Quiet window elapsed → snapshot()", "ProviderManager.armQuietWindow", {
+        conversationId: this.lastConversationId,
+        provider: this.active?.id,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
       void this.snapshot();
     }, ProviderManager.QUIET_WINDOW_MS);
   }
 
   private async snapshot(): Promise<void> {
-    if (!this.active || this.disposed) return;
-    if (this.savingInFlight) return;
+    if (!this.active || this.disposed) {
+      traceStateFlow("EARLY EXIT: inactive or disposed", "ProviderManager.snapshot", {
+        conversationId: this.lastConversationId,
+        provider: this.active?.id,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+        detail: { active: Boolean(this.active), disposed: this.disposed },
+      });
+      return;
+    }
+    if (this.savingInFlight) {
+      traceStateFlow("EARLY EXIT: save already in flight", "ProviderManager.snapshot", {
+        conversationId: this.lastConversationId,
+        provider: this.active.id,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
+      return;
+    }
 
     // Stage 1: extract
     this.setWatchState("extracting");
     const convo = this.active.getConversation();
+    traceStateFlow("ProviderManager.snapshot() extraction complete", "ProviderManager.snapshot", {
+      conversationId: convo?.conversationId ?? this.lastConversationId,
+      provider: convo?.provider ?? this.active.id,
+      currentWatchState: this.watchState,
+      previousWatchState: "watching",
+      detail: { found: Boolean(convo), messageCount: convo?.messages.length ?? 0 },
+    });
 
     // No conversation, or partial (empty) DOM — treat as UI noise and stay
     // in "watching". Never persist an empty conversation.
     if (!convo || convo.messages.length === 0) {
+      traceStateFlow("EARLY EXIT: no complete conversation", "ProviderManager.snapshot", {
+        conversationId: convo?.conversationId ?? this.lastConversationId,
+        provider: convo?.provider ?? this.active.id,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
       this.setWatchState("watching");
       return;
     }
@@ -155,6 +206,12 @@ export class ProviderManager {
     // assistant message must have non-empty content.
     const last = convo.messages[convo.messages.length - 1];
     if (last.role === "assistant" && !(last.content || last.markdown || "").trim()) {
+      traceStateFlow("EARLY EXIT: final assistant message empty", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
       this.setWatchState("watching");
       return;
     }
@@ -174,6 +231,12 @@ export class ProviderManager {
     if (hash === this.lastHash) {
       // No new content — flash "No changes" briefly, then return to watch.
       this.setWatchState("skipped");
+      traceStateFlow("EARLY EXIT: hash unchanged", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: "extracting",
+      });
       this.scheduleStateReset(900);
       return;
     }
@@ -183,6 +246,12 @@ export class ProviderManager {
       // same content once the user re-enables auto memory.
       this.lastHash = hash;
       this.setWatchState("watching");
+      traceStateFlow("EARLY EXIT: auto-save disabled", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: "extracting",
+      });
       return;
     }
 
@@ -191,6 +260,12 @@ export class ProviderManager {
     const now = Date.now();
     if (now - this.lastWriteAt < ProviderManager.WRITE_COOLDOWN_MS) {
       this.setWatchState("watching");
+      traceStateFlow("EARLY EXIT: write cooldown", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: "extracting",
+      });
       return;
     }
 
@@ -202,6 +277,12 @@ export class ProviderManager {
         messages: convo.messages.length,
       });
       this.setWatchState("saving");
+      traceStateFlow("Calling onConversationChanged()", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: "extracting",
+      });
       // Hard 8s timeout: the primary save must never pin the indicator.
       // If the handler stalls (e.g. a background message never resolves),
       // we surface the failure and reset the pill instead of hanging.
@@ -216,7 +297,20 @@ export class ProviderManager {
           setTimeout(() => resolve({ ok: false, stage: "timeout", error: new Error("save timed out after 8s") } as const), 8000),
         ),
       ])) as Awaited<ReturnType<ManagerEvents["onConversationChanged"]>>;
+      traceStateFlow("onConversationChanged() returned", "ProviderManager.snapshot", {
+        conversationId: outcome.ok ? outcome.conversationId : convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+        detail: outcome,
+      });
       if (!outcome.ok) {
+        traceStateFlow(`THROW: save outcome failed at ${outcome.stage}`, "ProviderManager.snapshot", {
+          conversationId: convo.conversationId,
+          provider: convo.provider,
+          currentWatchState: this.watchState,
+          previousWatchState: this.watchState,
+        });
         throw new Error(`stage:${outcome.stage}`);
       }
       // DB has committed. Downstream engines (knowledge, project, PIE,
@@ -243,17 +337,52 @@ export class ProviderManager {
       }
       this.scheduleStateReset(1600);
     } catch (err) {
+      traceStateFlow("CATCH: snapshot pipeline failed", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+        detail: err,
+      });
       console.warn("[Memlace] auto-save failed", err);
       this.setWatchState("error");
       this.scheduleStateReset(3000);
     } finally {
       this.savingInFlight = false;
+      traceStateFlow("FINALLY: snapshot pipeline released", "ProviderManager.snapshot", {
+        conversationId: convo.conversationId,
+        provider: convo.provider,
+        currentWatchState: this.watchState,
+        previousWatchState: this.watchState,
+      });
     }
   }
 
   private setWatchState(state: WatchState): void {
+    const previousWatchState = this.watchState;
     this.watchState = state;
-    window.dispatchEvent(new CustomEvent("memlace:watch-state", { detail: state }));
+    traceStateFlow("setWatchState()", "ProviderManager.setWatchState", {
+      conversationId: this.lastConversationId,
+      provider: this.active?.id,
+      currentWatchState: state,
+      previousWatchState,
+    });
+    const event = new CustomEvent<WatchState>("memlace:watch-state", { detail: state });
+    traceStateFlow("Dispatching memlace:watch-state", "ProviderManager.setWatchState", {
+      conversationId: this.lastConversationId,
+      provider: this.active?.id,
+      currentWatchState: state,
+      previousWatchState,
+      detail: { eventName: event.type, payload: event.detail },
+    });
+    const dispatched = window.dispatchEvent(event);
+    traceStateFlow("memlace:watch-state dispatch completed", "ProviderManager.setWatchState", {
+      conversationId: this.lastConversationId,
+      provider: this.active?.id,
+      currentWatchState: state,
+      previousWatchState,
+      detail: { dispatched },
+    });
   }
 
   private scheduleStateReset(ms: number): void {

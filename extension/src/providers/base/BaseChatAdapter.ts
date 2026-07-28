@@ -4,6 +4,7 @@ import type { CapturedConversation, CapturedMessage } from "./types";
 import { debounce } from "./dom";
 import { consumePendingHandoff } from "@/lib/handoff";
 import type { ContinuationProviderId } from "@/lib/continuation";
+import { traceStateFlow } from "./stateTrace";
 
 
 /**
@@ -84,6 +85,13 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
         // Ignore self-mutations (indicator DOM updates would otherwise loop).
         const t = m.target as HTMLElement | null;
         if (t && (t.id === this.buttonId || t.closest?.(`#${this.buttonId}`))) continue;
+        traceStateFlow("MutationObserver callback", "BaseChatAdapter.observeChanges", {
+          conversationId: this.getConversationId(),
+          provider: this.id,
+          currentWatchState: this.handlers?.getState(),
+          previousWatchState: this.handlers?.getState(),
+          detail: { mutationType: m.type, target: t?.tagName ?? null },
+        });
         debounced();
         return;
       }
@@ -98,6 +106,13 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
 
   injectIndicator(handlers: IndicatorHandlers): () => void {
     this.handlers = handlers;
+    traceStateFlow("injectIndicator() entered", "BaseChatAdapter.injectIndicator", {
+      conversationId: this.getConversationId(),
+      provider: this.id,
+      currentWatchState: handlers.getState(),
+      previousWatchState: handlers.getState(),
+      detail: { existingElement: Boolean(document.getElementById(this.buttonId)) },
+    });
     this.mountIndicator();
 
     this.reinjectObserver?.disconnect();
@@ -108,15 +123,35 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
 
     this.stateListener = (e: Event) => {
       const detail = (e as CustomEvent<WatchState>).detail;
+      traceStateFlow("memlace:watch-state listener received", "BaseChatAdapter.stateListener", {
+        conversationId: this.getConversationId(),
+        provider: this.id,
+        currentWatchState: detail,
+        previousWatchState: this.handlers?.getState(),
+        detail: { eventName: e.type, payload: detail, indicatorOwned: Boolean(this.indicatorEl) },
+      });
       this.applyIndicatorState(detail);
     };
     window.addEventListener("memlace:watch-state", this.stateListener);
+    traceStateFlow("memlace:watch-state listener installed", "BaseChatAdapter.injectIndicator", {
+      conversationId: this.getConversationId(),
+      provider: this.id,
+      currentWatchState: handlers.getState(),
+      previousWatchState: handlers.getState(),
+      detail: { target: "window", eventName: "memlace:watch-state" },
+    });
 
     return () => {
       this.reinjectObserver?.disconnect();
       this.reinjectObserver = null;
       if (this.stateListener) {
         window.removeEventListener("memlace:watch-state", this.stateListener);
+        traceStateFlow("memlace:watch-state listener removed", "BaseChatAdapter.injectIndicator disposer", {
+          conversationId: this.getConversationId(),
+          provider: this.id,
+          currentWatchState: this.handlers?.getState(),
+          previousWatchState: this.handlers?.getState(),
+        });
         this.stateListener = null;
       }
       this.indicatorEl?.remove();
@@ -141,7 +176,22 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   /* ---------------- Indicator internals ---------------- */
 
   protected mountIndicator(): void {
-    if (document.getElementById(this.buttonId)) return;
+    const existing = document.getElementById(this.buttonId);
+    if (existing) {
+      traceStateFlow("EARLY EXIT: indicator element already exists", "BaseChatAdapter.mountIndicator", {
+        conversationId: this.getConversationId(),
+        provider: this.id,
+        currentWatchState: this.handlers?.getState(),
+        previousWatchState: this.handlers?.getState(),
+        detail: {
+          existingText: existing.textContent?.trim() ?? "",
+          existingClass: existing.className,
+          existingDatasetState: existing.dataset.state ?? null,
+          indicatorOwned: existing === this.indicatorEl,
+        },
+      });
+      return;
+    }
 
     const el = document.createElement("div");
     el.id = this.buttonId;
@@ -155,6 +205,13 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     document.body.appendChild(el);
     ensureStylesInjected();
     this.indicatorEl = el;
+    traceStateFlow("Indicator mounted", "BaseChatAdapter.mountIndicator", {
+      conversationId: this.getConversationId(),
+      provider: this.id,
+      currentWatchState: this.handlers?.getState(),
+      previousWatchState: this.handlers?.getState(),
+      detail: { elementId: this.buttonId },
+    });
     this.applyIndicatorState(this.handlers?.getState() ?? "watching");
     void this.showHandoffReminder();
   }
@@ -168,13 +225,40 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
 
 
   protected applyIndicatorState(state: WatchState): void {
-    if (!this.indicatorEl) return;
+    if (!this.indicatorEl) {
+      const existing = document.getElementById(this.buttonId);
+      traceStateFlow("EARLY EXIT: indicatorEl is null", "BaseChatAdapter.applyIndicatorState", {
+        conversationId: this.getConversationId(),
+        provider: this.id,
+        currentWatchState: state,
+        previousWatchState: this.handlers?.getState(),
+        detail: {
+          expectedText: STATE_MAP[state].text,
+          existingDomText: existing?.textContent?.trim() ?? null,
+          existingClass: existing?.className ?? null,
+          existingDatasetState: existing?.dataset.state ?? null,
+        },
+      });
+      return;
+    }
     const label = this.indicatorEl.querySelector<HTMLSpanElement>(".memlace-indicator-label");
     const cfg = STATE_MAP[state];
     if (label) label.textContent = cfg.text;
     this.indicatorEl.dataset.state = state;
     this.indicatorEl.setAttribute("aria-label", `Memlace: ${cfg.text}`);
     this.indicatorEl.title = cfg.tooltip;
+    traceStateFlow("DOM pill updated", "BaseChatAdapter.applyIndicatorState", {
+      conversationId: this.getConversationId(),
+      provider: this.id,
+      currentWatchState: state,
+      previousWatchState: this.handlers?.getState(),
+      detail: {
+        currentDomText: label?.textContent ?? null,
+        expectedDomText: cfg.text,
+        currentCssClass: this.indicatorEl.className,
+        currentDatasetState: this.indicatorEl.dataset.state ?? null,
+      },
+    });
   }
 }
 
