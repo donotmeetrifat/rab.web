@@ -42,6 +42,12 @@ Exact path reproduced with the real `BaseChatAdapter` module:
 
 This proves the conflict is **rendering ownership**, not persistence or state-machine logic. It occurs when a stale/existing indicator node survives while the active adapter instance does not own a reference to it.
 
+## Minimal correction
+
+After proving the failure, `BaseChatAdapter.mountIndicator()` was changed to adopt the one existing indicator node, assign it to `this.indicatorEl`, and immediately apply the owner's current state. It does not add another state owner, event, listener, or DOM pill.
+
+The same reproduction now must finish with `text="Synced"` and `data-state="synced"`.
+
 ## State transition report
 
 ### Expected
@@ -52,9 +58,13 @@ This proves the conflict is **rendering ownership**, not persistence or state-ma
 
 `Watching` → `Extracting` → `Saving` → `Indexing` → `Synced`
 
-### Actual rendered pill
+### Actual rendered pill before correction
 
 `Saving` → receives `Indexing` event → renderer exits early → receives `Synced` event → renderer exits early → remains `Saving`
+
+### Actual rendered pill after correction
+
+`Saving` → existing pill adopted → receives `Indexing` → renders `Indexing` → receives `Synced` → renders `Synced`
 
 ## Diagnostic output
 

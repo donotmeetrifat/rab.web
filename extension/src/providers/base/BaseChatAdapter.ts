@@ -182,7 +182,11 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   protected mountIndicator(): void {
     const existing = document.getElementById(this.buttonId);
     if (existing) {
-      traceStateFlow("EARLY EXIT: indicator element already exists", "BaseChatAdapter.mountIndicator", {
+      // A provider SPA or extension reload can leave the pill in the DOM after
+      // the adapter instance that created it has gone away. Adopt that exact
+      // node so the single active listener still owns the single visible pill.
+      this.indicatorEl = existing as HTMLDivElement;
+      traceStateFlow("Existing indicator adopted", "BaseChatAdapter.mountIndicator", {
         conversationId: this.getConversationId(),
         provider: this.id,
         currentWatchState: this.handlers?.getState(),
@@ -191,9 +195,10 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
           existingText: existing.textContent?.trim() ?? "",
           existingClass: existing.className,
           existingDatasetState: existing.dataset.state ?? null,
-          indicatorOwned: existing === this.indicatorEl,
+          indicatorOwned: true,
         },
       });
+      this.applyIndicatorState(this.handlers?.getState() ?? "watching");
       return;
     }
 
