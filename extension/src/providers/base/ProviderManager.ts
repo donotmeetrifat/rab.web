@@ -21,6 +21,7 @@ export interface ManagerEvents {
 const WATCH_STATE_LABEL: Record<WatchState, string> = {
   watching: "Watching",
   extracting: "Extracting",
+  sending: "Sending",
   saving: "Saving",
   indexing: "Indexing",
   synced: "Synced",
