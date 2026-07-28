@@ -26,6 +26,8 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   protected stateListener: ((e: Event) => void) | null = null;
   protected indicatorEl: HTMLDivElement | null = null;
   protected handlers: IndicatorHandlers | null = null;
+  /** Diagnostic mirror of the last state actually applied to the pill. */
+  protected renderedState: WatchState | null = null;
 
   /* ---------------- Provider-specific hooks ---------------- */
 
@@ -127,7 +129,7 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
         conversationId: this.getConversationId(),
         provider: this.id,
         currentWatchState: detail,
-        previousWatchState: this.handlers?.getState(),
+        previousWatchState: this.renderedState ?? undefined,
         detail: { eventName: e.type, payload: detail, indicatorOwned: Boolean(this.indicatorEl) },
       });
       this.applyIndicatorState(detail);
@@ -156,6 +158,7 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
       }
       this.indicatorEl?.remove();
       this.indicatorEl = null;
+      this.renderedState = null;
     };
   }
 
@@ -170,6 +173,7 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     }
     this.indicatorEl?.remove();
     this.indicatorEl = null;
+    this.renderedState = null;
     this.handlers = null;
   }
 
@@ -231,7 +235,7 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
         conversationId: this.getConversationId(),
         provider: this.id,
         currentWatchState: state,
-        previousWatchState: this.handlers?.getState(),
+        previousWatchState: this.renderedState ?? undefined,
         detail: {
           expectedText: STATE_MAP[state].text,
           existingDomText: existing?.textContent?.trim() ?? null,
@@ -243,15 +247,17 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     }
     const label = this.indicatorEl.querySelector<HTMLSpanElement>(".memlace-indicator-label");
     const cfg = STATE_MAP[state];
+    const previousWatchState = this.renderedState ?? undefined;
     if (label) label.textContent = cfg.text;
     this.indicatorEl.dataset.state = state;
     this.indicatorEl.setAttribute("aria-label", `Memlace: ${cfg.text}`);
     this.indicatorEl.title = cfg.tooltip;
+    this.renderedState = state;
     traceStateFlow("DOM pill updated", "BaseChatAdapter.applyIndicatorState", {
       conversationId: this.getConversationId(),
       provider: this.id,
       currentWatchState: state,
-      previousWatchState: this.handlers?.getState(),
+      previousWatchState,
       detail: {
         currentDomText: label?.textContent ?? null,
         expectedDomText: cfg.text,
