@@ -6,6 +6,8 @@ import { loadSettings } from "@/services/settings";
 import { saveConversation } from "@/services/conversations";
 import { db } from "@/lib/db";
 
+console.log("[Memlace BG] started");
+
 // Global error listeners — a bug in one handler must never take the SW down.
 self.addEventListener("error", (ev) => {
   console.error("[Memlace][bg] error", (ev as ErrorEvent).error ?? (ev as ErrorEvent).message);
@@ -149,6 +151,7 @@ chrome.commands?.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(
   (msg: RuntimeMessage, sender, sendResponse: (r: RuntimeResponse) => void) => {
+    console.log("[BG] received", msg?.type);
     (async () => {
       try {
         switch (msg.type) {
