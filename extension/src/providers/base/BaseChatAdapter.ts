@@ -370,9 +370,11 @@ function ensureStylesInjected(): void {
       animation: memlace-pulse 2.4s ease-in-out infinite;
     }
     .memlace-indicator[data-state="extracting"],
+    .memlace-indicator[data-state="sending"],
     .memlace-indicator[data-state="saving"],
     .memlace-indicator[data-state="indexing"] { color: #2563EB; opacity: 0.95; }
     .memlace-indicator[data-state="extracting"] .memlace-indicator-dot,
+    .memlace-indicator[data-state="sending"] .memlace-indicator-dot,
     .memlace-indicator[data-state="saving"] .memlace-indicator-dot,
     .memlace-indicator[data-state="indexing"] .memlace-indicator-dot {
       animation: memlace-pulse 900ms ease-in-out infinite;
