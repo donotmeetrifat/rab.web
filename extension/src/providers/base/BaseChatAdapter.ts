@@ -394,6 +394,7 @@ function ensureStylesInjected(): void {
       }
       .memlace-indicator[data-state="watching"] { color: #94A3B8; }
       .memlace-indicator[data-state="extracting"],
+      .memlace-indicator[data-state="sending"],
       .memlace-indicator[data-state="saving"],
       .memlace-indicator[data-state="indexing"] { color: #60A5FA; }
       .memlace-indicator[data-state="synced"]   { color: #34D399; }
