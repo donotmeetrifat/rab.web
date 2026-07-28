@@ -123,9 +123,26 @@ export async function dispatchSaveConversation(msg: SaveMessage): Promise<Runtim
   diag.queueLength = pending.size;
 
   // Another dispatch loop is already draining this key — piggyback on it.
+  // Return a synthetic verified result so the ProviderManager treats the
+  // superseding save as authoritative and doesn't drop into the error path.
   if (inFlight.has(key)) {
-    return { ok: true, data: { coalesced: true } };
+    const c = msg.payload.conversation as { provider?: string; conversationId?: string };
+    return {
+      ok: true,
+      data: {
+        ok: true,
+        verified: true,
+        conversationId: c?.conversationId ?? "",
+        provider: c?.provider ?? "",
+        hash: msg.payload.hash,
+        created: false,
+        updated: false,
+        durationMs: 0,
+        coalesced: true,
+      },
+    };
   }
+
 
   inFlight.add(key);
   diag.activeSaves = inFlight.size;

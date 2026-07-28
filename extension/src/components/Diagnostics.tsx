@@ -8,6 +8,8 @@ import { exportAll, importAll } from "@/services/memories";
 import { PROVIDERS } from "@/lib/providers";
 import { collectPieStats } from "@/pie";
 import type { PieStats } from "@/pie/types";
+import { readLiveEventDiag, subscribeLiveEvents, type LiveEventDiag } from "@/core/liveEvents";
+
 
 type Stats = {
   memories: number;
@@ -75,12 +77,20 @@ export function Diagnostics() {
   const toast = useToast();
   const [s, setS] = useState<Stats | null>(null);
   const [pie, setPie] = useState<PieStats | null>(null);
+  const [live, setLive] = useState<LiveEventDiag>(() => readLiveEventDiag());
   const [busy, setBusy] = useState(false);
   const refresh = () => {
     void collect().then(setS);
     void collectPieStats().then(setPie);
+    setLive(readLiveEventDiag());
   };
   useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    const unsub = subscribeLiveEvents(() => setLive(readLiveEventDiag()));
+    const id = window.setInterval(() => setLive(readLiveEventDiag()), 2000);
+    return () => { unsub(); window.clearInterval(id); };
+  }, []);
+
 
   const backup = async () => {
     setBusy(true);
@@ -159,6 +169,34 @@ export function Diagnostics() {
           Local-only. Nothing here is sent anywhere — copy the report yourself if you want to share it.
         </p>
       </div>
+
+      <section className="rounded-lg border border-border bg-surface">
+        <header className="px-4 py-2 border-b border-border">
+          <h3 className="text-sm font-semibold">Live Event Monitor</h3>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            MEMLACE_CONVERSATION_UPDATED broadcasts from the background.
+          </p>
+        </header>
+        <dl className="divide-y divide-border">
+          {([
+            ["Last event", live.lastEvent ?? "—"],
+            ["Last event at", live.lastEventAt ? new Date(live.lastEventAt).toLocaleTimeString() : "—"],
+            ["Last save (conversation)", live.lastConversationId ?? "—"],
+            ["Last provider", live.lastProvider ?? "—"],
+            ["Last refresh at", live.lastRefreshAt ? new Date(live.lastRefreshAt).toLocaleTimeString() : "—"],
+            ["Last broadcast at", live.lastBroadcastAt ? new Date(live.lastBroadcastAt).toLocaleTimeString() : "—"],
+            ["Cache invalidations", live.cacheInvalidations],
+            ["Events received", live.eventCount],
+            ["Current subscribers", live.subscribers],
+          ] as Array<[string, string | number]>).map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="font-medium text-foreground tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
 
       <section className="rounded-lg border border-border bg-surface">
         <dl className="divide-y divide-border">
