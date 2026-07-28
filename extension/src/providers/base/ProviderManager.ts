@@ -382,6 +382,7 @@ export class ProviderManager {
   private setWatchState(state: WatchState): void {
     const previousWatchState = this.watchState;
     this.watchState = state;
+    this.armStateWatchdog(state);
     traceStateFlow("setWatchState()", "ProviderManager.setWatchState", {
       conversationId: this.lastConversationId,
       provider: this.active?.id,
@@ -412,6 +413,41 @@ export class ProviderManager {
         currentDatasetState: indicator?.dataset.state ?? null,
       },
     });
+  }
+
+  /**
+   * FSM invariant: `extracting`, `saving`, and `indexing` are transient and
+   * must resolve within TRANSIENT_STATE_TIMEOUT_MS. If they don't (e.g. a
+   * downstream promise never settles), force an `error` transition, record
+   * the failure, and let the next mutation start a fresh cycle.
+   *
+   * Terminal states (`synced`, `skipped`, `error`) and the idle `watching`
+   * state clear the watchdog.
+   */
+  private armStateWatchdog(state: WatchState): void {
+    if (this.stateWatchdogTimer !== null) {
+      clearTimeout(this.stateWatchdogTimer);
+      this.stateWatchdogTimer = null;
+    }
+    if (!ProviderManager.TRANSIENT_STATES.has(state)) return;
+    this.stateWatchdogTimer = window.setTimeout(() => {
+      this.stateWatchdogTimer = null;
+      if (this.watchState !== state) return; // already advanced
+      console.warn(
+        `[Memlace] watch-state watchdog: '${state}' exceeded ${ProviderManager.TRANSIENT_STATE_TIMEOUT_MS}ms — forcing 'error'`,
+      );
+      traceStateFlow("WATCHDOG: transient state exceeded ceiling", "ProviderManager.armStateWatchdog", {
+        conversationId: this.lastConversationId,
+        provider: this.active?.id,
+        currentWatchState: state,
+        previousWatchState: state,
+        detail: { ceilingMs: ProviderManager.TRANSIENT_STATE_TIMEOUT_MS },
+      });
+      // Release the in-flight guard so the next mutation cycle can proceed.
+      this.savingInFlight = false;
+      this.setWatchState("error");
+      this.scheduleStateReset(3000);
+    }, ProviderManager.TRANSIENT_STATE_TIMEOUT_MS);
   }
 
   private scheduleStateReset(ms: number): void {
