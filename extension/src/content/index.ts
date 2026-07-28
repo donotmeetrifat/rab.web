@@ -72,15 +72,16 @@ const manager = new ProviderManager(buildAdapters(), {
       return { ok: false, stage: "backgroundSave", error: response.error } as const;
     }
 
-    const ack = response.data as SaveConversationAck;
+    const result = response.data as SaveConversationResult;
     traceStateFlow("SW replied ok", "content.onConversationChanged", {
-      conversationId: ack.conversationId,
+      conversationId: result.conversationId,
       provider: conversation.provider,
       currentWatchState: "sending",
       previousWatchState: "sending",
-      detail: ack,
+      detail: result,
     });
-    return { ok: true, verified: ack.verified, conversationId: ack.conversationId } as const;
+    return { ok: true, verified: result.verified, conversationId: result.conversationId } as const;
+
   },
 });
 
