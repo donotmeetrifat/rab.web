@@ -25,32 +25,15 @@
  *   UI       → read-only
  * ============================================================
  */
-import type { RuntimeMessage, RuntimeResponse, SaveConversationAck, Settings } from "@/types";
+import type { RuntimeMessage, SaveConversationAck, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
 import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
 import { traceStateFlow } from "@/providers/base/stateTrace";
+import { dispatchSaveConversation } from "./saveTransport";
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
 loadSettings().then((s) => { currentSettings = s; });
 subscribeSettings((s) => { currentSettings = s; });
-
-/**
- * Ship the captured conversation to the background service worker, which
- * owns the extension-origin Dexie instance. Returns the SaveOutcome shape
- * that ProviderManager expects.
- */
-async function sendToBackground(
-  msg: Extract<RuntimeMessage, { type: "SAVE_CONVERSATION" }>,
-): Promise<RuntimeResponse> {
-  try {
-    return await chrome.runtime.sendMessage(msg);
-  } catch (err) {
-    return {
-      ok: false,
-      error: err instanceof Error ? err.message : "SW transport failed",
-    };
-  }
-}
 
 const manager = new ProviderManager(buildAdapters(), {
   isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
