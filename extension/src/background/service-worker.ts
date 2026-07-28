@@ -1,4 +1,4 @@
-import type { RuntimeMessage, RuntimeResponse, SaveConversationAck } from "@/types";
+import type { RuntimeMessage, RuntimeResponse, SaveConversationResult } from "@/types";
 import type { CapturedConversation } from "@/providers/base/types";
 import "@/core/subscribers";
 import { notify } from "@/services/notifications";
