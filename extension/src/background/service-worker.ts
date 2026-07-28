@@ -151,6 +151,7 @@ chrome.commands?.onCommand.addListener(async (command) => {
 
 chrome.runtime.onMessage.addListener(
   (msg: RuntimeMessage, sender, sendResponse: (r: RuntimeResponse) => void) => {
+    console.log("[BG] received", msg?.type);
     (async () => {
       try {
         switch (msg.type) {
