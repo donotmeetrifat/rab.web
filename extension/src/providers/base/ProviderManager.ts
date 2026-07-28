@@ -18,6 +18,16 @@ export interface ManagerEvents {
   isAutoSaveEnabled: () => boolean;
 }
 
+const WATCH_STATE_LABEL: Record<WatchState, string> = {
+  watching: "Watching",
+  extracting: "Extracting",
+  saving: "Saving",
+  indexing: "Indexing",
+  synced: "Synced",
+  skipped: "No changes",
+  error: "Error",
+};
+
 /**
  * Owns the lifecycle of a single active provider adapter for the current page.
  *
@@ -376,12 +386,20 @@ export class ProviderManager {
       detail: { eventName: event.type, payload: event.detail },
     });
     const dispatched = window.dispatchEvent(event);
+    const indicator = document.querySelector<HTMLElement>('[data-memlace="indicator"]');
+    const label = indicator?.querySelector<HTMLElement>(".memlace-indicator-label");
     traceStateFlow("memlace:watch-state dispatch completed", "ProviderManager.setWatchState", {
       conversationId: this.lastConversationId,
       provider: this.active?.id,
       currentWatchState: state,
       previousWatchState,
-      detail: { dispatched },
+      detail: {
+        dispatched,
+        currentDomText: label?.textContent ?? null,
+        expectedDomText: WATCH_STATE_LABEL[state],
+        currentCssClass: indicator?.className ?? null,
+        currentDatasetState: indicator?.dataset.state ?? null,
+      },
     });
   }
 
