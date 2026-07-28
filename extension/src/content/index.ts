@@ -25,7 +25,7 @@
  *   UI       → read-only
  * ============================================================
  */
-import type { RuntimeMessage, SaveConversationAck, Settings } from "@/types";
+import type { RuntimeMessage, SaveConversationResult, Settings } from "@/types";
 import { ProviderManager, buildAdapters } from "@/providers";
 import { DEFAULT_SETTINGS, loadSettings, subscribeSettings } from "@/services/settings";
 import { traceStateFlow } from "@/providers/base/stateTrace";
