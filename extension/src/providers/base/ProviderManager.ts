@@ -202,11 +202,20 @@ export class ProviderManager {
         messages: convo.messages.length,
       });
       this.setWatchState("saving");
-      const outcome = await this.events.onConversationChanged({
+      // Hard 8s timeout: the primary save must never pin the indicator.
+      // If the handler stalls (e.g. a background message never resolves),
+      // we surface the failure and reset the pill instead of hanging.
+      const savePromise = this.events.onConversationChanged({
         conversation: convo,
         hash,
         reason: this.lastHash === null ? "initial" : "auto",
       });
+      const outcome = (await Promise.race([
+        savePromise,
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ ok: false, stage: "timeout", error: new Error("save timed out after 8s") } as const), 8000),
+        ),
+      ])) as Awaited<ReturnType<ManagerEvents["onConversationChanged"]>>;
       if (!outcome.ok) {
         throw new Error(`stage:${outcome.stage}`);
       }
