@@ -111,7 +111,19 @@ export async function bootstrap(options: {
     // Subscribers module installs platform adapters + local API + wires
     // event bus listeners. All calls inside are idempotent.
     await import("@/core/subscribers");
+    // Phase 14.4 — subscribe once to MEMLACE_CONVERSATION_UPDATED so
+    // every UI surface stays live without polling or reopening.
+    const [{ installLiveEventBridge, subscribeLiveEvents }, { useMemlace }] = await Promise.all([
+      import("@/core/liveEvents"),
+      import("@/store/useMemlace"),
+    ]);
+    installLiveEventBridge();
+    subscribeLiveEvents(() => {
+      const s = useMemlace.getState();
+      if (s.ready) void s.refresh();
+    });
   }));
+
 
   const container = document.getElementById(options.rootId ?? "root");
   if (!container) {
