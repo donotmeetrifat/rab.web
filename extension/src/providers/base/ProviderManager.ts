@@ -304,7 +304,7 @@ export class ProviderManager {
         currentWatchState: this.watchState,
         previousWatchState: "extracting",
       });
-      // Hard 8s timeout: the primary save must never pin the indicator.
+      // Hard 10s timeout: the primary save must never pin the indicator.
       // If the handler stalls (e.g. a background message never resolves),
       // we surface the failure and reset the pill instead of hanging.
       const savePromise = this.events.onConversationChanged({
@@ -315,7 +315,7 @@ export class ProviderManager {
       const outcome = (await Promise.race([
         savePromise,
         new Promise((resolve) =>
-          setTimeout(() => resolve({ ok: false, stage: "timeout", error: new Error("save timed out after 8s") } as const), 8000),
+          setTimeout(() => resolve({ ok: false, stage: "timeout", error: new Error("save timed out after 10s") } as const), 10_000),
         ),
       ])) as Awaited<ReturnType<ManagerEvents["onConversationChanged"]>>;
       traceStateFlow("onConversationChanged() returned", "ProviderManager.snapshot", {
