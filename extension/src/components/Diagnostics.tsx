@@ -77,12 +77,20 @@ export function Diagnostics() {
   const toast = useToast();
   const [s, setS] = useState<Stats | null>(null);
   const [pie, setPie] = useState<PieStats | null>(null);
+  const [live, setLive] = useState<LiveEventDiag>(() => readLiveEventDiag());
   const [busy, setBusy] = useState(false);
   const refresh = () => {
     void collect().then(setS);
     void collectPieStats().then(setPie);
+    setLive(readLiveEventDiag());
   };
   useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    const unsub = subscribeLiveEvents(() => setLive(readLiveEventDiag()));
+    const id = window.setInterval(() => setLive(readLiveEventDiag()), 2000);
+    return () => { unsub(); window.clearInterval(id); };
+  }, []);
+
 
   const backup = async () => {
     setBusy(true);
