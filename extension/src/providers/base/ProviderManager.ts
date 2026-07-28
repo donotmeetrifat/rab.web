@@ -299,8 +299,12 @@ export class ProviderManager {
         provider: convo.provider,
         messages: convo.messages.length,
       });
-      this.setWatchState("saving");
-      traceStateFlow("Calling onConversationChanged()", "ProviderManager.snapshot", {
+      // Content script never writes IndexedDB itself. It ships the
+      // CapturedConversation to the background service worker (which owns
+      // the extension-origin Dexie instance) via SAVE_CONVERSATION and
+      // reflects the background's terminal outcome in the indicator.
+      this.setWatchState("sending");
+      traceStateFlow("Calling onConversationChanged() (bg transport)", "ProviderManager.snapshot", {
         conversationId: convo.conversationId,
         provider: convo.provider,
         currentWatchState: this.watchState,
