@@ -315,6 +315,7 @@ type StateConfig = { text: string; tooltip: string };
 const STATE_MAP: Record<WatchState, StateConfig> = {
   watching:   { text: "Watching",   tooltip: "Memlace is watching this conversation" },
   extracting: { text: "Extracting", tooltip: "Reading the latest conversation…" },
+  sending:    { text: "Sending",    tooltip: "Handing off to the background writer…" },
   saving:     { text: "Saving",     tooltip: "Writing to local storage…" },
   indexing:   { text: "Indexing",   tooltip: "Updating knowledge & projects…" },
   synced:     { text: "Synced",     tooltip: "Latest snapshot saved locally" },
