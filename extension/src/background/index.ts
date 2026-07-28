@@ -1,7 +1,10 @@
-import type { RuntimeMessage, RuntimeResponse } from "@/types";
+import type { RuntimeMessage, RuntimeResponse, SaveConversationAck } from "@/types";
+import type { CapturedConversation } from "@/providers/base/types";
 import "@/core/subscribers";
 import { notify } from "@/services/notifications";
 import { loadSettings } from "@/services/settings";
+import { saveConversation } from "@/services/conversations";
+import { db } from "@/lib/db";
 
 // Global error listeners — a bug in one handler must never take the SW down.
 self.addEventListener("error", (ev) => {
@@ -175,7 +178,65 @@ chrome.runtime.onMessage.addListener(
             await captureFromActiveTab();
             sendResponse({ ok: true });
             return;
+          case "SAVE_CONVERSATION": {
+            // ============================================================
+            //  MV3 sole writer. Content scripts hand off CapturedConversation
+            //  here; this is the ONLY place saveConversation() runs in the
+            //  extension-origin IndexedDB.
+            // ============================================================
+            const t0 = performance.now();
+            const captured = msg.payload.conversation as CapturedConversation;
+            try {
+              const { conversation, created, changed } = await saveConversation(captured, {
+                hash: msg.payload.hash,
+                source: msg.payload.source,
+                saveImages: msg.payload.options?.saveImages,
+                saveAttachments: msg.payload.options?.saveAttachments,
+              });
+              // Background is the sole verifier — content never reads the DB.
+              const row = await db.conversations.get(conversation.id);
+              const verified = Boolean(row);
+              const durationMs = Math.round(performance.now() - t0);
+              const ack: SaveConversationAck = {
+                verified,
+                conversationId: conversation.id,
+                created,
+                updated: !created && changed,
+                provider: conversation.provider,
+                messageCount: captured.messages.length,
+                hash: msg.payload.hash,
+                createdAt: conversation.createdAt,
+                updatedAt: conversation.updatedAt,
+                durationMs,
+              };
+              console.log("[Memlace] Conversation saved", ack);
+              // Fire-and-forget user notification (no longer traveling
+              // back through the content script's message channel).
+              if (changed) {
+                const settings = await loadSettings().catch(() => null);
+                if (settings?.notificationsEnabled !== false) {
+                  void notify({
+                    title: created
+                      ? `Saved from ${conversation.provider}`
+                      : `Updated from ${conversation.provider}`,
+                    message: conversation.title.slice(0, 100),
+                  }).catch(() => undefined);
+                }
+              }
+              sendResponse({ ok: true, data: ack });
+            } catch (err) {
+              console.error("[Memlace] SAVE_CONVERSATION failed", err);
+              sendResponse({
+                ok: false,
+                error: err instanceof Error ? err.message : "save failed",
+              });
+            }
+            return;
+          }
           case "CONVERSATION_SAVED": {
+            // Legacy path — kept for backward compatibility with older
+            // content-script bundles still in the wild during rollout.
+            // New pipeline notifies from SAVE_CONVERSATION directly.
             const settings = await loadSettings().catch(() => null);
             if (settings?.notificationsEnabled !== false) {
               await notify({

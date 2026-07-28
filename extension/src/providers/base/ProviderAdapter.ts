@@ -60,6 +60,7 @@ export interface ProviderAdapter {
 export type WatchState =
   | "watching"
   | "extracting"
+  | "sending"
   | "saving"
   | "indexing"
   | "synced"

@@ -315,6 +315,7 @@ type StateConfig = { text: string; tooltip: string };
 const STATE_MAP: Record<WatchState, StateConfig> = {
   watching:   { text: "Watching",   tooltip: "Memlace is watching this conversation" },
   extracting: { text: "Extracting", tooltip: "Reading the latest conversation…" },
+  sending:    { text: "Sending",    tooltip: "Handing off to the background writer…" },
   saving:     { text: "Saving",     tooltip: "Writing to local storage…" },
   indexing:   { text: "Indexing",   tooltip: "Updating knowledge & projects…" },
   synced:     { text: "Synced",     tooltip: "Latest snapshot saved locally" },
@@ -369,9 +370,11 @@ function ensureStylesInjected(): void {
       animation: memlace-pulse 2.4s ease-in-out infinite;
     }
     .memlace-indicator[data-state="extracting"],
+    .memlace-indicator[data-state="sending"],
     .memlace-indicator[data-state="saving"],
     .memlace-indicator[data-state="indexing"] { color: #2563EB; opacity: 0.95; }
     .memlace-indicator[data-state="extracting"] .memlace-indicator-dot,
+    .memlace-indicator[data-state="sending"] .memlace-indicator-dot,
     .memlace-indicator[data-state="saving"] .memlace-indicator-dot,
     .memlace-indicator[data-state="indexing"] .memlace-indicator-dot {
       animation: memlace-pulse 900ms ease-in-out infinite;
@@ -391,6 +394,7 @@ function ensureStylesInjected(): void {
       }
       .memlace-indicator[data-state="watching"] { color: #94A3B8; }
       .memlace-indicator[data-state="extracting"],
+      .memlace-indicator[data-state="sending"],
       .memlace-indicator[data-state="saving"],
       .memlace-indicator[data-state="indexing"] { color: #60A5FA; }
       .memlace-indicator[data-state="synced"]   { color: #34D399; }

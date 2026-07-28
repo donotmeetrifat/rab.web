@@ -21,6 +21,7 @@ export interface ManagerEvents {
 const WATCH_STATE_LABEL: Record<WatchState, string> = {
   watching: "Watching",
   extracting: "Extracting",
+  sending: "Sending",
   saving: "Saving",
   indexing: "Indexing",
   synced: "Synced",
@@ -77,6 +78,7 @@ export class ProviderManager {
   private static readonly TRANSIENT_STATE_TIMEOUT_MS = 10_000;
   private static readonly TRANSIENT_STATES: ReadonlySet<WatchState> = new Set<WatchState>([
     "extracting",
+    "sending",
     "saving",
     "indexing",
   ]);
@@ -297,8 +299,12 @@ export class ProviderManager {
         provider: convo.provider,
         messages: convo.messages.length,
       });
-      this.setWatchState("saving");
-      traceStateFlow("Calling onConversationChanged()", "ProviderManager.snapshot", {
+      // Content script never writes IndexedDB itself. It ships the
+      // CapturedConversation to the background service worker (which owns
+      // the extension-origin Dexie instance) via SAVE_CONVERSATION and
+      // reflects the background's terminal outcome in the indicator.
+      this.setWatchState("sending");
+      traceStateFlow("Calling onConversationChanged() (bg transport)", "ProviderManager.snapshot", {
         conversationId: convo.conversationId,
         provider: convo.provider,
         currentWatchState: this.watchState,
@@ -337,6 +343,9 @@ export class ProviderManager {
       // DB has committed. Downstream engines (knowledge, project, PIE,
       // graph, workspace, context) fire on the Orchestrator's queue and
       // never block us here.
+      // Background acknowledged the write. Reflect the persist stage briefly
+      // for user-visible continuity, then transition to indexing/synced.
+      this.setWatchState("saving");
       this.setWatchState("indexing");
       this.lastHash = hash;
       this.lastWriteAt = Date.now();
