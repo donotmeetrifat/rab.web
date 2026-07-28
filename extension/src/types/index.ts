@@ -171,22 +171,48 @@ export type RuntimeMessage =
         created: boolean;
         source: "manual" | "auto" | "initial";
       };
+    }
+  | {
+      /**
+       * Phase 14.4: after every successful background save, broadcast this
+       * event so every open UI surface can invalidate caches and refresh
+       * without polling or reopening.
+       */
+      type: "MEMLACE_CONVERSATION_UPDATED";
+      payload: {
+        conversationId: string;
+        provider: ProviderId;
+        projectId: string | null;
+        updatedAt: number;
+        created: boolean;
+        source: "manual" | "auto" | "initial";
+      };
     };
 
-/** Reply shape for SAVE_CONVERSATION carried inside RuntimeResponse.data. */
-export interface SaveConversationAck {
+/**
+ * Unified reply payload for SAVE_CONVERSATION. Every layer (content,
+ * background, ProviderManager, saveTransport) speaks this exact shape;
+ * no duplicated interfaces, no `any`.
+ */
+export interface SaveConversationResult {
+  ok: boolean;
   verified: boolean;
   conversationId: string;
+  provider: ProviderId;
+  hash: string;
   created: boolean;
   updated: boolean;
-  provider: ProviderId;
-  messageCount: number;
-  hash: string;
-  createdAt: number;
-  updatedAt: number;
   durationMs: number;
+  /** Set when this call was folded into an already-in-flight save. */
+  coalesced?: boolean;
+  /** Present only on `ok:false`. */
+  error?: string;
 }
+
+/** @deprecated Alias for SaveConversationResult — kept only for older callers. */
+export type SaveConversationAck = SaveConversationResult;
 
 export type RuntimeResponse =
   | { ok: true; data?: unknown }
   | { ok: false; error: string };
+
