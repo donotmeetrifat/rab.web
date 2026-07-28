@@ -72,6 +72,10 @@ export class ProviderManager {
   private currentUrl = "";
   private disposed = false;
   private savingInFlight = false;
+  /** Set to true when a DOM change (or snapshot request) arrives while a save
+   *  is already running. Guarantees the newest content is captured after the
+   *  in-flight save completes — no mutation is ever silently lost. */
+  private pendingRearm = false;
 
   /** Hard ceiling for any transient (non-terminal) watch state. Guarantees
    *  the FSM can never remain in extracting/saving/indexing forever. */
@@ -192,7 +196,10 @@ export class ProviderManager {
       return;
     }
     if (this.savingInFlight) {
-      traceStateFlow("EARLY EXIT: save already in flight", "ProviderManager.snapshot", {
+      // Coalesce: remember that content changed while we were busy so we
+      // can re-arm the quiet window once the in-flight save resolves.
+      this.pendingRearm = true;
+      traceStateFlow("EARLY EXIT: save already in flight (pending re-arm)", "ProviderManager.snapshot", {
         conversationId: this.lastConversationId,
         provider: this.active.id,
         currentWatchState: this.watchState,
@@ -385,6 +392,12 @@ export class ProviderManager {
         currentWatchState: this.watchState,
         previousWatchState: this.watchState,
       });
+      // If content changed during the save, re-arm the quiet window so the
+      // newest snapshot is still captured — no mutation is ever lost.
+      if (this.pendingRearm && !this.disposed) {
+        this.pendingRearm = false;
+        this.armQuietWindow();
+      }
     }
   }
 
