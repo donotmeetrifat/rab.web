@@ -194,6 +194,9 @@ chrome.runtime.onMessage.addListener(
             // ============================================================
             const t0 = performance.now();
             const captured = msg.payload.conversation as CapturedConversation;
+            auditStart(captured.provider, captured.conversationId, msg.payload.hash);
+            auditMark(captured.provider, captured.conversationId, "sent", { hash: msg.payload.hash });
+            auditMark(captured.provider, captured.conversationId, "queued");
             try {
               const { conversation, created, changed } = await saveConversation(captured, {
                 hash: msg.payload.hash,
@@ -201,9 +204,11 @@ chrome.runtime.onMessage.addListener(
                 saveImages: msg.payload.options?.saveImages,
                 saveAttachments: msg.payload.options?.saveAttachments,
               });
+              auditMark(conversation.provider, conversation.id, "saved", { hash: msg.payload.hash });
               // Background is the sole verifier — content never reads the DB.
               const row = await db.conversations.get(conversation.id);
               const verified = Boolean(row);
+              if (verified) auditMark(conversation.provider, conversation.id, "verified", { hash: msg.payload.hash });
               const durationMs = Math.round(performance.now() - t0);
               const result: SaveConversationResult = {
                 ok: true,
@@ -233,6 +238,7 @@ chrome.runtime.onMessage.addListener(
               // surface. Fire-and-forget: broadcast MUST NOT block the ack.
               if (verified) {
                 try {
+                  auditMark(conversation.provider, conversation.id, "broadcast", { hash: msg.payload.hash });
                   void chrome.runtime
                     .sendMessage({
                       type: "MEMLACE_CONVERSATION_UPDATED",
@@ -252,6 +258,7 @@ chrome.runtime.onMessage.addListener(
 
             } catch (err) {
               console.error("[Memlace] SAVE_CONVERSATION failed", err);
+              auditFail(captured.provider, captured.conversationId, err instanceof Error ? err.message : "save failed");
               sendResponse({
                 ok: false,
                 error: err instanceof Error ? err.message : "save failed",
