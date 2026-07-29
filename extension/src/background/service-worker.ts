@@ -245,7 +245,7 @@ chrome.runtime.onMessage.addListener(
                       payload: {
                         conversationId: conversation.id,
                         provider: conversation.provider,
-                        projectId: conversation.projectId ?? null,
+                        projectId: null,
                         updatedAt: conversation.updatedAt,
                         created,
                         source: msg.payload.source,
