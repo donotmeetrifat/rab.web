@@ -120,6 +120,10 @@ async function sendWithRetry(msg: SaveMessage): Promise<RuntimeResponse> {
  */
 export async function dispatchSaveConversation(msg: SaveMessage): Promise<RuntimeResponse> {
   const key = keyOf(msg);
+  const c = msg.payload.conversation as { provider?: string; conversationId?: string };
+  if (c?.provider && c?.conversationId) {
+    try { auditStart(c.provider, c.conversationId, msg.payload.hash); } catch { /* noop */ }
+  }
   pending.set(key, msg); // newest snapshot wins
   diag.queueLength = pending.size;
 

@@ -9,6 +9,9 @@ import { PROVIDERS } from "@/lib/providers";
 import { collectPieStats } from "@/pie";
 import type { PieStats } from "@/pie/types";
 import { readLiveEventDiag, subscribeLiveEvents, type LiveEventDiag } from "@/core/liveEvents";
+import { auditSummary, type AuditSummary } from "@/core/SaveAuditor";
+import { readHealthReport, runHealthCheck, type HealthReport as HealthProbeReport } from "@/core/HealthCheck";
+import { runMemoryHealth, type HealthReport as MemoryReport } from "@/services/memoryHealth";
 
 
 type Stats = {
