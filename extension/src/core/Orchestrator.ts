@@ -88,7 +88,7 @@ export function dispatchConversationSaved(
 
       await runStep("projectDetection", async () => {
         await detectProjectFor(conversation);
-        emit("project.updated", { conversationId: conversation.id });
+        emit("project.updated", {});
       });
 
       await runStep("personalIntelligence", async () => {

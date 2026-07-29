@@ -51,7 +51,7 @@ export function runMemoryHealth(): Promise<HealthReport> {
         db.projects.toArray(),
       ]);
       const convIds = new Set(convs.map((c) => c.id));
-      const projectIds = new Set(projects.map((p) => p.id));
+      void projects;
 
       // 1. Orphan messages
       const orphanIds: string[] = [];
