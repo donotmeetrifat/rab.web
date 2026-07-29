@@ -81,16 +81,28 @@ export function Diagnostics() {
   const [s, setS] = useState<Stats | null>(null);
   const [pie, setPie] = useState<PieStats | null>(null);
   const [live, setLive] = useState<LiveEventDiag>(() => readLiveEventDiag());
+  const [audit, setAudit] = useState<AuditSummary>(() => auditSummary());
+  const [health, setHealth] = useState<HealthProbeReport>(() => readHealthReport());
+  const [memRepair, setMemRepair] = useState<MemoryReport | null>(null);
   const [busy, setBusy] = useState(false);
   const refresh = () => {
     void collect().then(setS);
     void collectPieStats().then(setPie);
     setLive(readLiveEventDiag());
+    setAudit(auditSummary());
+    setHealth(readHealthReport());
   };
   useEffect(() => { refresh(); }, []);
   useEffect(() => {
-    const unsub = subscribeLiveEvents(() => setLive(readLiveEventDiag()));
-    const id = window.setInterval(() => setLive(readLiveEventDiag()), 2000);
+    const unsub = subscribeLiveEvents(() => {
+      setLive(readLiveEventDiag());
+      setAudit(auditSummary());
+    });
+    const id = window.setInterval(() => {
+      setLive(readLiveEventDiag());
+      setAudit(auditSummary());
+      setHealth(readHealthReport());
+    }, 2000);
     return () => { unsub(); window.clearInterval(id); };
   }, []);
 
