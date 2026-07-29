@@ -5,6 +5,10 @@ import { notify } from "@/services/notifications";
 import { loadSettings } from "@/services/settings";
 import { saveConversation } from "@/services/conversations";
 import { db } from "@/lib/db";
+import { auditStart, auditMark, auditFail } from "@/core/SaveAuditor";
+import { startHealthLoop } from "@/core/HealthCheck";
+
+startHealthLoop();
 
 console.log("[Memlace BG] started");
 console.log("[Memlace BG] runtime", chrome.runtime.id, globalThis.location.origin);
