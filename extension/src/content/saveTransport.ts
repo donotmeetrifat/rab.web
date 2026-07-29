@@ -11,6 +11,7 @@
  * This module is loaded only by the content script.
  */
 import type { RuntimeMessage, RuntimeResponse } from "@/types";
+import { auditStart } from "@/core/SaveAuditor";
 
 type SaveMessage = Extract<RuntimeMessage, { type: "SAVE_CONVERSATION" }>;
 
