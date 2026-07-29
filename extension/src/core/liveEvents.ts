@@ -18,6 +18,7 @@
 import type { RuntimeMessage } from "@/types";
 import { invalidate } from "./Cache";
 import { emit } from "./EventBus";
+import { auditMark } from "./SaveAuditor";
 
 export interface LiveEventDiag {
   lastEvent: string | null;
@@ -75,12 +76,14 @@ export function installLiveEventBridge(): void {
     diag.lastBroadcastAt = payload.updatedAt;
     diag.lastConversationId = payload.conversationId;
     diag.lastProvider = payload.provider;
+    auditMark(payload.provider, payload.conversationId, "received");
 
     // Invalidate only the affected scopes — never a full wipe.
     const scopes = ["workspace", "projects", "context", "answers", "search", "knowledge", "timeline"];
     for (const scope of scopes) {
       try { invalidate(scope); diag.cacheInvalidations += 1; } catch { /* noop */ }
     }
+    auditMark(payload.provider, payload.conversationId, "cacheInvalidated");
 
     // Fan out to the internal bus so existing subscribers (project brain,
     // smart workspace, onboarding, etc.) refresh through the same wiring.
@@ -99,5 +102,7 @@ export function installLiveEventBridge(): void {
       try { l(msg); } catch (err) { console.warn("[Memlace][liveEvents] listener threw", err); }
     }
     diag.lastRefreshAt = Date.now();
+    auditMark(payload.provider, payload.conversationId, "rendered");
+    auditMark(payload.provider, payload.conversationId, "completed");
   });
 }

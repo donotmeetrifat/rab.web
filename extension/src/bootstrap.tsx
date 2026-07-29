@@ -113,15 +113,17 @@ export async function bootstrap(options: {
     await import("@/core/subscribers");
     // Phase 14.4 — subscribe once to MEMLACE_CONVERSATION_UPDATED so
     // every UI surface stays live without polling or reopening.
-    const [{ installLiveEventBridge, subscribeLiveEvents }, { useMemlace }] = await Promise.all([
+    const [{ installLiveEventBridge, subscribeLiveEvents }, { useMemlace }, { startHealthLoop }] = await Promise.all([
       import("@/core/liveEvents"),
       import("@/store/useMemlace"),
+      import("@/core/HealthCheck"),
     ]);
     installLiveEventBridge();
     subscribeLiveEvents(() => {
       const s = useMemlace.getState();
       if (s.ready) void s.refresh();
     });
+    startHealthLoop();
   }));
 
 
