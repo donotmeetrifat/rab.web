@@ -18,6 +18,7 @@
 import type { RuntimeMessage } from "@/types";
 import { invalidate } from "./Cache";
 import { emit } from "./EventBus";
+import { auditMark } from "./SaveAuditor";
 
 export interface LiveEventDiag {
   lastEvent: string | null;
