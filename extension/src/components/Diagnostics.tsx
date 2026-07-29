@@ -212,6 +212,118 @@ export function Diagnostics() {
         </dl>
       </section>
 
+      <section className="rounded-lg border border-border bg-surface">
+        <header className="px-4 py-2 border-b border-border flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Save Auditor</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Every save gets an audit record. Successful ones self-clear; failures stay for inspection.
+            </p>
+          </div>
+          <span className="text-[11px] font-medium text-foreground tabular-nums">
+            reliability {(audit.reliabilityScore * 100).toFixed(1)}%
+          </span>
+        </header>
+        <dl className="divide-y divide-border">
+          {([
+            ["Records tracked", audit.total],
+            ["Pending", audit.pending],
+            ["Succeeded", audit.ok],
+            ["Failed", audit.failed],
+            ["Integrity warnings", audit.integrity],
+            ["Success rate", `${(audit.successRate * 100).toFixed(1)}%`],
+            ["Integrity score", `${(audit.integrityScore * 100).toFixed(1)}%`],
+            ["Avg save duration", `${audit.avgDurationMs} ms`],
+            ["Max save duration", `${audit.maxDurationMs} ms`],
+            ["Avg broadcast latency", `${audit.avgBroadcastMs} ms`],
+            ["Avg UI refresh latency", `${audit.avgUiRefreshMs} ms`],
+          ] as Array<[string, string | number]>).map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="font-medium text-foreground tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
+        {audit.records.filter((r) => r.status !== "ok").length > 0 && (
+          <div className="border-t border-border px-4 py-2 space-y-1">
+            <p className="text-[11px] font-semibold text-foreground">Open audits</p>
+            {audit.records
+              .filter((r) => r.status !== "ok")
+              .slice(0, 6)
+              .map((r) => (
+                <div key={`${r.provider}|${r.conversationId}`} className="text-[11px] text-muted-foreground truncate">
+                  <span className="uppercase tracking-wide mr-2">{r.status}</span>
+                  {r.provider} · {r.conversationId.slice(0, 12)}… {r.error ? `— ${r.error}` : ""}
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-border bg-surface">
+        <header className="px-4 py-2 border-b border-border flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">System Health</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Lightweight probe every 60 s. Never interrupts you.
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={async () => setHealth(await runHealthCheck())}
+          >
+            Run now
+          </Button>
+        </header>
+        <dl className="divide-y divide-border">
+          {health.probes.length === 0 ? (
+            <div className="px-4 py-3 text-xs text-muted-foreground">No probe run yet.</div>
+          ) : (
+            health.probes.map((p) => (
+              <div key={p.key} className="flex items-center justify-between px-4 py-2 text-xs">
+                <dt className="text-muted-foreground">{p.key}</dt>
+                <dd className={`font-medium tabular-nums ${p.ok ? "text-foreground" : "text-red-600"}`}>
+                  {p.ok ? "OK" : "FAIL"}{p.detail ? ` · ${p.detail}` : ""}{p.ms ? ` · ${p.ms}ms` : ""}
+                </dd>
+              </div>
+            ))
+          )}
+          <div className="flex items-center justify-between px-4 py-2 text-xs">
+            <dt className="text-muted-foreground">Runs / failures</dt>
+            <dd className="font-medium text-foreground tabular-nums">{health.runs} / {health.failures}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="rounded-lg border border-border bg-surface">
+        <header className="px-4 py-2 border-b border-border flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Memory Health</h3>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Repairs orphans, duplicates and invalid links in place.
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            onClick={async () => setMemRepair(await runMemoryHealth())}
+          >
+            Repair now
+          </Button>
+        </header>
+        {memRepair && (
+          <dl className="divide-y divide-border">
+            {(Object.entries(memRepair) as Array<[string, number]>).map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd className="font-medium text-foreground tabular-nums">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </section>
+
+
+
 
       <section className="rounded-lg border border-border bg-surface">
         <dl className="divide-y divide-border">
