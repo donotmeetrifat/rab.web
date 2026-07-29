@@ -136,16 +136,11 @@ export function runMemoryHealth(): Promise<HealthReport> {
         report.orphanRelationships = orphanRelIds.length;
       }
 
-      // 6. Invalid project links on conversations.
-      const invalid = convs.filter(
-        (c) => c.projectId && !projectIds.has(c.projectId) && convIds.has(c.id),
-      );
-      if (invalid.length) {
-        await db.conversations.bulkUpdate(
-          invalid.map((c) => ({ key: c.id, changes: { projectId: null } })),
-        );
-        report.invalidProjectLinks = invalid.length;
-      }
+      // 6. Invalid project links live on memories, not conversations.
+      // Skip here — memory project links are validated by the memories
+      // service on read and repaired on next write.
+      void projects;
+
     } catch (err) {
       console.warn("[memlace] memory health sweep failed", err);
     }
