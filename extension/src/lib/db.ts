@@ -223,11 +223,10 @@ try {
           _dlog("transaction start", { stores, mode });
           const tx = down.transaction(stores, mode);
           try {
-            tx.addEventListener?.("abort", () => _dlog("transaction abort", { stores, mode }));
-            tx.addEventListener?.("complete", () => _dlog("transaction end", { stores, mode }));
-            tx.addEventListener?.("error", (ev: unknown) =>
-              _dlog("transaction error", { stores, mode, ev }),
-            );
+            const anyTx = tx as unknown as { addEventListener?: (t: string, cb: (ev?: unknown) => void) => void };
+            anyTx.addEventListener?.("abort", () => _dlog("transaction abort", { stores, mode }));
+            anyTx.addEventListener?.("complete", () => _dlog("transaction end", { stores, mode }));
+            anyTx.addEventListener?.("error", (ev) => _dlog("transaction error", { stores, mode, ev }));
           } catch { /* ignore listener attach failure */ }
           return tx;
         },
