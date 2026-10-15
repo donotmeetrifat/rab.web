@@ -614,8 +614,8 @@ function CleanVideoPlayer() {
             ref={videoRef}
             src="/railway-demo.mp4"
             playsInline
-            preload="auto"
-            poster="/railway-hero.png"
+            preload="metadata"
+            poster="/railway-thumbnail.png"
             className="w-full h-full object-cover bg-black block cursor-pointer"
             onClick={togglePlay}
             onTimeUpdate={handleTimeUpdate}
@@ -629,6 +629,15 @@ function CleanVideoPlayer() {
           >
             আপনার ব্রাউজার ভিডিও প্লে করতে সমর্থন করে না।
           </video>
+
+          {/* Video Thumbnail Overlay (visible before first play) */}
+          {!isPlaying && currentTime === 0 && !isEnded && (
+            <img
+              src="/railway-thumbnail.png"
+              alt="Railway Auto-Booker Video Thumbnail"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] select-none"
+            />
+          )}
 
           {/* Center Play/Pause Flash Animation on Video Click */}
           {flashFeedback && (
