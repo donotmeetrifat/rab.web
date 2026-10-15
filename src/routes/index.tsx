@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -18,7 +18,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
 export const Route = createFileRoute("/")({
@@ -30,13 +29,13 @@ const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
 /** Default Contact URLs (Placeholders for user to update) */
-const WHATSAPP_NUMBER = "8801XXXXXXXXX"; // User can replace with their WhatsApp number
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello! I want to buy the Bangladesh Railway Auto-Booker subscription.")}`;
-const FACEBOOK_LINK = "https://facebook.com/"; // User can replace with their Facebook profile / page link
+const WHATSAPP_NUMBER = "8801XXXXXXXXX";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("আসসালামু আলাইকুম! আমি BD Railway Auto-Booker এক্সটেনশনটির সাবস্ক্রিপশন নিতে চাই।")}`;
+const FACEBOOK_LINK = "https://facebook.com/";
 
 function BrandWordmark({
   className = "",
-  iconSize = "h-7 w-7",
+  iconSize = "h-8 w-8",
   textSize = "text-xl",
 }: {
   className?: string;
@@ -47,17 +46,12 @@ function BrandWordmark({
     <span className={`inline-flex items-center gap-2.5 leading-none select-none ${className}`}>
       <img
         src="/railway-icon.png"
-        alt="Railway Auto-Booker Logo"
+        alt="Railway Auto-Booker"
         className={`${iconSize} rounded-[8px] object-cover shrink-0 shadow-xs border border-primary/20`}
       />
-      <div className="flex flex-col">
-        <span className={`font-bold tracking-tight text-foreground ${textSize}`}>
-          Railway <span className="text-primary">Auto-Booker</span>
-        </span>
-        <span className="text-[10px] font-mono tracking-wider uppercase text-muted-foreground">
-          By Rifat · v4.0 Pro
-        </span>
-      </div>
+      <span className={`font-bold tracking-tight text-foreground ${textSize}`}>
+        Railway <span className="text-primary">Auto-Booker</span>
+      </span>
     </span>
   );
 }
@@ -78,124 +72,161 @@ function FacebookIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-const TOP_ROUTES = [
-  { from: "Dhaka", to: "Chittagong", train: "Suborno / Sonar Bangla" },
-  { from: "Dhaka", to: "Cox's Bazar", train: "Cox's Bazar / Tourist Exp" },
-  { from: "Dhaka", to: "Sylhet", train: "Parabat / Upaban Express" },
-  { from: "Dhaka", to: "Rajshahi", train: "Silkcity / Padma Express" },
-  { from: "Dhaka", to: "Khulna", train: "Sundarban / Chitra Express" },
+const SHARED_BENEFITS = [
+  "সকাল ৮:০০ ও দুপুর ২:০০ টার রাশ আওয়ার টিকিট অটো-বুকিং",
+  "কম্পিউটার (Chrome, Edge, Brave) ও মোবাইল (Kiwi) সাপোর্ট",
+  "পছন্দের বগি ও সিট রেঞ্জ অনুযায়ী অটোমেটিক সিট সিলেকশন",
+  "স্বয়ংক্রিয়ভাবে যাত্রীর তথ্য পূরণ ও ওটিপি পেজে রিডাইরেক্ট",
+  "বাংলাদেশ রেলওয়ের সকল আন্তঃনগর ট্রেনের জন্য কার্যকর",
+  "লাইসেন্স কি অ্যাক্টিভেশন ও তাৎক্ষণিক ইনস্টলেশন সহায়তা",
 ];
 
-const SEAT_CLASSES = ["Snigdha (AC)", "AC_B (Berth)", "S_CHAIR", "AC_S (Seat)", "Shovon"];
+const SHORT_TERM_PLANS = [
+  {
+    id: "3-days",
+    name: "৩ দিনের পাস",
+    badge: "টেস্ট / ১টি ট্রিপ",
+    price: "৳ ৭৯",
+    period: "৩ দিনের জন্য ভ্যালিড",
+    subtitle: "টেস্ট করার জন্য বা ১টি ট্রিপের টিকিট কাটার জন্য উপযুক্ত",
+    isPopular: false,
+  },
+  {
+    id: "7-days",
+    name: "৭ দিনের পাস",
+    badge: "যাওয়া ও আসার টিকিট",
+    price: "৳ ১৪৯",
+    period: "৭ দিনের জন্য ভ্যালিড",
+    subtitle: "এক সপ্তাহে যাওয়া ও আসার টিকিট নিশ্চিন্তে কাটুন",
+    isPopular: false,
+  },
+  {
+    id: "15-days",
+    name: "১৫ দিনের পাস",
+    badge: "শর্ট-টার্ম ট্রিপ",
+    price: "৳ ১৯৯",
+    period: "১৫ দিনের জন্য ভ্যালিড",
+    subtitle: "স্বল্পমেয়াদী একাধিক ভ্রমণের জন্য সুবিধাজনক",
+    isPopular: false,
+  },
+];
+
+const REGULAR_PLANS = [
+  {
+    id: "30-days",
+    name: "৩০ দিন (১ মাস)",
+    badge: "🔥 মোস্ট পপুলার / বেস্ট ভ্যালু",
+    price: "৳ ২৪৯",
+    period: "পূর্ণ ১ মাসের ভ্যালিডিটি",
+    subtitle: "সবচেয়ে জনপ্রিয় প্যাকেজ — নিয়মিত ভ্রমণকারীদের সেরা পছন্দ",
+    isPopular: true,
+  },
+  {
+    id: "90-days",
+    name: "৯০ দিন (৩ মাস)",
+    badge: "Save ৳১৫০",
+    price: "৳ ৫৯৯",
+    period: "৩ মাসের ভ্যালিডিটি",
+    subtitle: "দীর্ঘমেয়াদী ট্রিপ ও ফ্যামিলি টিকিটের জন্য সেরা সাশ্রয়ী",
+    isPopular: false,
+  },
+  {
+    id: "180-days",
+    name: "১৮০ দিন (৬ মাস)",
+    badge: "Save ৳৫০০",
+    price: "৳ ৯৯৯",
+    period: "৬ মাসের ভ্যালিডিটি",
+    subtitle: "অর্ধবার্ষিক প্যাকেজ — প্রতি মাসে ব্যাপক সাশ্রয়",
+    isPopular: false,
+  },
+  {
+    id: "365-days",
+    name: "১ বছর (৩৬৫ দিন)",
+    badge: "ভিআইপি মেম্বারশিপ",
+    price: "৳ ১,৭৯৯",
+    period: "সম্পূর্ণ ১ বছরের ভ্যালিডিটি",
+    subtitle: "সারা বছর আনলিমিটেড টিকিট কাটার ফুল ভিআইপি অ্যাক্সেস",
+    isPopular: false,
+  },
+];
 
 const FEATURES = [
   {
     icon: Zap,
-    title: "8:00 AM Millisecond Rush Trigger",
-    body: "Synchronizes directly with official server time. Searches and selects seats the exact millisecond tickets unlock at 8:00 AM or 2:00 PM.",
+    title: "সকাল ৮:০০ ও দুপুর ২:০০ টার মিলি-সেকেন্ড অটো-ট্রিগার",
+    body: "বাংলাদেশ রেলওয়ে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত সিঙ্ক। টিকিট ছাড়ার সাথে সাথে মানুষের চেয়ে ৫০ গুণ দ্রুত টিকিট সার্চ ও সিলেক্ট করে।",
+  },
+  {
+    icon: Smartphone,
+    title: "কম্পিউটার ও মোবাইল উভয় ডিভাইসে সাপোর্ট",
+    body: "পিসিতে গুগল ক্রোম, এজ, ব্রেভ ব্রাউজার ছাড়াও অ্যান্ড্রয়েড মোবাইলে Kiwi Browser-এর মাধ্যমে সমান দ্রুততায় মোবাইল থেকেই টিকিট কাটতে পারবেন।",
   },
   {
     icon: Train,
-    title: "Smart Seat & Coach Selector",
-    body: "Specify your desired class, favorite bogie (coach), and seat number range (1–40). Auto-selects consecutive seats for families in seconds.",
+    title: "স্মার্ট সিট ও বগি (Coach) অটো-সিলেকশন",
+    body: "আপনার পছন্দের ক্লাস (Snigdha, S_CHAIR, AC), বগি এবং সিট রেঞ্জ (যেমন ২০-৫০) দিয়ে রাখলে পরিবারের জন্য এক সারির খালি সিট স্বয়ংক্রিয়ভাবে লক করে।",
   },
   {
     icon: Clock,
-    title: "Auto OTP & Instant Checkout Handoff",
-    body: "Auto-fills passenger details and jumps straight to the payment gateway (bKash, Nagad, Rocket, or Card) without hesitation.",
+    title: "অটো ওটিপি ও দ্রুত পেমেন্ট পেজ জাম্প",
+    body: "যাত্রীর নাম, বয়স ও তথ্য স্বয়ংক্রিয়ভাবে টাইপ করে সেকেন্ডের মধ্যে ওটিপি পেজে নিয়ে যায়, যাতে বিকাশ/নগদে পেমেন্ট করে দ্রুত কনফার্ম করা যায়।",
   },
   {
     icon: ShieldCheck,
-    title: "100% Local, Private & Secure",
-    body: "Runs purely on your local browser. No passwords, personal data, or payment tokens are ever sent to third-party servers. Zero logs.",
+    title: "১০০% লোকাল, প্রাইভেট ও নিরাপদ",
+    body: "সম্পূর্ণ ব্রাউজারের ভেতর লোকালভাবে কাজ করে। আপনার কোনো পাসওয়ার্ড, তথ্য বা ওটিপি কোনো সার্ভারে পাঠানো হয় না। সম্পূর্ণ নিরাপদ।",
   },
   {
     icon: RotateCcw,
-    title: "Multi-Train & Route Fallbacks",
-    body: "If your top train is sold out within 100 milliseconds, the auto-booker instantly flips to your secondary train choice without missing a beat.",
-  },
-  {
-    icon: Sparkles,
-    title: "Anti-Ban & Humanized Micro-Delays",
-    body: "Engineered with intelligent delay distribution that mimics high-speed human interaction, avoiding server rate limits and IP blocks.",
+    title: "ফেইলসেফ ব্যাকআপ ও অ্যান্টি-ব্যান প্রযুক্তি",
+    body: "পছন্দের সিট খালি না থাকলে সাথে সাথে অন্য খালি সিট সিলেক্ট করার ব্যাকআপ অপশন রয়েছে। সাথে আছে হিউম্যানাইজড টাইম ডিলে যা আইপি ব্লক প্রতিরোধ করে।",
   },
 ];
 
-const STEPS = [
+const INSTALL_STEPS = [
   {
-    step: "1",
-    title: "Get Extension & Unzip",
-    desc: "Contact us via WhatsApp or Facebook to receive the latest v4.0 extension ZIP file, then extract it to a folder on your computer.",
-  },
-  {
-    step: "2",
-    title: "Open Chrome Extensions",
-    desc: "In your Chrome, Edge, Brave, or Opera browser, go to chrome://extensions in the address bar.",
-  },
-  {
-    step: "3",
-    title: "Enable Developer Mode",
-    desc: "Turn ON the 'Developer mode' toggle located at the top-right corner of the Extensions page.",
-  },
-  {
-    step: "4",
-    title: "Click 'Load Unpacked'",
-    desc: "Click the 'Load unpacked' button at the top-left and select the unzipped folder. You're ready to auto-book!",
-  },
-];
-
-const PRICING_PLANS = [
-  {
-    id: "monthly",
-    name: "1 Month Pass",
-    badge: "Quick Trip",
-    isPopular: false,
-    price: "৳ 499",
-    period: "for 30 Days",
-    description: "Ideal for travelers planning single journeys or holiday vacation tickets.",
-    features: [
-      "1 Browser / PC License",
-      "8:00 AM & 2:00 PM Rush Auto-Booking",
-      "All Bangladesh Railway Routes & Trains",
-      "Class & Seat Range Preference",
-      "Auto-fill Passenger Details",
-      "WhatsApp Setup Guidance",
+    step: "১",
+    title: "ফাইলটি আনজিপ (Unzip) করুন",
+    details: [
+      "ডাউনলোড করা Railway Auto-Booker.zip ফাইলের ওপর মাউসের রাইট ক্লিক করুন।",
+      "'Extract All...' বা 'Extract to Railway Auto-Booker' অপশনে ক্লিক করে ফোল্ডার তৈরি করুন।",
     ],
   },
   {
-    id: "seasonal",
-    name: "Seasonal / Eid Special",
-    badge: "Most Popular · Eid Rush",
-    isPopular: true,
-    price: "৳ 999",
-    period: "for 3 Months (Full Season)",
-    description: "The top choice for regular commuters, family trips, and high-demand Eid rushes.",
-    features: [
-      "Up to 2 Devices Supported",
-      "High-Priority Millisecond Search Engine",
-      "Multi-Train Fallback Queuing",
-      "Consecutive Family Seat Auto-Lock",
-      "VIP 1-on-1 Remote Setup (AnyDesk)",
-      "Instant Updates for Railway Portal Changes",
-      "Priority WhatsApp & Facebook Support",
+    step: "২",
+    title: "গুগল ক্রোম বা মোবাইলে এক্সটেনশন যুক্ত করুন",
+    details: [
+      "কম্পিউটারে Chrome অথবা মোবাইলে Kiwi Browser ওপেন করুন।",
+      "অ্যাড্রেস বারে লিখুন: chrome://extensions/ এবং Enter চাপুন।",
+      "উপরে ডান কোনায় 'Developer mode' সুইচটি চালু (ON) করুন।",
+      "উপরে বাম পাশে 'Load unpacked' বাটনে ক্লিক করে আনজিপ করা ফোল্ডারটি সিলেক্ট করুন।",
     ],
   },
   {
-    id: "lifetime",
-    name: "Lifetime VIP Pro",
-    badge: "Maximum Value",
-    isPopular: false,
-    price: "৳ 1,999",
-    period: "One-Time · Lifetime Access",
-    description: "For frequent commuters, business executives, and power users who travel year-round.",
-    features: [
-      "Unlimited Device Activations",
-      "All Future Updates Free (v4.x, v5.x)",
-      "Dedicated WhatsApp VIP Direct Line",
-      "Custom Timing & Delay Tuning Support",
-      "Early Beta Access to New Features",
-      "Full Replacement & License Guarantee",
-      "Priority Booking Assistance",
+    step: "৩",
+    title: "এক্সটেনশনটি পিন (Pin) করুন",
+    details: [
+      "ব্রাউজারের উপরে ডান পাশে পাজল আইকনে (🧩 Extensions Icon) ক্লিক করুন।",
+      "BD Railway Auto-Booker এর পাশে থাকা পিন আইকনে (📌 Pin) ক্লিক করুন, যাতে লোগোটি সবসময় উপরে দেখা যায়।",
+    ],
+  },
+  {
+    step: "৪",
+    title: "লাইসেন্স কি (License Key) অ্যাক্টিভ করুন",
+    details: [
+      "ব্রাউজারের উপরে থাকা ট্রেনের লোগোটিতে ক্লিক করুন (সাইডপ্যানেল ওপেন হবে)।",
+      "আমাদের থেকে পাওয়া লাইসেন্স কি-টি কপি করে 'Enter License Key' বক্সে বসিয়ে 'Activate Key' বাটনে ক্লিক করুন।",
+      "সাথে সাথে আপনার স্ট্যাটাস 'ACTIVE' হয়ে যাবে এবং এক্সটেনশন প্রস্তুত হবে!",
+    ],
+  },
+  {
+    step: "৫",
+    title: "যেভাবে দ্রুত অটোমেটিকভাবে টিকিট কাটবেন",
+    details: [
+      "eticket.railway.gov.bd ওয়েবসাইটে আপনার রেলওয়ে অ্যাকাউন্টে আগে থেকেই লগইন করে রাখুন।",
+      "সাইডপ্যানেল ওপেন করে From Station, To Station, তারিখ, ক্লাস, ট্রেনের নাম ও সিট সংখ্যা দিন।",
+      "পছন্দের সিট রেঞ্জ (ঐচ্ছিক) দিতে পারেন। 'Start Automation' বাটনে ক্লিক করলেই স্বয়ংক্রিয়ভাবে সিট সিলেক্ট হয়ে যাবে।",
+      "মোবাইলে আসা SMS ওটিপি কোডটি বসিয়ে বিকাশ/নগদ দিয়ে পেমেন্ট করলেই টিকিট কনফার্ম!",
     ],
   },
 ];
@@ -204,24 +235,24 @@ function RailwayAutoBookerLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "#features", label: "Features" },
-    { href: "#video-demo", label: "Video Demo" },
-    { href: "#pricing", label: "Packages & Pricing" },
-    { href: "#install", label: "Installation" },
-    { href: "#contact", label: "Contact & Buy" },
+    { href: "#pricing", label: "সাবস্ক্রিপশন প্ল্যান" },
+    { href: "#video-demo", label: "ভিডিও ডেমো" },
+    { href: "#features", label: "ফিচারসমূহ" },
+    { href: "#install", label: "ইনস্টলেশন গাইড" },
+    { href: "#contact", label: "যোগাযোগ ও ক্রয়" },
   ];
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">
+    <div className="min-h-dvh overflow-x-hidden bg-background text-foreground font-sans antialiased">
       {/* Top sticky navigation bar */}
-      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/85 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-5 sm:px-6 md:h-[72px] md:px-8">
           <a
             href="/"
-            aria-label="Railway Auto-Booker — Home"
+            aria-label="Railway Auto-Booker — হোম"
             className={"inline-flex items-center leading-none rounded-lg " + focusRing}
           >
-            <BrandWordmark iconSize="h-8 w-8 sm:h-9 sm:w-9" textSize="text-lg sm:text-xl" />
+            <BrandWordmark iconSize="h-8 w-8 sm:h-9 sm:w-9" textSize="text-xl sm:text-2xl" />
           </a>
 
           {/* Desktop Nav */}
@@ -230,7 +261,7 @@ function RailwayAutoBookerLandingPage() {
               <a
                 key={l.href}
                 href={l.href}
-                className={"transition-colors hover:text-foreground font-medium " + focusRing}
+                className={"transition-colors hover:text-foreground font-medium text-[15px] " + focusRing}
               >
                 {l.label}
               </a>
@@ -239,11 +270,8 @@ function RailwayAutoBookerLandingPage() {
 
           {/* Header Action Button */}
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="#pricing"
-              className={button3dClass("sm", `gap-1.5 ${focusRing}`)}
-            >
-              <span>Get Subscription</span>
+            <a href="#pricing" className={button3dClass("sm", `gap-1.5 font-medium ${focusRing}`)}>
+              <span>প্যাকেজ দেখুন</span>
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </a>
           </div>
@@ -251,7 +279,7 @@ function RailwayAutoBookerLandingPage() {
           {/* Mobile hamburger button */}
           <button
             type="button"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? "মেনু বন্ধ করুন" : "মেনু খুলুন"}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             onClick={() => setMenuOpen((v) => !v)}
@@ -260,11 +288,7 @@ function RailwayAutoBookerLandingPage() {
               focusRing
             }
           >
-            {menuOpen ? (
-              <X className="h-5 w-5" aria-hidden />
-            ) : (
-              <Menu className="h-5 w-5" aria-hidden />
-            )}
+            {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
           </button>
         </div>
 
@@ -284,7 +308,7 @@ function RailwayAutoBookerLandingPage() {
                     href={l.href}
                     onClick={() => setMenuOpen(false)}
                     className={
-                      "flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-foreground/90 transition-colors hover:bg-[color:var(--surface)] " +
+                      "flex min-h-11 items-center rounded-md px-3 text-base font-medium text-foreground/90 transition-colors hover:bg-[color:var(--surface)] " +
                       focusRing
                     }
                   >
@@ -297,9 +321,9 @@ function RailwayAutoBookerLandingPage() {
               <a
                 href="#pricing"
                 onClick={() => setMenuOpen(false)}
-                className={button3dClass("md", "w-full justify-center")}
+                className={button3dClass("md", "w-full justify-center text-sm")}
               >
-                View Packages & Order
+                প্যাকেজ ও মূল্য তালিকা
               </a>
             </div>
           </nav>
@@ -308,47 +332,45 @@ function RailwayAutoBookerLandingPage() {
 
       <main className="mx-auto max-w-7xl px-5 sm:px-6 md:px-8">
         {/* HERO SECTION */}
-        <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 md:pt-20 md:pb-24">
+        <section className="pt-12 pb-14 sm:pt-16 sm:pb-18 md:pt-20 md:pb-22">
           <div className="mx-auto max-w-3xl text-center">
             {/* Animated Pill Badge */}
-            <div className="hero-pill mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-foreground/90 shadow-sm">
+            <div className="hero-pill mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/90 shadow-xs">
               <span
                 className="h-2 w-2 rounded-full bg-primary"
                 style={{ animation: "pill-dot 2.4s cubic-bezier(0.4,0,0.6,1) infinite" }}
                 aria-hidden
               />
-              <span className="tracking-tight font-medium">
-                v4.0 Ready for eticket.railway.gov.bd · 8:00 AM Rush Ready
+              <span className="tracking-tight text-emerald-800 dark:text-emerald-300">
+                eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন · সকাল ৮:০০ টার টিকিট নিশ্চিন্তে কাটুন
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-balance text-[clamp(2.25rem,7vw,4.25rem)] font-bold leading-[1.08] tracking-tight">
-              Book Bangladesh Railway Tickets
+            <h1 className="text-balance text-[clamp(2.15rem,6.5vw,3.85rem)] font-bold leading-[1.22] tracking-tight">
+              বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন
               <br />
               <span className="text-primary bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent">
-                in Milliseconds, Automatically.
+                মিলিসেকেন্ডে, সম্পূর্ণ অটোমেটিক!
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-[17px] md:text-lg">
-              The high-speed, local-first browser extension engineered specifically for Bangladesh
-              Railway (<strong>eticket.railway.gov.bd</strong>). Automates station search, coach
-              selection, seat picking, and OTP checkout before tickets sell out.
+              সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার মুহূর্তে সার্ভার স্পিডে স্বয়ংক্রিয়ভাবে স্টেশন সার্চ, বগি ও সিট সিলেক্ট করে ওটিপি ও পেমেন্ট পেজে নিয়ে যায়। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই ব্যবহারযোগ্য!
             </p>
 
-            {/* Action Buttons (3D button + Guide) */}
+            {/* Action Buttons */}
             <div className="mt-8 flex w-full flex-col items-stretch gap-3.5 sm:mt-10 sm:flex-row sm:items-center sm:justify-center">
               <a
                 href="#pricing"
                 className={button3dClass(
                   "lg",
-                  "w-full sm:w-auto min-h-12 gap-2 text-base shadow-lg",
+                  "w-full sm:w-auto min-h-12 gap-2 text-base shadow-md font-semibold",
                 )}
               >
                 <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <span>View Subscription Packages</span>
+                <span>সাবস্ক্রিপশন প্যাকেজসমূহ দেখুন</span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
 
@@ -360,82 +382,102 @@ function RailwayAutoBookerLandingPage() {
                 }
               >
                 <Play className="h-4 w-4 text-primary fill-primary/20" aria-hidden="true" />
-                <span>Watch Video Demo</span>
+                <span>ভিডিও ডেমো দেখুন</span>
               </a>
             </div>
 
             {/* Direct Order Quick CTAs */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-medium text-muted-foreground">
-              <span>Instant Buy via:</span>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-sm font-medium text-muted-foreground">
+              <span>সরাসরি ক্রয় ও কথা বলতে:</span>
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-whatsapp inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold text-white text-[11px] hover:scale-105 transition-transform"
+                className="btn-3d-whatsapp inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-bold text-white text-xs hover:scale-105 transition-transform shadow-sm"
               >
-                <WhatsAppIcon className="h-3.5 w-3.5" />
-                <span>WhatsApp</span>
+                <WhatsAppIcon className="h-4 w-4" />
+                <span>WhatsApp এ মেসেজ দিন</span>
               </a>
               <a
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-facebook inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold text-white text-[11px] hover:scale-105 transition-transform"
+                className="btn-3d-facebook inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-bold text-white text-xs hover:scale-105 transition-transform shadow-sm"
               >
-                <FacebookIcon className="h-3.5 w-3.5" />
-                <span>Facebook</span>
+                <FacebookIcon className="h-4 w-4" />
+                <span>Facebook এ যোগাযোগ করুন</span>
               </a>
             </div>
+          </div>
+        </section>
 
-            {/* Popular Routes Bar */}
-            <div className="mt-12 pt-8 border-t border-border/60">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Optimized for all major intercity routes & classes
+        {/* CLEAN VIDEO BOX SECTION (Dedicated Video Player Spot) */}
+        <section id="video-demo" className="pb-16 sm:pb-20 md:pb-24 scroll-mt-24">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center mb-6">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                <Play className="h-3 w-3 fill-primary" />
+                <span>লাইভ প্র্যাকটিক্যাল ডেমো</span>
+              </span>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">
+                ভিডিওতে দেখুন কীভাবে কাজ করে
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                সকাল ৮:০০ টায় কীভাবে চোখের পলকে অটোমেটিকভাবে টিকিট কনফার্ম হয় তা সরাসরি দেখুন।
               </p>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                {TOP_ROUTES.map((r) => (
-                  <span
-                    key={r.from + r.to}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-[color:var(--surface)] px-3 py-1.5 text-xs font-medium text-foreground/90 shadow-2xs"
-                  >
-                    <Train className="h-3.5 w-3.5 text-primary" />
-                    <span>
-                      {r.from} ⇄ {r.to}
-                    </span>
+            </div>
+
+            {/* Video Box Container */}
+            <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-xl ring-1 ring-border/50">
+              <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 backdrop-blur text-xs text-white/80 font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                  <span className="ml-2 font-sans font-medium text-white/90">
+                    BD Railway Auto-Booker · ডেমো ভিডিও
                   </span>
-                ))}
+                </div>
+                <span className="text-[11px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/50">
+                  HD 1080p
+                </span>
               </div>
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                {SEAT_CLASSES.map((cls) => (
-                  <span
-                    key={cls}
-                    className="rounded-md bg-muted/60 border border-border/50 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground"
-                  >
-                    {cls}
-                  </span>
-                ))}
+
+              {/* Video Player Box */}
+              <div className="relative aspect-video w-full bg-neutral-950 flex items-center justify-center overflow-hidden group">
+                <img
+                  src="/railway-hero.png"
+                  alt="Railway Auto-Booker Demo Poster"
+                  className="absolute inset-0 h-full w-full object-cover opacity-35 filter brightness-75 transition-transform duration-500 group-hover:scale-105"
+                />
+
+                <div className="relative z-10 p-6 flex flex-col items-center justify-center text-center max-w-lg">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 hover:scale-110 transition-transform cursor-pointer">
+                    <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" />
+                  </div>
+                  <h3 className="mt-4 text-lg sm:text-xl font-bold text-white">
+                    Railway Auto-Booker ডেমো ভিডিও
+                  </h3>
+                  <p className="mt-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                    ভিডিওটি দেখতে ক্লিক করুন (আপনার ফেসবুক ভিডিও লিংক এখানে সহজেই প্লে হবে)।
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* POP-UP / VIDEO DEMO SHOWCASE SECTION */}
-        <section id="video-demo" className="pb-16 sm:pb-20 md:pb-24 scroll-mt-24">
-          <RailwayVideoAndExtensionShowcase />
-        </section>
-
         {/* FEATURES SECTION */}
         <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
           <div className="mb-10 max-w-2xl sm:mb-14">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-primary font-semibold">
-              Engineered For Milliseconds
-            </p>
-            <h2 className="mt-2 text-[clamp(1.75rem,4.5vw,2.5rem)] font-bold tracking-tight">
-              Six things done properly for high-speed booking.
+            <span className="font-mono text-xs uppercase tracking-widest text-primary font-bold">
+              শক্তিশালী অটোমেশন ফিচারসমূহ
+            </span>
+            <h2 className="mt-2 text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
+              কেন হাজারো মানুষ এই অটো-বুকার ব্যবহার করছেন?
             </h2>
             <p className="mt-3 text-muted-foreground text-sm sm:text-base leading-relaxed">
-              When tickets release at 8:00 AM, thousands of passengers flood the server simultaneously.
-              Railway Auto-Booker executes all booking steps instantly so you secure the seat you want.
+              সকাল ৮:০০ টায় যখন লাখ লাখ মানুষ একসাথে সাইটে ঢোকার চেষ্টা করেন, তখন ম্যানুয়ালি ক্লিক করে সিট পাওয়া প্রায় অসম্ভব। Railway Auto-Booker মিলিসেকেন্ড স্পিডে আপনার টিকিট নিশ্চিত করে।
             </p>
           </div>
 
@@ -445,12 +487,12 @@ function RailwayAutoBookerLandingPage() {
               return (
                 <div
                   key={f.title}
-                  className="group rounded-2xl border border-border bg-[color:var(--surface)] p-6 transition-all duration-200 hover:border-primary/40 hover:shadow-md"
+                  className="group rounded-2xl border border-border bg-[color:var(--surface)] p-6 transition-all duration-200 hover:border-primary/50 hover:shadow-md"
                 >
                   <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                     <IconComp className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <h3 className="text-base font-semibold tracking-tight text-foreground">
+                  <h3 className="text-base font-bold tracking-tight text-foreground">
                     {f.title}
                   </h3>
                   <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
@@ -463,226 +505,211 @@ function RailwayAutoBookerLandingPage() {
         {/* SUBSCRIPTION PACKAGES / PRICING SECTION */}
         <section id="pricing" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
           <div className="mx-auto max-w-3xl text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Transparent & Affordable Pricing</span>
+              <span>সহজ ও সাশ্রয়ী সাবস্ক্রিপশন প্ল্যান</span>
             </div>
             <h2 className="text-[clamp(1.85rem,4.5vw,2.75rem)] font-bold tracking-tight">
-              Choose Your Subscription Package
+              BD Railway Auto-Booker এর সাবস্ক্রিপশন প্ল্যানসমূহ
             </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">
-              Choose the plan that fits your travel frequency. Subscriptions are activated directly
-              via WhatsApp or Facebook with instant setup assistance.
+              সব প্যাকেজেই সব ফিচার সমানভাবে অন্তর্ভুক্ত। শুধু আপনার প্রয়োজন অনুযায়ী মেয়াদের প্যাকেজটি বেছে নিন।
             </p>
           </div>
 
-          {/* Pricing Cards Grid */}
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8 items-stretch">
-            {PRICING_PLANS.map((plan) => (
-              <PricingCard key={plan.id} plan={plan} />
-            ))}
+          {/* PART 1: REGULAR & LONG TERM PACKAGES (MOST POPULAR) */}
+          <div className="mb-14">
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-border">
+              <span className="text-amber-500 font-bold text-lg">⭐</span>
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                রেগুলার ও লং-টার্ম প্যাকেজ (সবচেয়ে জনপ্রিয়)
+              </h3>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+              {REGULAR_PLANS.map((plan) => (
+                <BanglaPricingCard key={plan.id} plan={plan} />
+              ))}
+            </div>
           </div>
 
-          {/* Help notice under pricing */}
-          <div className="mt-10 rounded-xl border border-border bg-[color:var(--surface)] p-4 text-center sm:p-5">
-            <p className="text-sm text-muted-foreground">
-              ⚡ Need a custom agency license for multiple ticket desks or special train routes?{" "}
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-primary underline underline-offset-4 hover:text-emerald-700"
-              >
-                Chat with us on WhatsApp for custom setups →
-              </a>
-            </p>
+          {/* PART 2: TRIAL & SHORT TERM PLANS */}
+          <div>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-border">
+              <span className="text-blue-500 font-bold text-lg">🚀</span>
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                ট্রায়াল ও শর্ট-টার্ম প্ল্যান
+              </h3>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3 items-stretch">
+              {SHORT_TERM_PLANS.map((plan) => (
+                <BanglaPricingCard key={plan.id} plan={plan} />
+              ))}
+            </div>
           </div>
         </section>
 
         {/* INSTALLATION GUIDE SECTION */}
         <section id="install" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
-          <div className="grid gap-10 md:grid-cols-[1fr_1.3fr] md:gap-16 items-start">
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-widest text-primary font-semibold">
-                Setup In 60 Seconds
-              </p>
-              <h2 className="mt-2 text-[clamp(1.75rem,4.5vw,2.5rem)] font-bold tracking-tight">
-                Four simple steps. One minute.
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-10 sm:mb-12">
+              <span className="font-mono text-xs uppercase tracking-widest text-primary font-bold">
+                সহজ ইনস্টলেশন নির্দেশিকা
+              </span>
+              <h2 className="mt-2 text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
+                মাত্র ২ মিনিটে এক্সটেনশনটি সেটআপ করে নিন
               </h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Works seamlessly in any Chromium browser — <strong>Google Chrome, Microsoft Edge, Brave, Arc, and Opera</strong>. No complicated coding or terminal commands needed.
+              <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+                কম্পিউটারে গুগল ক্রোম ব্রাউজার অথবা অ্যান্ড্রয়েড মোবাইলে Kiwi Browser ব্যবহার করে সহজেই সেটআপ করতে পারবেন।
               </p>
+            </div>
 
-              <div className="mt-6 rounded-xl border border-border bg-[color:var(--surface)] p-4.5 space-y-3">
-                <div className="flex items-center gap-2.5 text-xs font-semibold text-foreground">
-                  <Laptop className="h-4 w-4 text-primary" />
-                  <span>Compatible Operating Systems</span>
-                </div>
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span className="rounded bg-muted px-2 py-1">Windows 10 / 11</span>
-                  <span className="rounded bg-muted px-2 py-1">macOS</span>
-                  <span className="rounded bg-muted px-2 py-1">Linux</span>
-                </div>
+            {/* Device Compatibility Badges */}
+            <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-2xs">
+                <Laptop className="h-4 w-4 text-primary" />
+                <span>কম্পিউটার (Google Chrome, Edge, Brave, Opera)</span>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-2xs">
+                <Smartphone className="h-4 w-4 text-primary" />
+                <span>অ্যান্ড্রয়েড মোবাইল (Kiwi Browser)</span>
               </div>
             </div>
 
-            <ol className="space-y-3 sm:space-y-4">
-              {STEPS.map((s) => (
-                <li
+            {/* Steps list */}
+            <div className="space-y-4">
+              {INSTALL_STEPS.map((s) => (
+                <div
                   key={s.step}
-                  className="flex items-start gap-4 rounded-xl border border-border bg-[color:var(--surface)] p-5 transition-colors hover:border-primary/40"
+                  className="rounded-2xl border border-border bg-[color:var(--surface)] p-5 sm:p-6 transition-colors hover:border-primary/40 shadow-xs"
                 >
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-mono text-xs font-bold">
-                    {s.step}
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-foreground">{s.title}</h3>
-                    <p className="mt-1 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                      {s.desc}
-                    </p>
+                  <div className="flex items-start gap-4">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm shadow-xs">
+                      {s.step}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base font-bold text-foreground">{s.title}</h3>
+                      <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
+                        {s.details.map((detail, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{detail}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                </li>
+                </div>
               ))}
-            </ol>
+            </div>
           </div>
         </section>
 
         {/* DEDICATED CONTACT & PURCHASE SECTION */}
         <section id="contact" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
-          <div className="rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/5 via-[color:var(--surface)] to-background p-8 sm:p-12 md:p-16 text-center max-w-4xl mx-auto shadow-sm">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
-              <MessageCircle className="h-3.5 w-3.5" />
-              <span>Direct Developer Assistance</span>
+          <div className="rounded-3xl border border-primary/30 bg-gradient-to-b from-primary/10 via-[color:var(--surface)] to-background p-8 sm:p-12 md:p-14 text-center max-w-4xl mx-auto shadow-md">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-3.5 py-1 text-xs font-bold text-primary">
+              <MessageCircle className="h-4 w-4" />
+              <span>তাৎক্ষণিক লাইসেন্স ডেলিভারি ও সাপোর্ট</span>
             </span>
 
             <h2 className="mt-4 text-balance text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
-              Ready to Secure Your Train Tickets?
+              আপনার ট্রেনের টিকিট এখনই সহজে ও দ্রুত কনফার্ম করুন
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Contact Rifat directly via WhatsApp or Facebook Messenger to buy your subscription,
-              get immediate license activation, and receive personal setup help.
+              পছন্দের প্যাকেজটি নিতে বা যেকোনো তথ্যের জন্য সরাসরি আমাদের হোয়াটসঅ্যাপ বা ফেসবুক মেসেঞ্জারে যোগাযোগ করুন। পেমেন্ট সম্পন্ন করার পর সাথে সাথে লাইসেন্স কি ও সেটআপ ফাইল প্রদান করা হবে।
             </p>
 
-            {/* The Two Main Contact Buttons Requested by User */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Highly Polished WhatsApp and Facebook Buttons */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-whatsapp w-full sm:w-auto min-h-12 inline-flex items-center justify-center gap-2.5 rounded-[12px] px-8 text-sm font-bold shadow-md hover:scale-[1.02] transition-transform"
+                className="btn-3d-whatsapp w-full sm:w-1/2 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm sm:text-base font-bold shadow-lg hover:scale-105 transition-transform"
               >
                 <WhatsAppIcon className="h-5 w-5" />
-                <span>Contact via WhatsApp</span>
-                <ExternalLink className="h-3.5 w-3.5 opacity-80" />
+                <span>WhatsApp এ মেসেজ দিন</span>
+                <ExternalLink className="h-4 w-4 opacity-80" />
               </a>
 
               <a
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-facebook w-full sm:w-auto min-h-12 inline-flex items-center justify-center gap-2.5 rounded-[12px] px-8 text-sm font-bold shadow-md hover:scale-[1.02] transition-transform"
+                className="btn-3d-facebook w-full sm:w-1/2 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm sm:text-base font-bold shadow-lg hover:scale-105 transition-transform"
               >
                 <FacebookIcon className="h-5 w-5" />
-                <span>Contact via Facebook</span>
-                <ExternalLink className="h-3.5 w-3.5 opacity-80" />
+                <span>Facebook এ যোগাযোগ করুন</span>
+                <ExternalLink className="h-4 w-4 opacity-80" />
               </a>
             </div>
 
             <p className="mt-6 text-xs text-muted-foreground font-mono">
-              ⚡ Typical response time: Under 5 minutes (8:00 AM – 11:30 PM BST)
+              ⚡ রেসপন্স টাইম: সাধারণত ১–৫ মিনিটের মধ্যে রিপ্লাই দেওয়া হয়
             </p>
           </div>
         </section>
 
-        {/* TRUST & GUARANTEE PRINCIPLES */}
-        <section className="border-t border-border py-14 sm:py-16">
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 md:gap-10">
-            <div>
-              <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-2">
-                <ShieldCheck className="h-4 w-4" />
-                <span>100% Local & Private</span>
-              </div>
-              <h3 className="text-base font-semibold tracking-tight">Your data never leaves your device.</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                No cloud servers, no account required. Your railway login information stays entirely inside your browser's private storage.
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-2">
-                <Clock className="h-4 w-4" />
-                <span>Millisecond Precision</span>
-              </div>
-              <h3 className="text-base font-semibold tracking-tight">Beats human reaction speed.</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                While humans take 15–30 seconds to select trains and seats, the auto-booker executes seat picking in 0.3 seconds.
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-2">
-                <RotateCcw className="h-4 w-4" />
-                <span>Continuous Updates</span>
-              </div>
-              <h3 className="text-base font-semibold tracking-tight">Always compatible with eticket portal.</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Whenever Bangladesh Railway updates their website or seat layouts, the extension receives instant patch updates.
-              </p>
-            </div>
+        {/* OFFICIAL DISCLAIMER SECTION */}
+        <section className="border-t border-border py-10 sm:py-12 bg-muted/20 rounded-2xl my-8 p-6 sm:p-8">
+          <div className="max-w-3xl mx-auto">
+            <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>ডিসক্লেইমার / Disclaimer</span>
+            </h4>
+            <ol className="space-y-2 text-xs sm:text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
+              <li>এই এক্সটেনশনটি ব্যবহারকারীদের টিকিট খোঁজা ও সিট নির্বাচন প্রক্রিয়া দ্রুততর করার জন্য তৈরি একটি সহায়ক টুল।</li>
+              <li>টিকিটের প্রাপ্যতা সম্পূর্ণভাবে বাংলাদেশ রেলওয়ের (eticket.railway.gov.bd) অফিশিয়াল সার্ভারের ওপর নির্ভরশীল।</li>
+              <li>পেমেন্ট সম্পন্ন করা এবং মোবাইল ওটিপি (OTP) সাবমিট করার দায়িত্ব ব্যবহারকারীর নিজস্ব।</li>
+              <li>এই সফটওয়্যারটি বাংলাদেশ রেলওয়ের কোনো অফিশিয়াল সেবা নয়, এটি একটি স্বাধীন অটোমেশন অ্যাসিস্ট্যান্ট টুল।</li>
+            </ol>
           </div>
         </section>
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-border bg-[color:var(--surface)]/50">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 md:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-border">
-            <div className="flex items-center gap-3">
+      <footer className="border-t border-border bg-[color:var(--surface)]/70">
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 md:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
               <img
                 src="/railway-icon.png"
                 alt="Railway Auto-Booker"
-                className="h-7 w-7 rounded-md object-cover"
+                className="h-6 w-6 rounded-md object-cover"
               />
-              <span className="font-bold text-foreground text-base">Railway Auto-Booker</span>
-              <span className="text-xs text-muted-foreground">· High-speed ticket booking extension</span>
+              <span className="font-bold text-foreground text-sm">Railway Auto-Booker</span>
+              <span className="text-xs text-muted-foreground">· সুপারফাস্ট রেলওয়ে টিকিট অটোমেশন</span>
             </div>
 
-            {/* Quick Contact Links in Footer */}
-            <div className="flex items-center gap-4 text-xs font-medium">
+            <div className="flex items-center gap-5 text-xs font-semibold">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-emerald-600 transition-colors"
+                className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
               >
-                <WhatsAppIcon className="h-4 w-4" />
+                <WhatsAppIcon className="h-3.5 w-3.5" />
                 <span>WhatsApp</span>
               </a>
               <a
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-blue-600 transition-colors"
+                className="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-800 dark:text-blue-400"
               >
-                <FacebookIcon className="h-4 w-4" />
+                <FacebookIcon className="h-3.5 w-3.5" />
                 <span>Facebook</span>
               </a>
-              <a
-                href="#pricing"
-                className="text-primary hover:underline font-semibold"
-              >
-                Pricing Plans
+              <a href="#pricing" className="text-primary hover:underline">
+                প্ল্যানসমূহ
               </a>
             </div>
           </div>
 
-          <div className="pt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-muted-foreground">
-            <p>
-              © {new Date().getFullYear()} Railway Auto-Booker By Rifat. All rights reserved.
-            </p>
-            <p className="max-w-xl text-[11px] leading-relaxed text-muted-foreground/80">
-              Disclaimer: Railway Auto-Booker is an independent browser utility developed to assist travelers with automated form completion. It is not affiliated with, endorsed by, or sponsored by Bangladesh Railway, the Ministry of Railways, or Shohoz-Synesis-Vincen JV.
-            </p>
+          <div className="mt-4 pt-4 border-t border-border/60 text-center text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Railway Auto-Booker. All rights reserved.
           </div>
         </div>
       </footer>
@@ -690,56 +717,61 @@ function RailwayAutoBookerLandingPage() {
   );
 }
 
-/** PRICING CARD COMPONENT */
-function PricingCard({
+/** BANGLA PRICING CARD COMPONENT */
+function BanglaPricingCard({
   plan,
 }: {
-  plan: (typeof PRICING_PLANS)[number];
+  plan: {
+    id: string;
+    name: string;
+    badge: string;
+    price: string;
+    period: string;
+    subtitle: string;
+    isPopular: boolean;
+  };
 }) {
   return (
     <div
       className={
-        "relative flex flex-col justify-between rounded-2xl border p-6 sm:p-8 transition-all duration-300 " +
+        "relative flex flex-col justify-between rounded-2xl border p-5 sm:p-6 transition-all duration-300 " +
         (plan.isPopular
-          ? "border-primary bg-[color:var(--surface)] shadow-lg ring-2 ring-primary/20 scale-[1.02]"
-          : "border-border bg-[color:var(--surface)] hover:border-primary/40 shadow-xs")
+          ? "border-primary bg-[color:var(--surface)] shadow-xl ring-2 ring-primary/30 md:scale-[1.03]"
+          : "border-border bg-[color:var(--surface)] hover:border-primary/50 shadow-xs")
       }
     >
       {plan.isPopular && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-md">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-1 text-[11px] font-bold text-white shadow-md whitespace-nowrap">
           {plan.badge}
         </div>
       )}
 
       <div>
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-lg font-bold tracking-tight text-foreground">{plan.name}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-lg font-bold tracking-tight text-foreground">{plan.name}</h4>
           {!plan.isPopular && (
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
               {plan.badge}
             </span>
           )}
         </div>
 
-        <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          {plan.description}
-        </p>
+        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{plan.subtitle}</p>
 
-        <div className="mt-6 flex items-baseline gap-2">
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {plan.price}
-          </span>
-          <span className="text-xs sm:text-sm text-muted-foreground font-mono">{plan.period}</span>
+        <div className="mt-5 flex items-baseline gap-1.5">
+          <span className="text-3xl font-extrabold tracking-tight text-foreground">{plan.price}</span>
+          <span className="text-xs text-muted-foreground font-medium">/ {plan.period}</span>
         </div>
 
-        <div className="mt-6 border-t border-border pt-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 font-mono">
-            Included Benefits:
+        {/* Benefits list (Same across all plans as requested) */}
+        <div className="mt-5 border-t border-border/80 pt-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
+            সকল সুবিধা অন্তর্ভুক্ত:
           </p>
-          <ul className="space-y-2.5 text-xs sm:text-sm">
-            {plan.features.map((feat) => (
-              <li key={feat} className="flex items-start gap-2.5 text-foreground/90">
-                <Check className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+          <ul className="space-y-2 text-xs">
+            {SHARED_BENEFITS.map((feat) => (
+              <li key={feat} className="flex items-start gap-2 text-foreground/90 leading-snug">
+                <Check className="h-3.5 w-3.5 shrink-0 text-primary mt-0.5" />
                 <span>{feat}</span>
               </li>
             ))}
@@ -747,347 +779,28 @@ function PricingCard({
         </div>
       </div>
 
-      {/* Two dedicated contact buttons on each card */}
-      <div className="mt-8 space-y-2.5 pt-4 border-t border-border">
+      {/* Upgraded, high-contrast Buy Buttons */}
+      <div className="mt-6 space-y-2 pt-4 border-t border-border/80">
         <a
           href={WHATSAPP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-3d-whatsapp flex w-full items-center justify-center gap-2 rounded-[10px] py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-[1.01] transition-transform"
+          className="btn-3d-whatsapp flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-102 transition-transform"
         >
           <WhatsAppIcon className="h-4 w-4" />
-          <span>Buy via WhatsApp</span>
+          <span>হোয়াটসঅ্যাপে কিনুন</span>
         </a>
 
         <a
           href={FACEBOOK_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-3d-facebook flex w-full items-center justify-center gap-2 rounded-[10px] py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-[1.01] transition-transform"
+          className="btn-3d-facebook flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-102 transition-transform"
         >
           <FacebookIcon className="h-4 w-4" />
-          <span>Buy via Facebook</span>
+          <span>ফেসবুকে মেসেজ দিন</span>
         </a>
       </div>
-    </div>
-  );
-}
-
-/** VIDEO & EXTENSION PREVIEW SHOWCASE COMPONENT (Replaces the Memlace popup frame) */
-function RailwayVideoAndExtensionShowcase() {
-  const [activeTab, setActiveTab] = useState<"video" | "interactive">("video");
-  const [bookingState, setBookingState] = useState<"idle" | "running" | "booked">("idle");
-  const [selectedClass, setSelectedClass] = useState("Snigdha");
-  const [selectedFrom, setSelectedFrom] = useState("DHAKA");
-  const [selectedTo, setSelectedTo] = useState("CHITTAGONG");
-
-  const startDemoBooking = () => {
-    if (bookingState === "running") return;
-    setBookingState("running");
-    toast.info("8:00:00 AM Trigger Activated! Searching tickets…");
-    setTimeout(() => {
-      setBookingState("booked");
-      toast.success("Seats Locked in 0.38s! Coach: CHA, Seats: 21, 22, 23, 24");
-    }, 1200);
-  };
-
-  const resetDemoBooking = () => {
-    setBookingState("idle");
-  };
-
-  return (
-    <div
-      role="region"
-      aria-label="Railway Auto-Booker video and live extension showcase"
-      className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 hover:shadow-xl"
-    >
-      {/* Mockup Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/70 px-4 py-3 backdrop-blur">
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-red-400/80" />
-          <span className="h-3 w-3 rounded-full bg-amber-400/80" />
-          <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
-          <span className="ml-3 font-mono text-xs text-muted-foreground hidden sm:inline">
-            eticket.railway.gov.bd · Railway Auto-Booker Extension
-          </span>
-        </div>
-
-        {/* View Switcher Tabs */}
-        <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab("video")}
-            className={
-              "inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-medium transition-all " +
-              (activeTab === "video"
-                ? "bg-[color:var(--surface)] text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground")
-            }
-          >
-            <Play className="h-3 w-3 text-primary fill-primary" />
-            <span>Demo Video</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("interactive")}
-            className={
-              "inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-medium transition-all " +
-              (activeTab === "interactive"
-                ? "bg-[color:var(--surface)] text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground")
-            }
-          >
-            <Sparkles className="h-3 w-3 text-primary" />
-            <span>Live Interactive UI</span>
-          </button>
-        </div>
-
-        {/* Live Status indicator */}
-        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-emerald-600 font-bold">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400" />
-            <span className="relative h-2 w-2 rounded-full bg-emerald-600" />
-          </span>
-          <span>Rush Ready</span>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      {activeTab === "video" ? (
-        /* TAB 1: User's Video Spot */
-        <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-b from-background via-[color:var(--surface)] to-background">
-          <div className="relative mx-auto aspect-video max-w-4xl overflow-hidden rounded-xl border border-border bg-black/95 shadow-md flex items-center justify-center text-center">
-            {/* Poster image fallback / Background */}
-            <img
-              src="/railway-hero.png"
-              alt="Bangladesh Railway Auto-Booker Preview"
-              className="absolute inset-0 h-full w-full object-cover opacity-25 filter blur-[1px]"
-            />
-
-            {/* Video or video embed container */}
-            <div className="relative z-10 p-6 flex flex-col items-center justify-center max-w-md">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-xl ring-8 ring-primary/20 hover:scale-110 transition-transform cursor-pointer">
-                <Play className="h-7 w-7 sm:h-9 sm:w-9 ml-1 fill-white" />
-              </div>
-              <h3 className="mt-5 text-lg sm:text-xl font-bold text-white">
-                Railway Auto-Booker Demo Video
-              </h3>
-              <p className="mt-2 text-xs sm:text-sm text-gray-300 leading-relaxed">
-                Watch how the extension automatically grabs seats on <em>eticket.railway.gov.bd</em> in under 0.4 seconds during 8:00 AM rush hour.
-              </p>
-              <div className="mt-4 flex items-center gap-2 text-[11px] font-mono text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 rounded-full px-3 py-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Place Your Video Here</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 text-center">
-            <p className="text-xs text-muted-foreground font-mono">
-              💡 Tip: Click the "Live Interactive UI" tab above to test the auto-booker form simulator!
-            </p>
-          </div>
-        </div>
-      ) : (
-        /* TAB 2: Live Extension Form Simulator */
-        <div className="p-4 sm:p-6 md:p-8">
-          <div className="grid gap-6 md:grid-cols-[1.1fr_1fr] items-start">
-            {/* Extension popup mockup */}
-            <div className="rounded-xl border border-border bg-background p-5 shadow-xs">
-              <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/railway-icon.png"
-                    alt=""
-                    className="h-6 w-6 rounded-md object-cover"
-                  />
-                  <span className="font-bold text-sm text-foreground">
-                    Railway Auto-Booker <span className="text-primary text-xs font-mono">v4.0</span>
-                  </span>
-                </div>
-                <span className="rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-mono text-[10px] px-2 py-0.5 font-bold">
-                  LOCAL EXTENSION
-                </span>
-              </div>
-
-              {/* Form fields */}
-              <div className="space-y-3.5 text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      From Station
-                    </label>
-                    <select
-                      value={selectedFrom}
-                      onChange={(e) => setSelectedFrom(e.target.value)}
-                      className="w-full rounded-md border border-border bg-[color:var(--surface)] px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="DHAKA">DHAKA (DA)</option>
-                      <option value="CHITTAGONG">CHITTAGONG (CG)</option>
-                      <option value="SYLHET">SYLHET (SYL)</option>
-                      <option value="RAJSHAHI">RAJSHAHI (RAJ)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      To Station
-                    </label>
-                    <select
-                      value={selectedTo}
-                      onChange={(e) => setSelectedTo(e.target.value)}
-                      className="w-full rounded-md border border-border bg-[color:var(--surface)] px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="CHITTAGONG">CHITTAGONG (CG)</option>
-                      <option value="COX'S BAZAR">COX'S BAZAR (CXB)</option>
-                      <option value="DHAKA">DHAKA (DA)</option>
-                      <option value="KHULNA">KHULNA (KHL)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      Journey Date
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value="Tomorrow (8:00 AM Rush)"
-                      className="w-full rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-xs text-foreground font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      Seat Class
-                    </label>
-                    <select
-                      value={selectedClass}
-                      onChange={(e) => setSelectedClass(e.target.value)}
-                      className="w-full rounded-md border border-border bg-[color:var(--surface)] px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-primary"
-                    >
-                      <option value="Snigdha">Snigdha (AC Chair)</option>
-                      <option value="AC_B">AC_B (AC Berth)</option>
-                      <option value="S_CHAIR">S_CHAIR (Shovon Chair)</option>
-                      <option value="AC_S">AC_S (AC Seat)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      Seats Count
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value="4 Seats (Consecutive)"
-                      className="w-full rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-muted-foreground block mb-1">
-                      Seat Range
-                    </label>
-                    <input
-                      type="text"
-                      readOnly
-                      value="1 – 40 (Window Preferred)"
-                      className="w-full rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-xs font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Simulated action button */}
-                <div className="pt-2">
-                  {bookingState === "booked" ? (
-                    <div className="space-y-2">
-                      <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 p-3 text-center">
-                        <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200">
-                          ✓ 4 Tickets Auto-Locked in 0.38 Seconds!
-                        </p>
-                        <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
-                          Coach: CHA | Seats: 21, 22, 23, 24 | Ready for bKash
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={resetDemoBooking}
-                        className="w-full rounded-md border border-border py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
-                      >
-                        Reset Simulator
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={startDemoBooking}
-                      disabled={bookingState === "running"}
-                      className={button3dClass(
-                        "md",
-                        "w-full justify-center text-xs font-bold uppercase tracking-wider",
-                      )}
-                    >
-                      {bookingState === "running" ? (
-                        <span>Searching & Locking Seats…</span>
-                      ) : (
-                        <span>Start Auto-Booking Test</span>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Live Speed Log */}
-            <div className="rounded-xl border border-border bg-background p-5 font-mono text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-border mb-3">
-                <span className="font-bold text-muted-foreground uppercase text-[11px] tracking-wider">
-                  Real-time Execution Telemetry
-                </span>
-                <span className="text-[10px] text-emerald-600 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded font-bold">
-                  0.38s TOTAL
-                </span>
-              </div>
-
-              <div className="space-y-2 text-[11px] text-muted-foreground">
-                <div className="flex items-start gap-2">
-                  <span className="text-primary">[08:00:00.005]</span>
-                  <span>System clock synced with Railway NTP server.</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-primary">[08:00:00.042]</span>
-                  <span>
-                    Query fired: {selectedFrom} ➔ {selectedTo} ({selectedClass})
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-primary">[08:00:00.118]</span>
-                  <span>Train located: Suborno Express (701). Available seats: 48</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-primary">[08:00:00.224]</span>
-                  <span>Scanning coach CHA for 4 adjacent seats...</span>
-                </div>
-                <div className="flex items-start gap-2 text-emerald-600 font-semibold">
-                  <span className="text-primary">[08:00:00.315]</span>
-                  <span>Locked CHA-21, 22, 23, 24. Session holding active.</span>
-                </div>
-                <div className="flex items-start gap-2 text-foreground font-semibold">
-                  <span className="text-primary">[08:00:00.380]</span>
-                  <span>Passenger details autofilled. Proceeding to checkout.</span>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Manual Human Speed: ~25.0s</span>
-                <span className="text-primary font-bold">Auto-Booker Speed: 0.38s (65x faster)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
