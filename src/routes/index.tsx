@@ -1101,33 +1101,29 @@ function RailwayAutoBookerLandingPage() {
             </p>
 
             {/* Highly Polished WhatsApp and Facebook Buttons */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto">
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-whatsapp w-full sm:w-1/2 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm sm:text-base font-bold shadow-lg hover:scale-105 transition-transform"
+                className="btn-3d-whatsapp w-full sm:flex-1 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
               >
-                <WhatsAppIcon className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5 shrink-0" />
                 <span>WhatsApp এ মেসেজ দিন</span>
-                <ExternalLink className="h-4 w-4 opacity-80" />
+                <ExternalLink className="h-4 w-4 shrink-0 opacity-80" />
               </a>
 
               <a
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-facebook w-full sm:w-1/2 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm sm:text-base font-bold shadow-lg hover:scale-105 transition-transform"
+                className="btn-3d-facebook w-full sm:flex-1 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
               >
-                <FacebookIcon className="h-5 w-5" />
+                <FacebookIcon className="h-5 w-5 shrink-0" />
                 <span>Facebook এ যোগাযোগ করুন</span>
-                <ExternalLink className="h-4 w-4 opacity-80" />
+                <ExternalLink className="h-4 w-4 shrink-0 opacity-80" />
               </a>
             </div>
-
-            <p className="mt-6 text-xs text-muted-foreground font-mono">
-              ⚡ রেসপন্স টাইম: সাধারণত ১–৫ মিনিটের মধ্যে রিপ্লাই দেওয়া হয়
-            </p>
           </div>
         </section>
 
