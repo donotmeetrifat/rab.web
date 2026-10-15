@@ -847,28 +847,6 @@ function RailwayAutoBookerLandingPage() {
               </a>
             </div>
 
-            {/* Direct Order Quick CTAs */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-sm font-medium text-muted-foreground">
-              <span>সরাসরি ক্রয় ও কথা বলতে:</span>
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-3d-whatsapp inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-bold text-white text-xs hover:scale-105 transition-transform shadow-sm"
-              >
-                <WhatsAppIcon className="h-4 w-4" />
-                <span>WhatsApp এ মেসেজ দিন</span>
-              </a>
-              <a
-                href={FACEBOOK_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-3d-facebook inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-bold text-white text-xs hover:scale-105 transition-transform shadow-sm"
-              >
-                <FacebookIcon className="h-4 w-4" />
-                <span>Facebook এ যোগাযোগ করুন</span>
-              </a>
-            </div>
           </div>
         </section>
 
