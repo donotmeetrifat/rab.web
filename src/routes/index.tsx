@@ -6,7 +6,7 @@ import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
 import { BRANDS } from "@/components/brand-icons";
 
-export function BrandWordmark({
+function BrandWordmark({
   className = "",
   iconSize = "h-7 w-7",
   textSize = "text-xl",
@@ -23,9 +23,7 @@ export function BrandWordmark({
         aria-hidden="true"
         className={`${iconSize} rounded-[7px] object-cover shrink-0 shadow-xs`}
       />
-      <span className={`font-bold tracking-tight text-foreground ${textSize}`}>
-        Memlace
-      </span>
+      <span className={`font-bold tracking-tight text-foreground ${textSize}`}>Memlace</span>
     </span>
   );
 }
@@ -35,12 +33,9 @@ const EXTENSION_ASSET_PATH = "/memlace-extension.zip";
 const DOWNLOAD_FILENAME = `Memlace-Chrome-Extension-v${EXTENSION_VERSION}.zip`;
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
-
-
 /** Shared focus-ring class — visible only on keyboard focus. */
 const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -174,7 +169,11 @@ function LandingPage() {
               focusRing
             }
           >
-            {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            {menuOpen ? (
+              <X className="h-5 w-5" aria-hidden />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden />
+            )}
           </button>
         </div>
 
@@ -206,7 +205,6 @@ function LandingPage() {
           </nav>
         </div>
       </header>
-
 
       <main className="mx-auto max-w-7xl px-5 sm:px-6 md:px-8">
         {/* Hero */}
@@ -252,9 +250,7 @@ function LandingPage() {
               </a>
             </div>
 
-            {error && (
-              <p className="mt-4 text-xs text-destructive">{error}</p>
-            )}
+            {error && <p className="mt-4 text-xs text-destructive">{error}</p>}
 
             <p className="mt-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground sm:mt-6">
               Works with
@@ -272,7 +268,6 @@ function LandingPage() {
                 </li>
               ))}
             </ul>
-
           </div>
         </section>
 
@@ -280,7 +275,6 @@ function LandingPage() {
         <section className="pb-16 sm:pb-20 md:pb-24">
           <PreviewFrame />
         </section>
-
 
         {/* Features */}
         <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20">
@@ -337,9 +331,18 @@ function LandingPage() {
         <section id="principles" className="border-t border-border py-14 sm:py-16 md:py-20">
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 md:gap-10">
             {[
-              ["Everything is local.", "No cloud, no backend, no account. Your data never leaves your device."],
-              ["You own everything.", "Projects belong to you — not to OpenAI, not to Anthropic, not to us."],
-              ["AI is replaceable.", "Switch providers whenever you want. Your workspace comes with you."],
+              [
+                "Everything is local.",
+                "No cloud, no backend, no account. Your data never leaves your device.",
+              ],
+              [
+                "You own everything.",
+                "Projects belong to you — not to OpenAI, not to Anthropic, not to us.",
+              ],
+              [
+                "AI is replaceable.",
+                "Switch providers whenever you want. Your workspace comes with you.",
+              ],
             ].map(([title, body]) => (
               <div key={title}>
                 <h3 className="text-base font-semibold tracking-tight">{title}</h3>
@@ -356,17 +359,12 @@ function LandingPage() {
             <BrandWordmark iconSize="h-6 w-6 sm:h-7 sm:w-7" textSize="text-base" />
             <span className="truncate text-xs">A place for your AI memory.</span>
           </div>
-          <p className="font-mono text-[11px] uppercase tracking-widest">
-            Local · Private · Free
-          </p>
+          <p className="font-mono text-[11px] uppercase tracking-widest">Local · Private · Free</p>
         </div>
       </footer>
-
-
     </div>
   );
 }
-
 
 function Mark({ size = 28 }: { size?: number }) {
   return (
@@ -380,7 +378,6 @@ function Mark({ size = 28 }: { size?: number }) {
     />
   );
 }
-
 
 type Project = {
   id: string;
@@ -432,8 +429,6 @@ function PreviewFrame() {
   const [activeProjectId, setActiveProjectId] = useState(PROJECTS[0].id);
   const [providerIdx, setProviderIdx] = useState(0);
 
-
-
   const project = useMemo(
     () => PROJECTS.find((p) => p.id === activeProjectId) ?? PROJECTS[0],
     [activeProjectId],
@@ -443,23 +438,18 @@ function PreviewFrame() {
     setProviderIdx((prev) => (prev + 1) % PROVIDERS.length);
   }, []);
 
-
   return (
     <div
       role="region"
       aria-label="Memlace popup preview"
       className="group/frame relative overflow-hidden rounded-2xl border border-border bg-[color:var(--surface)] shadow-[var(--shadow-soft)] transition-shadow duration-500 focus-within:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.18)] hover:shadow-[0_2px_4px_oklch(0_0_0/0.04),0_24px_56px_-16px_oklch(0_0_0/0.14)]"
     >
-
-
       {/* Chrome */}
       <div className="flex items-center gap-1.5 border-b border-border bg-background/60 px-4 py-3 backdrop-blur">
         <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.75_0.18_25)]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.82_0.16_85)]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[color:var(--hairline)] transition-colors group-hover/frame:bg-[oklch(0.78_0.16_145)]" />
-        <span className="ml-4 font-mono text-[11px] text-muted-foreground">
-          extension · popup
-        </span>
+        <span className="ml-4 font-mono text-[11px] text-muted-foreground">extension · popup</span>
         <div className="ml-auto flex items-center gap-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <span className="relative flex h-1.5 w-1.5" aria-hidden>
@@ -474,7 +464,6 @@ function PreviewFrame() {
       <div className="grid gap-px bg-border sm:grid-cols-[220px_1fr] md:grid-cols-[240px_1fr]">
         {/* Sidebar */}
         <aside className="bg-background p-3 sm:p-4" aria-label="Workspace sidebar">
-
           <div className="mb-4 flex items-center justify-between gap-2">
             <BrandWordmark iconSize="h-5 w-5" textSize="text-sm font-semibold" />
 
@@ -482,7 +471,6 @@ function PreviewFrame() {
               <Command className="h-2.5 w-2.5" aria-hidden />K
             </kbd>
           </div>
-
 
           {/* Fake search */}
           <button
@@ -500,12 +488,7 @@ function PreviewFrame() {
           </button>
 
           <nav aria-label="Primary">
-            <ul
-              role="menu"
-              aria-label="Sections"
-              className="space-y-0.5 text-sm"
-            >
-
+            <ul role="menu" aria-label="Sections" className="space-y-0.5 text-sm">
               {NAV.map((item, i) => {
                 const active = item === activeNav;
                 return (
@@ -649,20 +632,14 @@ function PreviewFrame() {
             </button>
           </div>
 
-
           <ul
             aria-label={`Chats in ${project.name}`}
             className="mt-5 space-y-1.5 [contain:layout_paint]"
           >
             {project.chats.map((c, i) => (
-              <ChatRow
-                key={`${project.id}-${c.title}`}
-                chat={c}
-                index={i}
-              />
+              <ChatRow key={`${project.id}-${c.title}`} chat={c} index={i} />
             ))}
           </ul>
-
 
           {/* Ambient gradient wash */}
           <div
@@ -671,8 +648,6 @@ function PreviewFrame() {
           />
         </section>
       </div>
-
-      
     </div>
   );
 }
@@ -711,10 +686,7 @@ type ChatRowProps = {
 const ChatRow = memo(function ChatRow({ chat, index }: ChatRowProps) {
   const staggered = index < 10;
   return (
-    <li
-      role="none"
-      className="[content-visibility:auto] [contain-intrinsic-size:auto_44px]"
-    >
+    <li role="none" className="[content-visibility:auto] [contain-intrinsic-size:auto_44px]">
       <button
         type="button"
         aria-label={`${chat.title}, from ${chat.provider}, ${chat.when}`}
@@ -744,5 +716,3 @@ const ChatRow = memo(function ChatRow({ chat, index }: ChatRowProps) {
     </li>
   );
 });
-
-
