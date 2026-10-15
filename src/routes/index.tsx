@@ -997,9 +997,10 @@ function RailwayAutoBookerLandingPage() {
         {/* FEATURES SECTION */}
         <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
           <div className="mb-10 max-w-2xl sm:mb-14">
-            <span className="font-mono text-xs uppercase tracking-widest text-primary font-bold">
-              শক্তিশালী অটোমেশন ফিচারসমূহ
-            </span>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary mb-3">
+              <Zap className="h-3.5 w-3.5" />
+              <span>শক্তিশালী অটোমেশন ফিচারসমূহ</span>
+            </div>
             <h2 className="mt-2 text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
               ম্যানুয়ালি টিকিট কাটার চেয়ে অটো-বুকার কেন বেশি কার্যকর?
             </h2>
@@ -1081,9 +1082,10 @@ function RailwayAutoBookerLandingPage() {
         <section id="install" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10 sm:mb-12">
-              <span className="font-mono text-xs uppercase tracking-widest text-primary font-bold">
-                সহজ ইনস্টলেশন নির্দেশিকা
-              </span>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary mb-3">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>সহজ ইনস্টলেশন নির্দেশিকা</span>
+              </div>
               <h2 className="mt-2 text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
                 মাত্র ২ মিনিটে এক্সটেনশনটি সেটআপ করে নিন
               </h2>
@@ -1326,7 +1328,7 @@ function BanglaPricingCard({
 
         {/* Benefits list (Same across all plans as requested) */}
         <div className="mt-5 border-t border-border/80 pt-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
+          <p className="text-xs font-bold text-muted-foreground mb-2.5">
             সকল সুবিধা অন্তর্ভুক্ত:
           </p>
           <ul className="space-y-2 text-xs">
