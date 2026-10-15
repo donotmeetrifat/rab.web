@@ -188,50 +188,97 @@ const FEATURES = [
   },
 ];
 
-const INSTALL_STEPS = [
+const PC_INSTALL_STEPS = [
   {
     step: "১",
     title: "ফাইলটি আনজিপ (Unzip) করুন",
     details: [
-      "ডাউনলোড করা Railway Auto-Booker.zip ফাইলের ওপর মাউসের রাইট ক্লিক করুন।",
-      "'Extract All...' বা 'Extract to Railway Auto-Booker' অপশনে ক্লিক করে ফোল্ডার তৈরি করুন।",
+      "ডাউনলোড করা 'Railway Auto Booker.zip' ফাইলের ওপর মাউসের রাইট ক্লিক করুন।",
+      "'Extract All...' বা 'Extract to Railway Auto Booker' অপশনে ক্লিক করে ফোল্ডারটি আনজিপ করুন।",
+      "আনজিপ করার পর ভেতরে থাকা মূল এক্সটেনশন ফাইলগুলোর ফোল্ডারটি দেখতে পাবেন।",
     ],
   },
   {
     step: "২",
-    title: "গুগল ক্রোম বা মোবাইলে এক্সটেনশন যুক্ত করুন",
+    title: "ক্রোম বা ব্রাউজারের এক্সটেনশন পেজে যান",
     details: [
-      "কম্পিউটারে Chrome অথবা মোবাইলে Kiwi Browser ওপেন করুন।",
-      "অ্যাড্রেস বারে লিখুন: chrome://extensions/ এবং Enter চাপুন।",
-      "উপরে ডান কোনায় 'Developer mode' সুইচটি চালু (ON) করুন।",
-      "উপরে বাম পাশে 'Load unpacked' বাটনে ক্লিক করে আনজিপ করা ফোল্ডারটি সিলেক্ট করুন।",
+      "কম্পিউটারে Google Chrome, Edge, Brave বা Opera ব্রাউজার ওপেন করুন।",
+      "ব্রাউজারের অ্যাড্রেস বারে লিখুন: chrome://extensions এবং Enter চাপুন।",
+      "(অথবা ব্রাউজারের উপরে ডান পাশে থাকা ৩-ডট মেনু > Extensions > Manage Extensions-এ যান)।",
     ],
   },
   {
     step: "৩",
-    title: "এক্সটেনশনটি পিন (Pin) করুন",
+    title: "Developer Mode চালু করুন",
     details: [
-      "ব্রাউজারের উপরে ডান পাশে পাজল আইকনে (🧩 Extensions Icon) ক্লিক করুন।",
-      "BD Railway Auto-Booker এর পাশে থাকা পিন আইকনে (📌 Pin) ক্লিক করুন, যাতে লোগোটি সবসময় উপরে দেখা যায়।",
+      "Extensions পেজের উপরে ডান কোনায় 'Developer mode' নামের একটি সুইচ/টগল বাটন দেখতে পাবেন।",
+      "টগল বাটনটিতে ক্লিক করে এটি চালু (ON) করে দিন।",
     ],
   },
   {
     step: "৪",
-    title: "লাইসেন্স কি (License Key) অ্যাক্টিভ করুন",
+    title: "এক্সটেনশনটি ব্রাউজারে লোড করুন (Load unpacked)",
     details: [
-      "ব্রাউজারের উপরে থাকা ট্রেনের লোগোটিতে ক্লিক করুন (সাইডপ্যানেল ওপেন হবে)।",
-      "আমাদের থেকে পাওয়া লাইসেন্স কি-টি কপি করে 'Enter License Key' বক্সে বসিয়ে 'Activate Key' বাটনে ক্লিক করুন।",
-      "সাথে সাথে আপনার স্ট্যাটাস 'ACTIVE' হয়ে যাবে এবং এক্সটেনশন প্রস্তুত হবে!",
+      "Extensions পেজের উপরে বাম পাশে থাকা 'Load unpacked' বাটনে ক্লিক করুন।",
+      "একটি ফাইল উইন্ডো ওপেন হবে, সেখান থেকে ধাপ ১-এ আনজিপ করা ফোল্ডারটি সিলেক্ট করে 'Select Folder' বাটনে ক্লিক করুন।",
+      "সাথে সাথে BD Railway Auto-Booker এক্সটেনশনটি আপনার ব্রাউজারে সফলভাবে ইনস্টল হয়ে যাবে!",
     ],
   },
   {
     step: "৫",
-    title: "যেভাবে দ্রুত অটোমেটিকভাবে টিকিট কাটবেন",
+    title: "এক্সটেনশনটি পিন করুন ও লাইসেন্স কি দিয়ে অ্যাক্টিভ করুন",
     details: [
-      "eticket.railway.gov.bd ওয়েবসাইটে আপনার রেলওয়ে অ্যাকাউন্টে আগে থেকেই লগইন করে রাখুন।",
-      "সাইডপ্যানেল ওপেন করে From Station, To Station, তারিখ, ক্লাস, ট্রেনের নাম ও সিট সংখ্যা দিন।",
-      "পছন্দের সিট রেঞ্জ (ঐচ্ছিক) দিতে পারেন। 'Start Automation' বাটনে ক্লিক করলেই স্বয়ংক্রিয়ভাবে সিট সিলেক্ট হয়ে যাবে।",
-      "মোবাইলে আসা SMS ওটিপি কোডটি বসিয়ে বিকাশ/নগদ দিয়ে পেমেন্ট করলেই টিকিট কনফার্ম!",
+      "ব্রাউজারের উপরে ডান পাশে পাজল আইকনে (🧩 Extensions Icon) ক্লিক করে পিন (📌 Pin) আইকনে চাপুন, যাতে ট্রেনের লোগোটি সবসময় সামনে দেখা যায়।",
+      "এবার ট্রেনের লোগোতে ক্লিক করলে সাইডপ্যানেল ওপেন হবে। আমাদের থেকে পাওয়া লাইসেন্স কি-টি 'Enter License Key' বক্সে বসিয়ে 'Activate Key' বাটনে চাপুন।",
+      "স্ট্যাটাস 'ACTIVE' হয়ে যাবে! এখন eticket.railway.gov.bd ওয়েবসাইটে গিয়ে সকাল ৮:০০ টায় নিমেষেই টিকিট কাটুন।",
+    ],
+  },
+];
+
+const MOBILE_INSTALL_STEPS = [
+  {
+    step: "১",
+    title: "প্লে-স্টোর থেকে Kiwi Browser ইনস্টল করুন",
+    details: [
+      "সাধারণ Chrome মোবাইল অ্যাপে ব্রাউজার এক্সটেনশন সাপোর্ট করে না, তাই প্রথমে আপনার অ্যান্ড্রয়েড ফোনে Google Play Store ওপেন করুন।",
+      "সার্চ বারে 'Kiwi Browser' লিখে সার্চ করুন এবং অ্যাপটি ফোনে ইনস্টল করে ওপেন করুন।",
+      "(Kiwi Browser ক্রোম ইঞ্জিনে তৈরি এবং এতে কম্পিউটার এক্সটেনশন স্মুথলি চলে)।",
+    ],
+  },
+  {
+    step: "২",
+    title: "জিপ ফাইলটি ফোনে আনজিপ (Extract) করুন",
+    details: [
+      "আমাদের পাঠানো 'Railway Auto Booker.zip' ফাইলটি আপনার ফোনে ডাউনলোড করুন।",
+      "আপনার ফোনের File Manager (ফাইল ম্যানেজার) বা ZArchiver অ্যাপ ব্যবহার করে জিপ ফাইলটি 'Extract' বা 'Unzip' করে একটি ফোল্ডারে রাখুন।",
+      "ফোল্ডারটির অবস্থান মনে রাখুন যাতে ব্রাউজার থেকে সহজে সিলেক্ট করতে পারেন।",
+    ],
+  },
+  {
+    step: "৩",
+    title: "Kiwi Browser-এ Extensions মেনু ওপেন করুন",
+    details: [
+      "ফোনে Kiwi Browser অ্যাপটি ওপেন করুন।",
+      "ব্রাউজারের উপরে ডানদিকের ৩-ডট (⋮) মেনু আইকনে ট্যাপ করুন।",
+      "মেনুর তালিকা থেকে 'Extensions' (এক্সটেনশনস) অপশনটিতে ট্যাপ করুন।",
+    ],
+  },
+  {
+    step: "৪",
+    title: "Developer Mode অন করে এক্সটেনশনটি লোড করুন",
+    details: [
+      "Extensions পেজের উপরে থাকা 'Developer mode' অপশনটি ট্যাপ করে অন (ON) করুন।",
+      "এবার উপরে থাকা '+(from .zip / .crx / folder)' বাটনে ট্যাপ করুন।",
+      "আপনার ফাইল ম্যানেজার থেকে ধাপ ২-এ আনজিপ করা ফোল্ডারটি সিলেক্ট করুন। সাথে সাথে এক্সটেনশনটি ইনস্টল হয়ে যাবে!",
+    ],
+  },
+  {
+    step: "৫",
+    title: "অটো-বুকার ওপেন করে লাইসেন্স দিয়ে টিকিট কাটুন",
+    details: [
+      "Kiwi Browser-এর উপরে ৩-ডট (⋮) মেনুতে ট্যাপ করে স্ক্রল করে একদম নিচে নামুন।",
+      "তালিকার একদম নিচে 'Railway Auto Booker' দেখতে পাবেন, সেটিতে ট্যাপ করুন (সাইডপ্যানেল ওপেন হবে)।",
+      "আপনার লাইসেন্স কি বসিয়ে 'Activate Key' দিন। এরপর Kiwi Browser-এই eticket.railway.gov.bd তে লগইন করে টিকিট বুক করুন!",
     ],
   },
 ];
@@ -769,6 +816,7 @@ function CleanVideoPlayer() {
 
 function RailwayAutoBookerLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [installTab, setInstallTab] = useState<"pc" | "mobile">("pc");
 
   const navLinks = [
     { href: "#pricing", label: "সাবস্ক্রিপশন প্ল্যান" },
@@ -1044,24 +1092,62 @@ function RailwayAutoBookerLandingPage() {
               </p>
             </div>
 
-            {/* Device Compatibility Badges */}
-            <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-2xs">
-                <Laptop className="h-4 w-4 text-primary" />
+            {/* Interactive Tab Switcher for PC vs Android Mobile */}
+            <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setInstallTab("pc")}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${focusRing} ${
+                  installTab === "pc"
+                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02] border border-primary"
+                    : "border border-border/80 bg-[color:var(--surface)] text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+              >
+                <Laptop className={`h-4 w-4 ${installTab === "pc" ? "text-white" : "text-primary"}`} />
                 <span>কম্পিউটার (Google Chrome, Edge, Brave, Opera)</span>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-2xs">
-                <Smartphone className="h-4 w-4 text-primary" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInstallTab("mobile")}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${focusRing} ${
+                  installTab === "mobile"
+                    ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02] border border-primary"
+                    : "border border-border/80 bg-[color:var(--surface)] text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+              >
+                <Smartphone className={`h-4 w-4 ${installTab === "mobile" ? "text-white" : "text-primary"}`} />
                 <span>অ্যান্ড্রয়েড মোবাইল (Kiwi Browser)</span>
-              </div>
+              </button>
             </div>
+
+            {/* Beginner guidance notice based on selected tab */}
+            {installTab === "mobile" ? (
+              <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/10 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex items-start gap-3 shadow-2xs">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs mt-0.5">
+                  📱
+                </span>
+                <p className="leading-relaxed">
+                  <strong>মোবাইল ব্যবহারকারীদের জন্য নির্দেশনা:</strong> মোবাইলের সাধারণ গুগল ক্রোম অ্যাপে এক্সটেনশন চলে না। তাই অ্যান্ড্রয়েডে টিকিট কাটতে প্লে-স্টোর থেকে সম্পূর্ণ ফ্রি <strong>Kiwi Browser</strong> ইনস্টল করতে হবে। নিচে নতুনদের জন্য খুব সহজ ভাষায় ৫টি ধাপ দেওয়া হলো:
+                </p>
+              </div>
+            ) : (
+              <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex items-start gap-3 shadow-2xs">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs mt-0.5">
+                  💻
+                </span>
+                <p className="leading-relaxed">
+                  <strong>কম্পিউটার ব্যবহারকারীদের জন্য নির্দেশনা:</strong> Google Chrome, Microsoft Edge, Brave বা Opera ব্রাউজারে মাত্র ২ মিনিটে নিচের ৫টি সহজ ধাপ অনুসরণ করে এক্সটেনশনটি সেটআপ করে নিতে পারবেন:
+                </p>
+              </div>
+            )}
 
             {/* Steps list */}
             <div className="space-y-4">
-              {INSTALL_STEPS.map((s) => (
+              {(installTab === "pc" ? PC_INSTALL_STEPS : MOBILE_INSTALL_STEPS).map((s) => (
                 <div
                   key={s.step}
-                  className="rounded-2xl border border-border bg-[color:var(--surface)] p-5 sm:p-6 transition-colors hover:border-primary/40 shadow-xs"
+                  className="rounded-2xl border border-border bg-[color:var(--surface)] p-5 sm:p-6 transition-all hover:border-primary/40 shadow-xs"
                 >
                   <div className="flex items-start gap-4">
                     <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm shadow-xs">
@@ -1072,7 +1158,7 @@ function RailwayAutoBookerLandingPage() {
                       <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
                         {s.details.map((detail, idx) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
+                            <span className="text-primary mt-1 font-bold">•</span>
                             <span>{detail}</span>
                           </li>
                         ))}
