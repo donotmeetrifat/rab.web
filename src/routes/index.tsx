@@ -243,40 +243,52 @@ function CleanVideoPlayer() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-2xl ring-1 ring-border/50 group">
-      <video
-        ref={videoRef}
-        controls
-        playsInline
-        preload="metadata"
-        poster="/railway-hero.png"
-        className="w-full aspect-video object-cover bg-black"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      >
-        <source src="/railway-demo.mp4" type="video/mp4" />
-        আপনার ব্রাউজার ভিডিও প্লে করতে সমর্থন করে না।
-      </video>
+    <div className="relative mx-auto max-w-4xl group">
+      {/* Subtle ambient emerald glow behind frame */}
+      <div
+        className="pointer-events-none absolute -inset-1 sm:-inset-1.5 rounded-[28px] bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-600/20 blur-xl opacity-70 transition-opacity duration-700 group-hover:opacity-100"
+        aria-hidden="true"
+      />
 
-      {!isPlaying && (
-        <div
-          onClick={handlePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 cursor-pointer group-hover:bg-black/25"
-          role="button"
-          tabIndex={0}
-          aria-label="ভিডিও প্লে করুন"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handlePlay();
-            }
-          }}
-        >
-          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 transition-transform duration-300 group-hover:scale-110">
-            <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" aria-hidden="true" />
-          </div>
+      {/* Premium Outer Gradient Border Frame */}
+      <div className="relative rounded-[22px] sm:rounded-[26px] p-[2.5px] sm:p-[3px] bg-gradient-to-b from-primary/70 via-border/90 to-primary/35 shadow-[0_20px_50px_-12px_rgba(5,150,105,0.22)] transition-all duration-500 hover:shadow-[0_28px_65px_-10px_rgba(5,150,105,0.32)]">
+        {/* Inner Bezel Container with Concentric Curvature */}
+        <div className="relative overflow-hidden rounded-[19.5px] sm:rounded-[23px] bg-neutral-950 ring-1 ring-white/10">
+          <video
+            ref={videoRef}
+            controls
+            playsInline
+            preload="metadata"
+            poster="/railway-hero.png"
+            className="w-full aspect-video object-cover bg-black block"
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+          >
+            <source src="/railway-demo.mp4" type="video/mp4" />
+            আপনার ব্রাউজার ভিডিও প্লে করতে সমর্থন করে না।
+          </video>
+
+          {!isPlaying && (
+            <div
+              onClick={handlePlay}
+              className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 cursor-pointer group-hover:bg-black/25"
+              role="button"
+              tabIndex={0}
+              aria-label="ভিডিও প্লে করুন"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handlePlay();
+                }
+              }}
+            >
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 transition-transform duration-300 group-hover:scale-110">
+                <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" aria-hidden="true" />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
