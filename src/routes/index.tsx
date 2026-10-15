@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -7,14 +7,19 @@ import {
   Clock,
   ExternalLink,
   Laptop,
+  Maximize,
   Menu,
   MessageCircle,
+  Minimize,
+  Pause,
   Play,
   RotateCcw,
   ShieldCheck,
   Smartphone,
   Sparkles,
   Train,
+  Volume2,
+  VolumeX,
   X,
   Zap,
 } from "lucide-react";
@@ -231,62 +236,456 @@ const INSTALL_STEPS = [
   },
 ];
 
-function CleanVideoPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+function formatVideoTime(seconds: number): string {
+  if (isNaN(seconds) || seconds < 0) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+}
 
-  const handlePlay = () => {
-    if (videoRef.current) {
+function CleanVideoPlayer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const scrubBarRef = useRef<HTMLDivElement>(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [bufferedPercent, setBufferedPercent] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [isEnded, setIsEnded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [hoverTime, setHoverTime] = useState<number | null>(null);
+  const [hoverX, setHoverX] = useState<number>(0);
+  const [flashFeedback, setFlashFeedback] = useState<"play" | "pause" | null>(null);
+
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerFlash = (type: "play" | "pause") => {
+    setFlashFeedback(type);
+    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = setTimeout(() => {
+      setFlashFeedback(null);
+    }, 450);
+  };
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (isEnded) {
+      videoRef.current.currentTime = 0;
       videoRef.current.play();
       setIsPlaying(true);
+      setIsEnded(false);
+      triggerFlash("play");
+    } else if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+      triggerFlash("pause");
+    } else {
+      videoRef.current.play();
+      setIsPlaying(true);
+      triggerFlash("play");
     }
   };
 
+  const resetHideTimer = useCallback(() => {
+    setShowControls(true);
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    if (isPlaying && !isDragging) {
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 2500);
+    }
+  }, [isPlaying, isDragging]);
+
+  const handleUserActivity = () => {
+    resetHideTimer();
+  };
+
+  const handleMouseLeave = () => {
+    if (isPlaying && !isDragging) {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 600);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration || 0);
+    }
+  };
+
+  const handleProgress = () => {
+    if (videoRef.current && videoRef.current.buffered.length > 0 && duration > 0) {
+      const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
+      setBufferedPercent(Math.min(100, (bufferedEnd / duration) * 100));
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setIsEnded(true);
+    setShowControls(true);
+  };
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    videoRef.current.muted = nextMuted;
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = parseFloat(e.target.value);
+    setVolume(newVol);
+    if (videoRef.current) {
+      videoRef.current.volume = newVol;
+      const muted = newVol === 0;
+      setIsMuted(muted);
+      videoRef.current.muted = muted;
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, []);
+
+  const seekToPosition = (clientX: number) => {
+    if (!scrubBarRef.current || !videoRef.current || !duration) return;
+    const rect = scrubBarRef.current.getBoundingClientRect();
+    const clickPos = Math.max(0, Math.min(rect.width, clientX - rect.left));
+    const percentage = clickPos / rect.width;
+    const targetTime = percentage * duration;
+    videoRef.current.currentTime = targetTime;
+    setCurrentTime(targetTime);
+  };
+
+  const handleScrubMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsDragging(true);
+    seekToPosition(e.clientX);
+  };
+
+  const handleScrubMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrubBarRef.current || !duration) return;
+    const rect = scrubBarRef.current.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    setHoverX(pos);
+    setHoverTime((pos / rect.width) * duration);
+  };
+
+  const handleScrubMouseLeave = () => {
+    setHoverTime(null);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        seekToPosition(e.clientX);
+      }
+    };
+    const handleMouseUp = () => {
+      if (isDragging) setIsDragging(false);
+    };
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, duration]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.target instanceof HTMLInputElement) return;
+    if (e.key === " " || e.key === "k") {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.key === "m") {
+      e.preventDefault();
+      toggleMute();
+    } else if (e.key === "f") {
+      e.preventDefault();
+      toggleFullscreen();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (videoRef.current) {
+        videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
+      }
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      if (videoRef.current) {
+        videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + 5);
+      }
+    }
+  };
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
-    <div className="relative mx-auto max-w-4xl group">
+    <div className="relative mx-auto max-w-4xl group/player select-none">
       {/* Subtle ambient emerald glow behind frame */}
       <div
-        className="pointer-events-none absolute -inset-1 sm:-inset-1.5 rounded-[28px] bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-600/20 blur-xl opacity-70 transition-opacity duration-700 group-hover:opacity-100"
+        className="pointer-events-none absolute -inset-1 sm:-inset-1.5 rounded-[28px] bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-600/20 blur-xl opacity-75 transition-opacity duration-700 group-hover/player:opacity-100"
         aria-hidden="true"
       />
 
       {/* Premium Outer Gradient Border Frame */}
       <div className="relative rounded-[22px] sm:rounded-[26px] p-[2.5px] sm:p-[3px] bg-gradient-to-b from-primary/70 via-border/90 to-primary/35 shadow-[0_20px_50px_-12px_rgba(5,150,105,0.22)] transition-all duration-500 hover:shadow-[0_28px_65px_-10px_rgba(5,150,105,0.32)]">
-        {/* Inner Bezel Container with Concentric Curvature */}
-        <div className="relative overflow-hidden rounded-[19.5px] sm:rounded-[23px] bg-neutral-950 ring-1 ring-white/10">
+        {/* Inner Video Container (can go Fullscreen) */}
+        <div
+          ref={containerRef}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+          onMouseMove={handleUserActivity}
+          onMouseEnter={() => setShowControls(true)}
+          onMouseLeave={handleMouseLeave}
+          className="relative overflow-hidden rounded-[19.5px] sm:rounded-[23px] bg-neutral-950 ring-1 ring-white/10 aspect-video group/frame focus:outline-none"
+        >
+          {/* Main Video Element — NO native browser controls */}
           <video
             ref={videoRef}
-            controls
             playsInline
             preload="metadata"
             poster="/railway-hero.png"
-            className="w-full aspect-video object-cover bg-black block"
-            onPlay={() => setIsPlaying(true)}
+            className="w-full h-full object-cover bg-black block cursor-pointer"
+            onClick={togglePlay}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onProgress={handleProgress}
+            onEnded={handleEnded}
+            onPlay={() => {
+              setIsPlaying(true);
+              setIsEnded(false);
+            }}
             onPause={() => setIsPlaying(false)}
           >
             <source src="/railway-demo.mp4" type="video/mp4" />
             আপনার ব্রাউজার ভিডিও প্লে করতে সমর্থন করে না।
           </video>
 
-          {!isPlaying && (
-            <div
-              onClick={handlePlay}
-              className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 cursor-pointer group-hover:bg-black/25"
-              role="button"
-              tabIndex={0}
-              aria-label="ভিডিও প্লে করুন"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handlePlay();
-                }
-              }}
-            >
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 transition-transform duration-300 group-hover:scale-110">
-                <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" aria-hidden="true" />
+          {/* Center Play/Pause Flash Animation on Video Click */}
+          {flashFeedback && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-30">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-black/70 backdrop-blur-md border border-white/25 text-white flex items-center justify-center shadow-2xl transition-all scale-110">
+                {flashFeedback === "play" ? (
+                  <Play className="h-8 w-8 ml-1 fill-white text-white drop-shadow" />
+                ) : (
+                  <Pause className="h-8 w-8 fill-white text-white drop-shadow" />
+                )}
               </div>
             </div>
           )}
+
+          {/* Big Center Play Button Overlay when Paused */}
+          {!isPlaying && !isEnded && (
+            <div
+              onClick={togglePlay}
+              className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1.5px] transition-all duration-300 cursor-pointer group-hover/frame:bg-black/30 z-10"
+              role="button"
+              tabIndex={-1}
+              aria-label="ভিডিও চালু করুন"
+            >
+              <div className="relative flex items-center justify-center">
+                <span className="absolute -inset-2.5 sm:-inset-3 rounded-full bg-emerald-500/35 blur-md animate-pulse" />
+                <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.55)] ring-4 ring-white/25 transition-transform duration-300 hover:scale-110 active:scale-95">
+                  <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white text-white drop-shadow" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Big Center Replay Button Overlay when Ended */}
+          {isEnded && (
+            <div
+              onClick={togglePlay}
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-300 cursor-pointer z-10"
+              role="button"
+              tabIndex={-1}
+              aria-label="ভিডিও আবার চালু করুন"
+            >
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative flex items-center justify-center">
+                  <span className="absolute -inset-2.5 sm:-inset-3 rounded-full bg-emerald-500/40 blur-md animate-pulse" />
+                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.6)] ring-4 ring-white/25 transition-transform duration-300 hover:scale-110 active:scale-95">
+                    <RotateCcw className="h-8 w-8 sm:h-9 sm:w-9 text-white drop-shadow" />
+                  </div>
+                </div>
+                <span className="text-white text-sm sm:text-base font-bold drop-shadow tracking-wide">
+                  আবার দেখুন
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Subtle Bottom Scrim Gradient */}
+          <div
+            className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none transition-opacity duration-300 z-15 ${
+              showControls || !isPlaying ? "opacity-100" : "opacity-0"
+            }`}
+          />
+
+          {/* Floating Glassmorphic Luxury Control Bar */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`absolute inset-x-3 sm:inset-x-5 bottom-3 sm:bottom-4 z-20 transition-all duration-300 ${
+              showControls || !isPlaying
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 translate-y-2 pointer-events-none"
+            }`}
+          >
+            <div className="rounded-xl sm:rounded-2xl border border-white/15 bg-neutral-950/80 backdrop-blur-xl p-2 sm:p-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.65)]">
+              {/* Custom Scrubber / Seekbar */}
+              <div
+                ref={scrubBarRef}
+                onMouseDown={handleScrubMouseDown}
+                onMouseMove={handleScrubMouseMove}
+                onMouseLeave={handleScrubMouseLeave}
+                className="relative h-3 w-full flex items-center cursor-pointer group/scrub py-1"
+              >
+                {/* Hover Time Tooltip */}
+                {hoverTime !== null && (
+                  <div
+                    className="absolute -top-7 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/90 border border-white/20 text-[10px] font-mono text-white pointer-events-none shadow-md z-30"
+                    style={{ left: `${hoverX}px` }}
+                  >
+                    {formatVideoTime(hoverTime)}
+                  </div>
+                )}
+
+                {/* Track Background */}
+                <div className="h-1 sm:h-1.5 w-full rounded-full bg-white/20 group-hover/scrub:h-2 transition-all relative overflow-hidden">
+                  {/* Buffer progress bar */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 bg-white/25 rounded-full transition-all"
+                    style={{ width: `${bufferedPercent}%` }}
+                  />
+                  {/* Played progress bar */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+
+                {/* Glowing Thumb Knob */}
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full bg-white shadow-[0_0_12px_rgba(16,185,129,1)] ring-2 ring-emerald-400 scale-0 group-hover/scrub:scale-100 transition-transform duration-150 pointer-events-none"
+                  style={{ left: `${progressPercent}%` }}
+                />
+              </div>
+
+              {/* Lower Controls Row */}
+              <div className="flex items-center justify-between gap-2 pt-1 px-1">
+                {/* Left Group: Play/Pause, Volume, Time */}
+                <div className="flex items-center gap-1.5 sm:gap-2.5">
+                  {/* Play/Pause Button */}
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-lg text-white/90 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-emerald-400/50"
+                    aria-label={isPlaying ? "বিরতি দিন (Pause)" : "চালু করুন (Play)"}
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-4 w-4 sm:h-5 sm:w-5 fill-white text-white" />
+                    ) : (
+                      <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-white text-white ml-0.5" />
+                    )}
+                  </button>
+
+                  {/* Volume Button + Expanding Slider */}
+                  <div className="group/vol flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={toggleMute}
+                      className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-lg text-white/90 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-emerald-400/50"
+                      aria-label={isMuted || volume === 0 ? "আনমিউট করুন" : "মিউট করুন"}
+                    >
+                      {isMuted || volume === 0 ? (
+                        <VolumeX className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
+                      ) : (
+                        <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                      )}
+                    </button>
+
+                    <div className="w-0 group-hover/vol:w-16 sm:group-hover/vol:w-20 transition-all duration-200 overflow-hidden flex items-center">
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className="w-16 sm:w-20 h-1 sm:h-1.5 accent-emerald-400 bg-white/25 rounded-lg cursor-pointer"
+                        aria-label="ভলিউম নিয়ন্ত্রণ"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Monospace Time Display */}
+                  <div className="font-mono text-[11px] sm:text-xs text-neutral-300 font-medium tracking-wider flex items-center gap-1 select-none">
+                    <span className="text-white font-semibold">{formatVideoTime(currentTime)}</span>
+                    <span className="text-neutral-500">/</span>
+                    <span>{formatVideoTime(duration)}</span>
+                  </div>
+                </div>
+
+                {/* Right Group: 1080p Badge & Fullscreen */}
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  {/* 1080p HD Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 tracking-wider uppercase select-none">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>1080p HD</span>
+                  </div>
+
+                  {/* Fullscreen Toggle */}
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-lg text-white/90 hover:text-white hover:bg-white/10 active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-emerald-400/50"
+                    aria-label={isFullscreen ? "ফুলস্ক্রিন থেকে প্রস্থান" : "ফুলস্ক্রিন"}
+                  >
+                    {isFullscreen ? (
+                      <Minimize className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    ) : (
+                      <Maximize className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
