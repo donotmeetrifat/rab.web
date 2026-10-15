@@ -1,6 +1,6 @@
-# Welcome to your Lovable project
+# Memlace — A place for your AI memory
 
-This project was built with [Lovable](https://lovable.dev).
+A private, local-first workspace for your AI memory. Organize conversations, projects, and context across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot.
 
 ## Build with Lovable
 
