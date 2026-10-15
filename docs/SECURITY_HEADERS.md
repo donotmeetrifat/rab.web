@@ -31,7 +31,7 @@ rules in `vercel.json` and don't need CSP evaluation.
 
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline' 'strict-dynamic';
+script-src 'self' 'unsafe-inline';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 font-src 'self' https://fonts.gstatic.com data:;
 img-src 'self' data: blob: https:;
@@ -48,12 +48,10 @@ upgrade-insecure-requests
 
 ### Notes
 
-- **`script-src`** includes `'unsafe-inline'` **and** `'strict-dynamic'`.
-  Modern browsers that understand `'strict-dynamic'` **ignore**
-  `'unsafe-inline'`; older browsers use it as a fallback for TanStack Start's
-  inline hydration script. When per-request nonces are added (v1.2),
-  swap `'unsafe-inline'` for `'nonce-<value>'` injected by the middleware
-  and mirrored into the SSR render.
+- **`script-src`** includes `'unsafe-inline'` for TanStack Start's inline hydration scripts.
+  `'strict-dynamic'` is intentionally omitted because without per-request nonces,
+  CSP Level 3 browsers ignore `'unsafe-inline'` and block hydration scripts, breaking the site.
+  When per-request nonces are added (v1.2), nonces can be introduced with strict-dynamic.
 - **`connect-src 'self'`** — the landing page has no third-party API calls.
   Widen this deliberately if analytics or forms are added later.
 - **`frame-ancestors 'none'`** + **`X-Frame-Options: DENY`** — anti-clickjacking.

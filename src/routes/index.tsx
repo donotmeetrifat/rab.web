@@ -4,9 +4,31 @@ import { ArrowRight, Search, Command, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button3D, button3dClass } from "@/components/ui/button-3d";
 
-import memlaceLogo from "@/assets/memlace-logo.png.asset.json";
-import memlaceWordmark from "@/assets/memlace-wordmark-v4.png.asset.json";
 import { BRANDS } from "@/components/brand-icons";
+
+export function BrandWordmark({
+  className = "",
+  iconSize = "h-7 w-7",
+  textSize = "text-xl",
+}: {
+  className?: string;
+  iconSize?: string;
+  textSize?: string;
+}) {
+  return (
+    <span className={`inline-flex items-center gap-2.5 leading-none select-none ${className}`}>
+      <img
+        src="/favicon.png"
+        alt=""
+        aria-hidden="true"
+        className={`${iconSize} rounded-[7px] object-cover shrink-0 shadow-xs`}
+      />
+      <span className={`font-bold tracking-tight text-foreground ${textSize}`}>
+        Memlace
+      </span>
+    </span>
+  );
+}
 
 const EXTENSION_VERSION = "1.0.0";
 const EXTENSION_ASSET_PATH = "/memlace-extension.zip";
@@ -124,13 +146,9 @@ function LandingPage() {
           <a
             href="/"
             aria-label="Memlace — home"
-            className="inline-flex items-center gap-[10px] leading-none"
+            className={"inline-flex items-center leading-none rounded-lg " + focusRing}
           >
-            <img
-              src={memlaceWordmark.url}
-              alt="Memlace"
-              className="block h-6 w-auto sm:h-7 md:h-8"
-            />
+            <BrandWordmark iconSize="h-7 w-7 sm:h-8 sm:w-8" textSize="text-xl sm:text-2xl" />
           </a>
 
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex lg:gap-8">
@@ -335,7 +353,7 @@ function LandingPage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:px-8">
           <div className="flex min-w-0 items-center gap-3">
-            <img src={memlaceWordmark.url} alt="Memlace" className="block h-7 w-auto" />
+            <BrandWordmark iconSize="h-6 w-6 sm:h-7 sm:w-7" textSize="text-base" />
             <span className="truncate text-xs">A place for your AI memory.</span>
           </div>
           <p className="font-mono text-[11px] uppercase tracking-widest">
@@ -353,11 +371,11 @@ function LandingPage() {
 function Mark({ size = 28 }: { size?: number }) {
   return (
     <img
-      src={memlaceLogo.url}
+      src="/favicon.png"
       alt="Memlace"
       width={size}
       height={size}
-      className="block select-none"
+      className="block select-none rounded-[7px] object-cover"
       draggable={false}
     />
   );
@@ -457,8 +475,8 @@ function PreviewFrame() {
         {/* Sidebar */}
         <aside className="bg-background p-3 sm:p-4" aria-label="Workspace sidebar">
 
-          <div className="mb-4 flex items-center gap-2">
-            <img src={memlaceWordmark.url} alt="Memlace" className="block h-5 w-auto" />
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <BrandWordmark iconSize="h-5 w-5" textSize="text-sm font-semibold" />
 
             <kbd className="ml-auto hidden items-center gap-1 rounded border border-border bg-[color:var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-flex">
               <Command className="h-2.5 w-2.5" aria-hidden />K

@@ -20,11 +20,12 @@ export const config = {
 
 // Strict CSP.
 //
-// `script-src` includes `'unsafe-inline'` because TanStack Start's SSR emits a
-// small hydration script inline. Modern browsers ignore `'unsafe-inline'` when
-// `'strict-dynamic'` is present, but we keep it as a fallback for older
-// browsers that don't understand `'strict-dynamic'`. When we introduce
-// per-request nonces (v1.2), swap `'unsafe-inline'` for `'nonce-<value>'`.
+// `script-src` includes `'unsafe-inline'` because TanStack Start's SSR emits
+// hydration scripts inline. `'strict-dynamic'` must NOT be used without
+// per-request nonces, because modern browsers ignore `'unsafe-inline'` and
+// host sources when `'strict-dynamic'` is present, which blocks the hydration
+// scripts and causes the client-side app to crash with a blank screen.
+// When per-request nonces are introduced (v1.2), nonces can be paired here.
 //
 // `style-src` allows `'unsafe-inline'` for Tailwind-injected styles and Google
 // Fonts stylesheet, plus the Google Fonts host.
@@ -32,7 +33,7 @@ export const config = {
 // `connect-src` is `'self'` — the landing page has no third-party API calls.
 const CSP_DIRECTIVES: Record<string, string[]> = {
   "default-src": ["'self'"],
-  "script-src": ["'self'", "'unsafe-inline'", "'strict-dynamic'"],
+  "script-src": ["'self'", "'unsafe-inline'"],
   "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
   "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
   "img-src": ["'self'", "data:", "blob:", "https:"],
