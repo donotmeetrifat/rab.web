@@ -73,17 +73,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Memlace — A place for your AI memory." },
+      { title: "Bangladesh Railway Auto-Booker — Fast & Automated Train Ticket Booking" },
       {
         name: "description",
         content:
-          "Memlace is a private, local-first workspace that keeps your AI conversations, projects, and context organized across ChatGPT, Claude, Gemini, DeepSeek, Perplexity, and Copilot.",
+          "High-speed browser extension for Bangladesh Railway (eticket.railway.gov.bd). Automatically books train tickets during 8:00 AM rush hour with instant seat picking, coach selection, and fast checkout.",
       },
-      { property: "og:title", content: "Memlace — A place for your AI memory." },
+      {
+        property: "og:title",
+        content: "Bangladesh Railway Auto-Booker — Fast & Automated Train Ticket Booking",
+      },
       {
         property: "og:description",
         content:
-          "A private, local-first workspace for your AI memory. Organize conversations, projects, and context across every AI assistant.",
+          "The fastest automated ticket booking extension for Bangladesh Railway. Auto seat picking, route selection, and millisecond 8:00 AM rush booking.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
