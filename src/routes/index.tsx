@@ -1320,7 +1320,7 @@ function BanglaPricingCard({
 
       <div>
         <div className="flex items-start justify-between gap-2">
-          <h4 className="text-lg font-bold tracking-tight text-foreground">{plan.name}</h4>
+          <h4 className="text-lg font-bold text-foreground">{plan.name}</h4>
           {!plan.isPopular && (
             <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
               {plan.badge}
@@ -1331,7 +1331,7 @@ function BanglaPricingCard({
         <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{plan.subtitle}</p>
 
         <div className="mt-5 flex items-baseline gap-1.5">
-          <span className="text-3xl font-extrabold tracking-tight text-foreground">{plan.price}</span>
+          <span className="text-3xl font-extrabold text-foreground">{plan.price}</span>
           <span className="text-xs text-muted-foreground font-medium">/ {plan.period}</span>
         </div>
 
