@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -28,10 +28,10 @@ export const Route = createFileRoute("/")({
 const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-/** Default Contact URLs (Placeholders for user to update) */
-const WHATSAPP_NUMBER = "8801XXXXXXXXX";
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("আসসালামু আলাইকুম! আমি BD Railway Auto-Booker এক্সটেনশনটির সাবস্ক্রিপশন নিতে চাই।")}`;
-const FACEBOOK_LINK = "https://facebook.com/";
+/** Official Contact URLs */
+const WHATSAPP_USERNAME = "meetrifat.ai";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_USERNAME}?text=${encodeURIComponent("আসসালামু আলাইকুম! আমি BD Railway Auto-Booker এক্সটেনশনটির সাবস্ক্রিপশন নিতে চাই।")}`;
+const FACEBOOK_LINK = "https://www.facebook.com/meetrifat";
 
 function BrandWordmark({
   className = "",
@@ -231,6 +231,56 @@ const INSTALL_STEPS = [
   },
 ];
 
+function CleanVideoPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handlePlay = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-black shadow-2xl ring-1 ring-border/50 group">
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        preload="metadata"
+        poster="/railway-hero.png"
+        className="w-full aspect-video object-cover bg-black"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      >
+        <source src="/railway-demo.mp4" type="video/mp4" />
+        আপনার ব্রাউজার ভিডিও প্লে করতে সমর্থন করে না।
+      </video>
+
+      {!isPlaying && (
+        <div
+          onClick={handlePlay}
+          className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 cursor-pointer group-hover:bg-black/25"
+          role="button"
+          tabIndex={0}
+          aria-label="ভিডিও প্লে করুন"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handlePlay();
+            }
+          }}
+        >
+          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/95 text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 transition-transform duration-300 group-hover:scale-110">
+            <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" aria-hidden="true" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RailwayAutoBookerLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -428,42 +478,7 @@ function RailwayAutoBookerLandingPage() {
             </div>
 
             {/* Video Box Container */}
-            <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-xl ring-1 ring-border/50">
-              <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 backdrop-blur text-xs text-white/80 font-mono">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
-                  <span className="ml-2 font-sans font-medium text-white/90">
-                    BD Railway Auto-Booker · ডেমো ভিডিও
-                  </span>
-                </div>
-                <span className="text-[11px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/50">
-                  HD 1080p
-                </span>
-              </div>
-
-              {/* Video Player Box */}
-              <div className="relative aspect-video w-full bg-neutral-950 flex items-center justify-center overflow-hidden group">
-                <img
-                  src="/railway-hero.png"
-                  alt="Railway Auto-Booker Demo Poster"
-                  className="absolute inset-0 h-full w-full object-cover opacity-35 filter brightness-75 transition-transform duration-500 group-hover:scale-105"
-                />
-
-                <div className="relative z-10 p-6 flex flex-col items-center justify-center text-center max-w-lg">
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl ring-8 ring-primary/30 hover:scale-110 transition-transform cursor-pointer">
-                    <Play className="h-8 w-8 sm:h-10 sm:w-10 ml-1 fill-white" />
-                  </div>
-                  <h3 className="mt-4 text-lg sm:text-xl font-bold text-white">
-                    Railway Auto-Booker ডেমো ভিডিও
-                  </h3>
-                  <p className="mt-1.5 text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                    ভিডিওটি দেখতে ক্লিক করুন (আপনার ফেসবুক ভিডিও লিংক এখানে সহজেই প্লে হবে)।
-                  </p>
-                </div>
-              </div>
-            </div>
+            <CleanVideoPlayer />
           </div>
         </section>
 
