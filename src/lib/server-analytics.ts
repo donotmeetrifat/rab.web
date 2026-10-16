@@ -178,6 +178,7 @@ export async function saveStats(stats: VisitorStats): Promise<void> {
       token: BLOB_TOKEN,
       access: "private",
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
   } catch (err) {
     console.error("Failed to save stats to Vercel Blob:", err);
