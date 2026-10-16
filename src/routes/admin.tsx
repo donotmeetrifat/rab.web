@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   Activity,
   Compass,
+  Download,
 } from "lucide-react";
 import type { VisitorStats } from "@/lib/server-analytics";
 
@@ -441,6 +442,93 @@ function AdminAnalyticsPage() {
           </div>
         </div>
 
+        {/* Section: Extension Downloads KPI Cards */}
+        <div className="space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              <span>এক্সটেনশন ডাউনলোড ট্র্যাকিং (Extension Downloads)</span>
+            </h2>
+            <span className="text-xs text-muted-foreground">
+              প্রকৃত ইউজারদের রিয়েল ডাউনলোড সংখ্যা (কোনো ফেক বা স্যাম্পল নয়)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {/* Card 1: Total Downloads */}
+            <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-emerald-500/15 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between text-muted-foreground mb-3">
+                <span className="text-xs sm:text-sm font-bold text-foreground">
+                  সর্বমোট ডাউনলোড
+                </span>
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <Download className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
+                {stats?.downloads ? toBengaliNumber(stats.downloads.total || 0) : "০"}
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                পিসি ও মোবাইল মিলিয়ে সর্বমোট
+              </p>
+            </div>
+
+            {/* Card 2: PC Downloads */}
+            <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between text-muted-foreground mb-3">
+                <span className="text-xs sm:text-sm font-bold text-foreground">
+                  কম্পিউটার (PC)
+                </span>
+                <div className="h-8 w-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-500">
+                  <Laptop className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
+                {stats?.downloads ? toBengaliNumber(stats.downloads.pc || 0) : "০"}
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                উইন্ডোজ / ম্যাক জিপ ডাউনলোড
+              </p>
+            </div>
+
+            {/* Card 3: Mobile (Android) Downloads */}
+            <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between text-muted-foreground mb-3">
+                <span className="text-xs sm:text-sm font-bold text-foreground">
+                  মোবাইল (Android)
+                </span>
+                <div className="h-8 w-8 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-500">
+                  <Smartphone className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
+                {stats?.downloads ? toBengaliNumber(stats.downloads.android || 0) : "০"}
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                কিউই ব্রাউজার জিপ ডাউনলোড
+              </p>
+            </div>
+
+            {/* Card 4: Today's Downloads */}
+            <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between text-muted-foreground mb-3">
+                <span className="text-xs sm:text-sm font-bold text-foreground">
+                  আজকের ডাউনলোড
+                </span>
+                <div className="h-8 w-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
+                  <Calendar className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
+                {stats?.downloads ? toBengaliNumber(stats.downloads.today || 0) : "০"}
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                আজকে হওয়া নতুন ডাউনলোড
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Section: Devices & Browsers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Box 1: Device Breakdown */}
@@ -608,13 +696,13 @@ function AdminAnalyticsPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <span>সর্বশেষ ভিজিটদের লাইভ লগ (Recent Visitor Log)</span>
+                <span>সর্বশেষ অ্যাক্টিভিটি ও ডাউনলোড লগ (Live Activity & Downloads)</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary">
                   রিয়েল টাইম
                 </span>
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                কোনো ডামি ডেটা নয় — প্রতিটি ভিজিট হওয়া মাত্রই এখানে স্বয়ংক্রিয়ভাবে রেকর্ড হয়
+                কোনো ডামি বা ফেক ডেটা নয় — প্রতিটি ভিজিট ও এক্সটেনশন ডাউনলোড হওয়া মাত্রই স্বয়ংক্রিয়ভাবে রেকর্ড হয়
               </p>
             </div>
           </div>
@@ -624,7 +712,7 @@ function AdminAnalyticsPage() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border/80 text-muted-foreground">
-                    <th className="pb-3 font-semibold">ভিজিটর ধরন</th>
+                    <th className="pb-3 font-semibold">ইভেন্ট / ধরন</th>
                     <th className="pb-3 font-semibold">ডিভাইস</th>
                     <th className="pb-3 font-semibold">ব্রাউজার ও ওএস</th>
                     <th className="pb-3 font-semibold">লোকেশন</th>
@@ -635,14 +723,24 @@ function AdminAnalyticsPage() {
                   {stats.recentLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-muted/40 transition-colors">
                       <td className="py-2.5">
-                        {log.isUnique ? (
+                        {log.eventType === "download_pc" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                            <Download className="h-3 w-3" />
+                            <span>পিসি এক্সটেনশন</span>
+                          </span>
+                        ) : log.eventType === "download_android" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 text-[11px] font-bold text-purple-600 dark:text-purple-400">
+                            <Download className="h-3 w-3" />
+                            <span>মোবাইল এক্সটেনশন</span>
+                          </span>
+                        ) : log.isUnique ? (
                           <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                             <CheckCircle2 className="h-3 w-3" />
-                            <span>নতুন ইউনিক</span>
+                            <span>নতুন ভিজিটর</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                            <span>রিটার্নিং</span>
+                            <span>রিটার্নিং ভিজিটর</span>
                           </span>
                         )}
                       </td>

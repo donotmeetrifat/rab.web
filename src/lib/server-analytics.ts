@@ -5,9 +5,24 @@ export interface VisitorStats {
   uniqueVisitors: number;
   todayVisits: number;
   todayUnique: number;
+  downloads: {
+    total: number;
+    pc: number;
+    android: number;
+    today: number;
+  };
   currentDay: string;
   lastUpdated: string;
-  dailyStats: Record<string, { visits: number; unique: number }>;
+  dailyStats: Record<
+    string,
+    {
+      visits: number;
+      unique: number;
+      downloads?: number;
+      pcDownloads?: number;
+      androidDownloads?: number;
+    }
+  >;
   devices: {
     mobile: number;
     desktop: number;
@@ -28,6 +43,7 @@ export interface VisitorStats {
     city: string;
     path: string;
     isUnique: boolean;
+    eventType?: "visit" | "download_pc" | "download_android";
   }>;
   seenFingerprints?: string[];
 }
@@ -76,6 +92,12 @@ function createEmptyStats(): VisitorStats {
     uniqueVisitors: 0,
     todayVisits: 0,
     todayUnique: 0,
+    downloads: {
+      total: 0,
+      pc: 0,
+      android: 0,
+      today: 0,
+    },
     currentDay: today,
     lastUpdated: new Date().toISOString(),
     dailyStats: {},
@@ -177,12 +199,24 @@ export async function getStats(): Promise<VisitorStats> {
       return createEmptyStats();
     }
 
+    // Ensure downloads object exists
+    if (!parsed.downloads) {
+      parsed.downloads = { total: 0, pc: 0, android: 0, today: 0 };
+    }
+    if (typeof parsed.downloads.pc !== "number") parsed.downloads.pc = 0;
+    if (typeof parsed.downloads.android !== "number") parsed.downloads.android = 0;
+    if (typeof parsed.downloads.today !== "number") parsed.downloads.today = 0;
+    if (typeof parsed.downloads.total !== "number") {
+      parsed.downloads.total = parsed.downloads.pc + parsed.downloads.android;
+    }
+
     // Reset daily counters if date has changed in BST
     const today = getBstDate();
     if (parsed.currentDay !== today) {
       parsed.currentDay = today;
       parsed.todayVisits = 0;
       parsed.todayUnique = 0;
+      parsed.downloads.today = 0;
       parsed.seenFingerprints = [];
     }
 
@@ -279,6 +313,8 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
   if (
     request.method === "OPTIONS" &&
     (url.pathname === "/api/track" ||
+      url.pathname === "/api/track-download" ||
+      url.pathname === "/api/download" ||
       url.pathname === "/api/admin-auth" ||
       url.pathname === "/api/admin-stats" ||
       url.pathname === "/api/admin-reset")
@@ -396,6 +432,157 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
         status: 500,
         headers: { "content-type": "application/json" },
       });
+    }
+  }
+
+  // 1b. /api/track-download — Tracks real extension downloads (PC vs Android)
+  if (url.pathname === "/api/track-download" && request.method === "POST") {
+    try {
+      const body = (await request.json().catch(() => ({}))) as {
+        type?: "pc" | "android";
+        vid?: string;
+      };
+
+      const downloadType: "pc" | "android" = body.type === "android" ? "android" : "pc";
+      const ua = request.headers.get("user-agent") || "";
+      const country = request.headers.get("x-vercel-ip-country") || "BD";
+      const city = request.headers.get("x-vercel-ip-city") || "Dhaka";
+      const { device, browser, os } = parseUserAgent(ua);
+      const today = getBstDate();
+
+      const stats = await getStats();
+      if (!stats.downloads) {
+        stats.downloads = { total: 0, pc: 0, android: 0, today: 0 };
+      }
+
+      stats.downloads.total += 1;
+      stats.downloads.today += 1;
+      if (downloadType === "android") {
+        stats.downloads.android += 1;
+      } else {
+        stats.downloads.pc += 1;
+      }
+
+      // Update daily stats
+      if (!stats.dailyStats[today]) {
+        stats.dailyStats[today] = { visits: 0, unique: 0, downloads: 0, pcDownloads: 0, androidDownloads: 0 };
+      }
+      stats.dailyStats[today].downloads = (stats.dailyStats[today].downloads || 0) + 1;
+      if (downloadType === "android") {
+        stats.dailyStats[today].androidDownloads = (stats.dailyStats[today].androidDownloads || 0) + 1;
+      } else {
+        stats.dailyStats[today].pcDownloads = (stats.dailyStats[today].pcDownloads || 0) + 1;
+      }
+
+      const nowIso = new Date().toISOString();
+      const countryKey = country.toUpperCase();
+      const decodedCity = city ? decodeURIComponent(city) : "Unknown";
+
+      stats.recentLogs.unshift({
+        id: Math.random().toString(36).substring(2, 9),
+        timestamp: nowIso,
+        timeFormatted: formatBstTime(nowIso),
+        device,
+        browser,
+        os,
+        country: countryKey,
+        city: decodedCity,
+        path: downloadType === "android" ? "/downloads/Railway-Auto-Booker-Android.zip" : "/downloads/Railway-Auto-Booker-PC.zip",
+        isUnique: false,
+        eventType: downloadType === "android" ? "download_android" : "download_pc",
+      });
+
+      if (stats.recentLogs.length > 40) {
+        stats.recentLogs = stats.recentLogs.slice(0, 40);
+      }
+
+      await saveStats(stats);
+
+      return new Response(JSON.stringify({ ok: true, downloads: stats.downloads }), {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "cache-control": "no-store, no-cache, must-revalidate",
+        },
+      });
+    } catch (error) {
+      console.error("Track download error:", error);
+      return new Response(JSON.stringify({ ok: false }), {
+        status: 500,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  }
+
+  // 1c. /api/download — Direct download handler that tracks and redirects
+  if (url.pathname === "/api/download" && request.method === "GET") {
+    try {
+      const typeParam = url.searchParams.get("type");
+      const downloadType: "pc" | "android" = typeParam === "android" ? "android" : "pc";
+      const targetFile =
+        downloadType === "android"
+          ? "/downloads/Railway-Auto-Booker-Android.zip"
+          : "/downloads/Railway-Auto-Booker-PC.zip";
+
+      const ua = request.headers.get("user-agent") || "";
+      const country = request.headers.get("x-vercel-ip-country") || "BD";
+      const city = request.headers.get("x-vercel-ip-city") || "Dhaka";
+      const { device, browser, os } = parseUserAgent(ua);
+      const today = getBstDate();
+
+      const stats = await getStats();
+      if (!stats.downloads) {
+        stats.downloads = { total: 0, pc: 0, android: 0, today: 0 };
+      }
+
+      stats.downloads.total += 1;
+      stats.downloads.today += 1;
+      if (downloadType === "android") {
+        stats.downloads.android += 1;
+      } else {
+        stats.downloads.pc += 1;
+      }
+
+      if (!stats.dailyStats[today]) {
+        stats.dailyStats[today] = { visits: 0, unique: 0, downloads: 0, pcDownloads: 0, androidDownloads: 0 };
+      }
+      stats.dailyStats[today].downloads = (stats.dailyStats[today].downloads || 0) + 1;
+      if (downloadType === "android") {
+        stats.dailyStats[today].androidDownloads = (stats.dailyStats[today].androidDownloads || 0) + 1;
+      } else {
+        stats.dailyStats[today].pcDownloads = (stats.dailyStats[today].pcDownloads || 0) + 1;
+      }
+
+      const nowIso = new Date().toISOString();
+      const countryKey = country.toUpperCase();
+      const decodedCity = city ? decodeURIComponent(city) : "Unknown";
+
+      stats.recentLogs.unshift({
+        id: Math.random().toString(36).substring(2, 9),
+        timestamp: nowIso,
+        timeFormatted: formatBstTime(nowIso),
+        device,
+        browser,
+        os,
+        country: countryKey,
+        city: decodedCity,
+        path: targetFile,
+        isUnique: false,
+        eventType: downloadType === "android" ? "download_android" : "download_pc",
+      });
+
+      if (stats.recentLogs.length > 40) {
+        stats.recentLogs = stats.recentLogs.slice(0, 40);
+      }
+
+      await saveStats(stats);
+
+      return Response.redirect(new URL(targetFile, request.url).toString(), 302);
+    } catch {
+      return Response.redirect(
+        new URL("/downloads/Railway-Auto-Booker-PC.zip", request.url).toString(),
+        302,
+      );
     }
   }
 

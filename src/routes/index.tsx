@@ -41,6 +41,27 @@ const WHATSAPP_USERNAME = "meetrifat.ai";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_USERNAME}?text=${encodeURIComponent("আসসালামু আলাইকুম! আমি BD Railway Auto-Booker এক্সটেনশনটির সাবস্ক্রিপশন নিতে চাই।")}`;
 const FACEBOOK_LINK = "https://www.facebook.com/meetrifat";
 
+/** Track extension download clicks reliably */
+function trackDownload(type: "pc" | "android") {
+  try {
+    let vid = "";
+    try {
+      vid = localStorage.getItem("rab_visitor_id") || "";
+    } catch {
+      // ignore
+    }
+    fetch("/api/track-download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, vid }),
+      keepalive: true,
+      cache: "no-store",
+    }).catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
 function BrandWordmark({
   className = "",
   iconSize = "h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9",
@@ -1023,7 +1044,10 @@ function RailwayAutoBookerLandingPage() {
                         <a
                           href="/downloads/Railway-Auto-Booker-PC.zip"
                           download="Railway Auto-Booker PC.zip"
-                          onClick={() => setDownloadMenuOpen(false)}
+                          onClick={() => {
+                            setDownloadMenuOpen(false);
+                            trackDownload("pc");
+                          }}
                           className="group flex items-center justify-between gap-3 w-full rounded-xl border border-border/70 bg-[color:var(--surface)] px-4 py-3 text-sm font-semibold text-foreground transition-all duration-150 hover:border-primary hover:bg-primary hover:text-white shadow-2xs hover:shadow-md cursor-pointer select-none"
                         >
                           <div className="flex items-center gap-2.5">
@@ -1037,7 +1061,10 @@ function RailwayAutoBookerLandingPage() {
                         <a
                           href="/downloads/Railway-Auto-Booker-Android.zip"
                           download="Railway Auto-Booker Android.zip"
-                          onClick={() => setDownloadMenuOpen(false)}
+                          onClick={() => {
+                            setDownloadMenuOpen(false);
+                            trackDownload("android");
+                          }}
                           className="group flex items-center justify-between gap-3 w-full rounded-xl border border-border/70 bg-[color:var(--surface)] px-4 py-3 text-sm font-semibold text-foreground transition-all duration-150 hover:border-primary hover:bg-primary hover:text-white shadow-2xs hover:shadow-md cursor-pointer select-none"
                         >
                           <div className="flex items-center gap-2.5">
@@ -1243,6 +1270,7 @@ function RailwayAutoBookerLandingPage() {
                 <a
                   href="/downloads/Railway-Auto-Booker-Android.zip"
                   download="Railway Auto-Booker Android.zip"
+                  onClick={() => trackDownload("android")}
                   className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors w-full sm:w-auto whitespace-nowrap"
                 >
                   <Download className="h-4 w-4 shrink-0" />
@@ -1262,6 +1290,7 @@ function RailwayAutoBookerLandingPage() {
                 <a
                   href="/downloads/Railway-Auto-Booker-PC.zip"
                   download="Railway Auto-Booker PC.zip"
+                  onClick={() => trackDownload("pc")}
                   className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors w-full sm:w-auto whitespace-nowrap"
                 >
                   <Download className="h-4 w-4 shrink-0" />
