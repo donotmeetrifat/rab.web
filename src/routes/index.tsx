@@ -122,7 +122,7 @@ const REGULAR_PLANS = [
     name: "৩০ দিন (১ মাস)",
     badge: "🔥 মোস্ট পপুলার / বেস্ট ভ্যালু",
     price: "৳ ২৪৯",
-    period: "পূর্ণ ১ মাসের ভ্যালিডিটি",
+    period: "১ মাসের ভ্যালিডিটি",
     subtitle: "সবচেয়ে জনপ্রিয় প্যাকেজ — নিয়মিত ভ্রমণকারীদের সেরা পছন্দ",
     isPopular: true,
   },
@@ -149,7 +149,7 @@ const REGULAR_PLANS = [
     name: "১ বছর (৩৬৫ দিন)",
     badge: "ভিআইপি মেম্বারশিপ",
     price: "৳ ১,৭৯৯",
-    period: "সম্পূর্ণ ১ বছরের ভ্যালিডিটি",
+    period: "১ বছরের ভ্যালিডিটি",
     subtitle: "সারা বছর আনলিমিটেড টিকিট কাটার ফুল ভিআইপি অ্যাক্সেস",
     isPopular: false,
   },
@@ -1330,9 +1330,13 @@ function BanglaPricingCard({
 
         <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{plan.subtitle}</p>
 
-        <div className="mt-5 flex items-baseline gap-1.5">
-          <span className="text-3xl font-extrabold text-foreground">{plan.price}</span>
-          <span className="text-xs text-muted-foreground font-medium">/ {plan.period}</span>
+        <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="text-2xl sm:text-[27px] xl:text-3xl font-extrabold text-foreground whitespace-nowrap shrink-0">
+            {plan.price}
+          </span>
+          <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+            / {plan.period}
+          </span>
         </div>
 
         {/* Benefits list (Same across all plans as requested) */}
