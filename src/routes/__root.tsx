@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Button3D, LinkButton3D } from "../components/ui/button-3d";
 import { Toaster } from "../components/ui/sonner";
+import { AnalyticsTracker } from "../components/analytics-tracker";
 
 function NotFoundComponent() {
   return (
@@ -131,6 +132,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <AnalyticsTracker />
       <Toaster />
     </QueryClientProvider>
   );
