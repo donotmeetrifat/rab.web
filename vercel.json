@@ -9,6 +9,38 @@
   },
   "headers": [
     {
+      "source": "/downloads/Railway-Auto-Booker-PC.zip",
+      "headers": [
+        { "key": "Content-Type", "value": "application/zip" },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"Railway Auto-Booker PC.zip\""
+        },
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/downloads/Railway-Auto-Booker-Android.zip",
+      "headers": [
+        { "key": "Content-Type", "value": "application/zip" },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"Railway Auto-Booker Android.zip\""
+        },
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/downloads/(.*)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/zip" },
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
       "source": "/memlace-extension.zip",
       "headers": [
         { "key": "Content-Type", "value": "application/zip" },
