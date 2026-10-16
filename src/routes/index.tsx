@@ -43,21 +43,21 @@ const FACEBOOK_LINK = "https://www.facebook.com/meetrifat";
 
 function BrandWordmark({
   className = "",
-  iconSize = "h-8 w-8",
-  textSize = "text-xl",
+  iconSize = "h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9",
+  textSize = "text-lg sm:text-xl md:text-2xl",
 }: {
   className?: string;
   iconSize?: string;
   textSize?: string;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 leading-none select-none ${className}`}>
+    <span className={`inline-flex items-center gap-2 sm:gap-2.5 leading-none select-none ${className}`}>
       <img
         src="/railway-icon.png"
         alt="Railway Auto-Booker"
         className={`${iconSize} rounded-[8px] object-cover shrink-0 shadow-xs border border-primary/20`}
       />
-      <span className={`font-bold tracking-tight text-foreground ${textSize}`}>
+      <span className={`font-bold tracking-tight text-foreground whitespace-nowrap ${textSize}`}>
         Railway <span className="text-primary">Auto-Booker</span>
       </span>
     </span>
@@ -699,7 +699,7 @@ function CleanVideoPlayer() {
           {/* Clean Integrated Video Controls Bar (NO box, NO bg card, NO 1080p text) */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`absolute inset-x-0 bottom-0 z-20 px-3 sm:px-5 pb-2.5 sm:pb-3.5 pt-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent flex flex-col justify-end transition-all duration-300 ${
+            className={`absolute inset-x-0 bottom-0 z-20 px-2.5 sm:px-5 pb-2 sm:pb-3.5 pt-8 sm:pt-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent flex flex-col justify-end transition-all duration-300 ${
               showControls || !isPlaying
                 ? "opacity-100 translate-y-0 pointer-events-auto"
                 : "opacity-0 translate-y-2 pointer-events-none"
@@ -795,7 +795,7 @@ function CleanVideoPlayer() {
                 </div>
 
                 {/* Clean Time Display: 0:07 / 0:35 */}
-                <div className="font-mono text-xs sm:text-[13px] text-white/90 font-medium tracking-wider flex items-center gap-1.5 select-none drop-shadow">
+                <div className="font-mono text-[11px] sm:text-[13px] text-white/90 font-medium tracking-wide flex items-center gap-1 sm:gap-1.5 select-none drop-shadow shrink-0">
                   <span className="text-white font-semibold">{formatVideoTime(currentTime)}</span>
                   <span className="text-white/50">/</span>
                   <span className="text-white/80">{formatVideoTime(effectiveDuration)}</span>
@@ -865,13 +865,13 @@ function RailwayAutoBookerLandingPage() {
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground font-sans antialiased">
       {/* Top sticky navigation bar */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex h-[64px] max-w-7xl items-center justify-between px-5 sm:px-6 md:h-[72px] md:px-8">
+        <div className="mx-auto flex h-[60px] sm:h-[64px] md:h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 md:px-8">
           <a
             href="/"
             aria-label="Railway Auto-Booker — হোম"
-            className={"inline-flex items-center leading-none rounded-lg " + focusRing}
+            className={"inline-flex items-center leading-none rounded-lg shrink-0 " + focusRing}
           >
-            <BrandWordmark iconSize="h-8 w-8 sm:h-9 sm:w-9" textSize="text-xl sm:text-2xl" />
+            <BrandWordmark iconSize="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" textSize="text-lg sm:text-xl md:text-2xl" />
           </a>
 
           {/* Desktop Nav */}
@@ -903,7 +903,7 @@ function RailwayAutoBookerLandingPage() {
             aria-controls="mobile-menu"
             onClick={() => setMenuOpen((v) => !v)}
             className={
-              "inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:bg-[color:var(--surface)] md:hidden " +
+              "inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:bg-[color:var(--surface)] md:hidden shrink-0 " +
               focusRing
             }
           >
@@ -949,24 +949,24 @@ function RailwayAutoBookerLandingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-5 sm:px-6 md:px-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         {/* HERO SECTION */}
-        <section className="pt-12 pb-14 sm:pt-16 sm:pb-18 md:pt-20 md:pb-22">
+        <section className="pt-8 pb-12 sm:pt-14 sm:pb-16 md:pt-20 md:pb-22">
           <div className="mx-auto max-w-3xl text-center">
             {/* Animated Pill Badge */}
-            <div className="hero-pill mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/90 shadow-xs">
+            <div className="hero-pill mb-5 sm:mb-6 inline-flex max-w-[calc(100vw-2.5rem)] items-center gap-2 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold text-foreground/90 shadow-xs">
               <span
-                className="h-2 w-2 rounded-full bg-primary"
+                className="h-2 w-2 rounded-full bg-primary shrink-0"
                 style={{ animation: "pill-dot 2.4s cubic-bezier(0.4,0,0.6,1) infinite" }}
                 aria-hidden
               />
-              <span className="tracking-tight text-emerald-800 dark:text-emerald-300">
+              <span className="tracking-tight text-emerald-800 dark:text-emerald-300 text-pretty text-left sm:text-center leading-relaxed">
                 eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন · সকাল ৮:০০ টার টিকিট নিশ্চিন্তে কাটুন
               </span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-balance text-[clamp(2.15rem,6.5vw,3.85rem)] font-bold leading-[1.22] tracking-tight">
+            <h1 className="text-balance text-[clamp(1.75rem,5.5vw,3.75rem)] font-bold leading-[1.25] tracking-tight">
               বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন
               <br />
               <span className="text-primary bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 bg-clip-text text-transparent">
@@ -975,12 +975,12 @@ function RailwayAutoBookerLandingPage() {
             </h1>
 
             {/* Subheading */}
-            <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-[17px] md:text-lg">
+            <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
               সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার মুহূর্তে সার্ভার স্পিডে স্বয়ংক্রিয়ভাবে স্টেশন সার্চ, বগি ও সিট সিলেক্ট করে ওটিপি ও পেমেন্ট পেজে নিয়ে যায়। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই ব্যবহারযোগ্য!
             </p>
 
             {/* Action Buttons */}
-            <div className="mt-8 flex w-full flex-col items-stretch gap-3.5 sm:mt-10 sm:flex-row sm:items-center sm:justify-center">
+            <div className="mt-7 sm:mt-10 flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
               <div ref={downloadRef} className="relative w-full sm:w-auto">
                 <button
                   type="button"
@@ -989,7 +989,7 @@ function RailwayAutoBookerLandingPage() {
                   aria-haspopup="dialog"
                   className={button3dClass(
                     "lg",
-                    "w-full sm:w-auto min-h-12 gap-2 text-base shadow-md font-semibold cursor-pointer select-none",
+                    "w-full sm:w-auto min-h-12 gap-2 text-sm sm:text-base shadow-md font-semibold cursor-pointer select-none",
                   )}
                 >
                   <Download className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
@@ -1016,7 +1016,7 @@ function RailwayAutoBookerLandingPage() {
                     <div
                       role="menu"
                       aria-label="এক্সটেনশন ডাউনলোড অপশন"
-                      className="absolute left-1/2 -translate-x-1/2 top-full mt-2.5 z-50 w-full sm:w-[280px] rounded-2xl border border-primary/20 bg-background/95 backdrop-blur-xl p-2.5 shadow-2xl ring-1 ring-border/50 animate-in fade-in zoom-in-95 duration-150"
+                      className="absolute left-1/2 -translate-x-1/2 top-full mt-2.5 z-50 w-[min(290px,calc(100vw-2.5rem))] sm:w-[280px] rounded-2xl border border-primary/20 bg-background/95 backdrop-blur-xl p-2.5 shadow-2xl ring-1 ring-border/50 animate-in fade-in zoom-in-95 duration-150"
                     >
                       <div className="space-y-1.5">
                         {/* PC Option Button */}
@@ -1160,7 +1160,7 @@ function RailwayAutoBookerLandingPage() {
               </h3>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
               {REGULAR_PLANS.map((plan) => (
                 <BanglaPricingCard key={plan.id} plan={plan} />
               ))}
@@ -1176,7 +1176,7 @@ function RailwayAutoBookerLandingPage() {
               </h3>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3 items-stretch">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
               {SHORT_TERM_PLANS.map((plan) => (
                 <BanglaPricingCard key={plan.id} plan={plan} />
               ))}
@@ -1231,7 +1231,7 @@ function RailwayAutoBookerLandingPage() {
 
             {/* Beginner guidance notice based on selected tab */}
             {installTab === "mobile" ? (
-              <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/10 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/10 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-2xs">
                 <div className="flex items-start gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs mt-0.5">
                     📱
@@ -1243,14 +1243,14 @@ function RailwayAutoBookerLandingPage() {
                 <a
                   href="/downloads/Railway-Auto-Booker-Android.zip"
                   download="Railway Auto-Booker Android.zip"
-                  className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors w-full sm:w-auto whitespace-nowrap"
                 >
-                  <Download className="h-4 w-4" />
+                  <Download className="h-4 w-4 shrink-0" />
                   <span>মোবাইল জিপ ডাউনলোড (.zip)</span>
                 </a>
               </div>
             ) : (
-              <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 text-xs sm:text-sm text-foreground flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-2xs">
                 <div className="flex items-start gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs mt-0.5">
                     💻
@@ -1262,9 +1262,9 @@ function RailwayAutoBookerLandingPage() {
                 <a
                   href="/downloads/Railway-Auto-Booker-PC.zip"
                   download="Railway Auto-Booker PC.zip"
-                  className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors w-full sm:w-auto whitespace-nowrap"
                 >
-                  <Download className="h-4 w-4" />
+                  <Download className="h-4 w-4 shrink-0" />
                   <span>পিসি জিপ ডাউনলোড (.zip)</span>
                 </a>
               </div>
@@ -1275,18 +1275,18 @@ function RailwayAutoBookerLandingPage() {
               {(installTab === "pc" ? PC_INSTALL_STEPS : MOBILE_INSTALL_STEPS).map((s) => (
                 <div
                   key={s.step}
-                  className="rounded-2xl border border-border bg-[color:var(--surface)] p-5 sm:p-6 transition-all hover:border-primary/40 shadow-xs"
+                  className="rounded-2xl border border-border bg-[color:var(--surface)] p-4 sm:p-6 transition-all hover:border-primary/40 shadow-xs"
                 >
-                  <div className="flex items-start gap-4">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-sm shadow-xs">
+                  <div className="flex items-start gap-3.5 sm:gap-4">
+                    <span className="mt-0.5 flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-xs sm:text-sm shadow-xs">
                       {s.step}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-bold text-foreground">{s.title}</h3>
-                      <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground leading-relaxed">
+                      <h3 className="text-sm sm:text-base font-bold text-foreground">{s.title}</h3>
+                      <ul className="mt-2 space-y-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                         {s.details.map((detail, idx) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-primary mt-1 font-bold">•</span>
+                            <span className="text-primary mt-1 font-bold shrink-0">•</span>
                             <span>{detail}</span>
                           </li>
                         ))}
@@ -1300,10 +1300,10 @@ function RailwayAutoBookerLandingPage() {
         </section>
 
         {/* DEDICATED CONTACT & PURCHASE SECTION */}
-        <section id="contact" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
-          <div className="rounded-3xl border border-primary/30 bg-gradient-to-b from-primary/10 via-[color:var(--surface)] to-background p-8 sm:p-12 md:p-14 text-center max-w-4xl mx-auto shadow-md">
+        <section id="contact" className="border-t border-border py-12 sm:py-16 md:py-20 scroll-mt-20">
+          <div className="rounded-3xl border border-primary/30 bg-gradient-to-b from-primary/10 via-[color:var(--surface)] to-background p-6 sm:p-10 md:p-14 text-center max-w-4xl mx-auto shadow-md">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-3.5 py-1 text-xs font-bold text-primary">
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4 shrink-0" />
               <span>তাৎক্ষণিক লাইসেন্স ডেলিভারি ও সাপোর্ট</span>
             </span>
 
@@ -1315,12 +1315,12 @@ function RailwayAutoBookerLandingPage() {
             </p>
 
             {/* Highly Polished WhatsApp and Facebook Buttons */}
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
+            <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-2xl mx-auto">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-whatsapp w-full sm:flex-1 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
+                className="btn-3d-whatsapp w-full sm:flex-1 min-h-12 sm:min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-4 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
               >
                 <WhatsAppIcon className="h-5 w-5 shrink-0" />
                 <span>WhatsApp এ মেসেজ দিন</span>
@@ -1331,7 +1331,7 @@ function RailwayAutoBookerLandingPage() {
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-3d-facebook w-full sm:flex-1 min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
+                className="btn-3d-facebook w-full sm:flex-1 min-h-12 sm:min-h-13 inline-flex items-center justify-center gap-2.5 rounded-xl px-4 sm:px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
               >
                 <FacebookIcon className="h-5 w-5 shrink-0" />
                 <span>Facebook এ যোগাযোগ করুন</span>
@@ -1342,10 +1342,10 @@ function RailwayAutoBookerLandingPage() {
         </section>
 
         {/* OFFICIAL DISCLAIMER SECTION */}
-        <section className="border-t border-border py-10 sm:py-12 bg-muted/20 rounded-2xl my-8 p-6 sm:p-8">
+        <section className="border-t border-border py-8 sm:py-10 bg-muted/20 rounded-2xl my-6 sm:my-8 p-5 sm:p-7 md:p-8">
           <div className="max-w-3xl mx-auto">
             <h4 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" />
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
               <span>ডিসক্লেইমার / Disclaimer</span>
             </h4>
             <ol className="space-y-2 text-xs sm:text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
@@ -1360,38 +1360,38 @@ function RailwayAutoBookerLandingPage() {
 
       {/* FOOTER */}
       <footer className="border-t border-border bg-[color:var(--surface)]/70">
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-6 md:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex items-center gap-2.5 justify-center sm:justify-start flex-wrap">
               <img
                 src="/railway-icon.png"
                 alt="Railway Auto-Booker"
-                className="h-6 w-6 rounded-md object-cover"
+                className="h-6 w-6 rounded-md object-cover shrink-0"
               />
-              <span className="font-bold text-foreground text-sm">Railway Auto-Booker</span>
+              <span className="font-bold text-foreground text-sm whitespace-nowrap">Railway Auto-Booker</span>
               <span className="text-xs text-muted-foreground">· সুপারফাস্ট রেলওয়ে টিকিট অটোমেশন</span>
             </div>
 
-            <div className="flex items-center gap-5 text-xs font-semibold">
+            <div className="flex items-center gap-4 sm:gap-5 text-xs font-semibold justify-center sm:justify-end flex-wrap">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+                className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 whitespace-nowrap"
               >
-                <WhatsAppIcon className="h-3.5 w-3.5" />
+                <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
                 <span>WhatsApp</span>
               </a>
               <a
                 href={FACEBOOK_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-800 dark:text-blue-400"
+                className="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-800 dark:text-blue-400 whitespace-nowrap"
               >
-                <FacebookIcon className="h-3.5 w-3.5" />
+                <FacebookIcon className="h-3.5 w-3.5 shrink-0" />
                 <span>Facebook</span>
               </a>
-              <a href="#pricing" className="text-primary hover:underline">
+              <a href="#pricing" className="text-primary hover:underline whitespace-nowrap">
                 প্ল্যানসমূহ
               </a>
             </div>
@@ -1425,12 +1425,12 @@ function BanglaPricingCard({
       className={
         "relative flex flex-col justify-between rounded-2xl border p-5 sm:p-6 transition-all duration-300 " +
         (plan.isPopular
-          ? "border-primary bg-[color:var(--surface)] shadow-xl ring-2 ring-primary/30 md:scale-[1.03]"
+          ? "border-primary bg-[color:var(--surface)] shadow-xl ring-2 ring-primary/40"
           : "border-border bg-[color:var(--surface)] hover:border-primary/50 shadow-xs")
       }
     >
       {plan.isPopular && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-1 text-[11px] font-bold text-white shadow-md whitespace-nowrap">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-1 text-[11px] font-bold text-white shadow-md whitespace-nowrap max-w-[92%] text-center">
           {plan.badge}
         </div>
       )}
@@ -1439,7 +1439,7 @@ function BanglaPricingCard({
         <div className="flex items-start justify-between gap-2">
           <h4 className="text-lg font-bold text-foreground">{plan.name}</h4>
           {!plan.isPopular && (
-            <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+            <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground whitespace-nowrap">
               {plan.badge}
             </span>
           )}
@@ -1448,7 +1448,7 @@ function BanglaPricingCard({
         <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{plan.subtitle}</p>
 
         <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-2xl sm:text-[27px] xl:text-3xl font-extrabold text-foreground whitespace-nowrap shrink-0">
+          <span className="text-2xl sm:text-[26px] lg:text-[23px] xl:text-[28px] font-extrabold text-foreground whitespace-nowrap shrink-0">
             {plan.price}
           </span>
           <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
@@ -1478,9 +1478,9 @@ function BanglaPricingCard({
           href={WHATSAPP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-3d-whatsapp flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-102 transition-transform"
+          className="btn-3d-whatsapp flex w-full items-center justify-center gap-2 rounded-xl py-2.5 px-2.5 text-xs sm:text-sm font-bold shadow-xs whitespace-nowrap"
         >
-          <WhatsAppIcon className="h-4 w-4" />
+          <WhatsAppIcon className="h-4 w-4 shrink-0" />
           <span>হোয়াটসঅ্যাপে কিনুন</span>
         </a>
 
@@ -1488,9 +1488,9 @@ function BanglaPricingCard({
           href={FACEBOOK_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-3d-facebook flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-bold shadow-xs hover:scale-102 transition-transform"
+          className="btn-3d-facebook flex w-full items-center justify-center gap-2 rounded-xl py-2.5 px-2.5 text-xs sm:text-sm font-bold shadow-xs whitespace-nowrap"
         >
-          <FacebookIcon className="h-4 w-4" />
+          <FacebookIcon className="h-4 w-4 shrink-0" />
           <span>ফেসবুকে মেসেজ দিন</span>
         </a>
       </div>
