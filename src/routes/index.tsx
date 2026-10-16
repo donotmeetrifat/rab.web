@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
+  BookOpen,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -1001,123 +1002,61 @@ function RailwayAutoBookerLandingPage() {
                   />
                 </button>
 
-                {/* Dropdown / Modal Platform Selector */}
+                {/* Clean & Premium Dropdown Platform Selector */}
                 {downloadMenuOpen && (
                   <>
                     {/* Dim backdrop to dismiss on outside click */}
                     <div
-                      className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity"
+                      className="fixed inset-0 z-40 bg-black/20 backdrop-blur-2xs transition-opacity"
                       onClick={() => setDownloadMenuOpen(false)}
                       aria-hidden="true"
                     />
 
-                    {/* Popup Card */}
+                    {/* Perfectly aligned dropdown card */}
                     <div
-                      role="dialog"
-                      aria-modal="true"
+                      role="menu"
                       aria-label="এক্সটেনশন ডাউনলোড অপশন"
-                      className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:absolute sm:top-full sm:left-1/2 sm:-translate-x-1/2 sm:translate-y-0 sm:mt-3 z-50 w-[92vw] max-w-[430px] rounded-2xl border border-primary/30 bg-background/95 backdrop-blur-xl p-5 sm:p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+                      className="absolute left-1/2 -translate-x-1/2 top-full mt-2.5 z-50 w-full sm:w-[280px] rounded-2xl border border-primary/20 bg-background/95 backdrop-blur-xl p-2.5 shadow-2xl ring-1 ring-border/50 animate-in fade-in zoom-in-95 duration-150"
                     >
-                      {/* Header */}
-                      <div className="flex items-center justify-between border-b border-border/80 pb-3.5">
-                        <div className="text-left">
-                          <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-                            <Download className="h-5 w-5 text-primary" />
-                            <span>ডিভাইস নির্বাচন করুন</span>
-                          </h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            আপনার ডিভাইসের জন্য উপযুক্ত সংস্করণটি বেছে নিন
-                          </p>
-                        </div>
-                        <button
-                          type="button"
+                      <div className="space-y-1.5">
+                        {/* PC Option Button */}
+                        <a
+                          href="/downloads/Railway-Auto-Booker-PC.zip"
+                          download="Railway Auto-Booker PC.zip"
                           onClick={() => setDownloadMenuOpen(false)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-                          aria-label="বন্ধ করুন"
+                          className="group flex items-center justify-between gap-3 w-full rounded-xl border border-border/70 bg-[color:var(--surface)] px-4 py-3 text-sm font-semibold text-foreground transition-all duration-150 hover:border-primary hover:bg-primary hover:text-white shadow-2xs hover:shadow-md cursor-pointer select-none"
                         >
-                          <X className="h-4 w-4" />
-                        </button>
+                          <div className="flex items-center gap-2.5">
+                            <Laptop className="h-4.5 w-4.5 text-primary group-hover:text-white transition-colors" />
+                            <span>কম্পিউটার (PC)</span>
+                          </div>
+                          <Download className="h-4 w-4 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all" />
+                        </a>
+
+                        {/* Mobile Option Button */}
+                        <a
+                          href="/downloads/Railway-Auto-Booker-Android.zip"
+                          download="Railway Auto-Booker Android.zip"
+                          onClick={() => setDownloadMenuOpen(false)}
+                          className="group flex items-center justify-between gap-3 w-full rounded-xl border border-border/70 bg-[color:var(--surface)] px-4 py-3 text-sm font-semibold text-foreground transition-all duration-150 hover:border-primary hover:bg-primary hover:text-white shadow-2xs hover:shadow-md cursor-pointer select-none"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Smartphone className="h-4.5 w-4.5 text-primary group-hover:text-white transition-colors" />
+                            <span>মোবাইল (Android)</span>
+                          </div>
+                          <Download className="h-4 w-4 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all" />
+                        </a>
                       </div>
 
-                      {/* 2 Platform Options */}
-                      <div className="mt-4 space-y-3">
-                        {/* PC Option */}
-                        <div className="group rounded-xl border border-border/80 bg-[color:var(--surface)] p-3.5 transition-all hover:border-primary/50 hover:shadow-md text-left">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-colors">
-                              <Laptop className="h-5 w-5" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <h4 className="font-bold text-sm sm:text-base text-foreground">
-                                  কম্পিউটার (PC / Laptop)
-                                </h4>
-                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                  ১৭২ KB
-                                </span>
-                              </div>
-                              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                                Google Chrome, MS Edge, Brave, Opera ও Chromium ব্রাউজার
-                              </p>
-                              <div className="mt-3">
-                                <a
-                                  href="/downloads/Railway-Auto-Booker-PC.zip"
-                                  download="Railway Auto-Booker PC.zip"
-                                  onClick={() => setDownloadMenuOpen(false)}
-                                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors"
-                                >
-                                  <Download className="h-4 w-4" />
-                                  <span>পিসির জন্য ডাউনলোড (.zip)</span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Android Mobile Option */}
-                        <div className="group rounded-xl border border-border/80 bg-[color:var(--surface)] p-3.5 transition-all hover:border-primary/50 hover:shadow-md text-left">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-colors">
-                              <Smartphone className="h-5 w-5" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <h4 className="font-bold text-sm sm:text-base text-foreground">
-                                  অ্যান্ড্রয়েড মোবাইল (Mobile)
-                                </h4>
-                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                  ১৭২ KB
-                                </span>
-                              </div>
-                              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                                Kiwi Browser-এর জন্য (আনজিপ ছাড়া সরাসরি জিপ ইমপোর্ট সাপোর্ট করে)
-                              </p>
-                              <div className="mt-3">
-                                <a
-                                  href="/downloads/Railway-Auto-Booker-Android.zip"
-                                  download="Railway Auto-Booker Android.zip"
-                                  onClick={() => setDownloadMenuOpen(false)}
-                                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-600 transition-colors"
-                                >
-                                  <Download className="h-4 w-4" />
-                                  <span>মোবাইলের জন্য ডাউনলোড (.zip)</span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Footer Link */}
-                      <div className="mt-4 pt-3 border-t border-border/80 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>কীভাবে সেটআপ করবেন?</span>
+                      {/* Installation Guide Button */}
+                      <div className="mt-2 pt-2 border-t border-border/60">
                         <a
                           href="#install"
                           onClick={() => setDownloadMenuOpen(false)}
-                          className="font-semibold text-primary hover:underline flex items-center gap-1"
+                          className="flex items-center justify-center gap-2 w-full rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                         >
-                          <span>ইনস্টলেশন গাইড দেখুন</span>
-                          <ArrowRight className="h-3 w-3" />
+                          <BookOpen className="h-3.5 w-3.5 text-primary" />
+                          <span>সহজ ইনস্টলেশন গাইড</span>
                         </a>
                       </div>
                     </div>
