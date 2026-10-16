@@ -119,6 +119,11 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(window.location.pathname.indexOf('/admin')===0)return;var v='';try{v=localStorage.getItem('rab_visitor_id')||'';if(!v){v='v_'+Math.random().toString(36).slice(2,10)+'_'+Date.now().toString(36);localStorage.setItem('rab_visitor_id',v);}}catch(e){v='v_p_'+Math.random().toString(36).slice(2,10);}var b=JSON.stringify({vid:v,path:window.location.pathname,ref:document.referrer||'',screen:(window.screen?window.screen.width+'x'+window.screen.height:'')});if(typeof fetch==='function'){fetch('/api/track',{method:'POST',headers:{'Content-Type':'application/json'},body:b,keepalive:true,cache:'no-store'}).catch(function(){});}window.__rab_tracked=true;}catch(e){}})();`,
+          }}
+        />
         <Scripts />
       </body>
     </html>

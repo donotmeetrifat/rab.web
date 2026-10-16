@@ -1,62 +1,91 @@
 import { useEffect, useRef } from "react";
 
 const VID_KEY = "rab_visitor_id";
-const SESSION_SENT_KEY = "rab_session_sent";
+
+declare global {
+  interface Window {
+    __rab_tracked?: boolean;
+  }
+}
 
 export function AnalyticsTracker() {
   const hasSent = useRef(false);
 
   useEffect(() => {
-    // Only track once per page session and skip admin page tracking
-    if (typeof window === "undefined" || hasSent.current) return;
+    if (typeof window === "undefined") return;
+
+    // Skip admin dashboard page
     if (window.location.pathname.startsWith("/admin")) return;
 
-    // Check if session already tracked in this browser session
-    const sessionSent = sessionStorage.getItem(SESSION_SENT_KEY);
-    if (sessionSent === "1") return;
-
+    // Guard against multiple sends within the exact same component mount/render
+    if (hasSent.current || window.__rab_tracked) return;
     hasSent.current = true;
-    sessionStorage.setItem(SESSION_SENT_KEY, "1");
+    window.__rab_tracked = true;
 
     try {
-      // Get or create anonymous visitor ID
-      let vid = localStorage.getItem(VID_KEY);
+      // Safe visitor ID generator with fallback for incognito / disabled storage
+      let vid = "";
       let isFirstVisit = false;
 
-      if (!vid) {
-        vid =
-          "v_" +
-          Math.random().toString(36).substring(2, 10) +
-          "_" +
-          Date.now().toString(36);
-        localStorage.setItem(VID_KEY, vid);
+      try {
+        vid = localStorage.getItem(VID_KEY) || "";
+        if (!vid) {
+          vid =
+            "v_" +
+            Math.random().toString(36).substring(2, 10) +
+            "_" +
+            Date.now().toString(36);
+          localStorage.setItem(VID_KEY, vid);
+          isFirstVisit = true;
+        }
+      } catch {
+        // Fallback for private browsing mode or storage quotas
+        vid = "v_priv_" + Math.random().toString(36).substring(2, 12);
         isFirstVisit = true;
       }
 
+      const screenWidth = typeof window.screen !== "undefined" ? window.screen.width : 0;
+      const screenHeight = typeof window.screen !== "undefined" ? window.screen.height : 0;
+
       const payload = {
         vid,
-        path: window.location.pathname,
-        ref: document.referrer || "",
-        screen: `${window.screen.width}x${window.screen.height}`,
+        path: window.location.pathname || "/",
+        ref: typeof document !== "undefined" ? document.referrer || "" : "",
+        screen: `${screenWidth}x${screenHeight}`,
         isFirstVisit,
       };
 
-      // Non-blocking beacon or fetch
-      if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-        const blob = new Blob([JSON.stringify(payload)], {
-          type: "application/json",
-        });
-        navigator.sendBeacon("/api/track", blob);
-      } else {
+      const bodyStr = JSON.stringify(payload);
+
+      // Primary: High-reliability modern fetch with keepalive & no-store
+      if (typeof fetch === "function") {
         fetch("/api/track", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: bodyStr,
           keepalive: true,
-        }).catch(() => {});
+          cache: "no-store",
+        }).catch(() => {
+          // Fallback to sendBeacon if fetch errors
+          if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+            try {
+              navigator.sendBeacon("/api/track", bodyStr);
+            } catch {
+              // ignore
+            }
+          }
+        });
+      } else if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+        try {
+          navigator.sendBeacon("/api/track", bodyStr);
+        } catch {
+          // ignore
+        }
       }
     } catch {
-      // Ignore client storage/network errors silently
+      // Silently ignore any unexpected client errors
     }
   }, []);
 

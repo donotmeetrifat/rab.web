@@ -29,6 +29,7 @@ export interface VisitorStats {
     path: string;
     isUnique: boolean;
   }>;
+  seenFingerprints?: string[];
 }
 
 const BLOB_PATH = "analytics/stats.json";
@@ -84,6 +85,7 @@ function createEmptyStats(): VisitorStats {
     countries: {},
     cities: {},
     recentLogs: [],
+    seenFingerprints: [],
   };
 }
 
@@ -155,6 +157,11 @@ export async function getStats(): Promise<VisitorStats> {
       parsed.currentDay = today;
       parsed.todayVisits = 0;
       parsed.todayUnique = 0;
+      parsed.seenFingerprints = [];
+    }
+
+    if (!Array.isArray(parsed.seenFingerprints)) {
+      parsed.seenFingerprints = [];
     }
 
     return parsed;
@@ -241,6 +248,24 @@ export async function verifySessionToken(token: string): Promise<boolean> {
 export async function handleAnalyticsApi(request: Request): Promise<Response | null> {
   const url = new URL(request.url);
 
+  // Handle CORS Preflight OPTIONS requests for analytics APIs
+  if (
+    request.method === "OPTIONS" &&
+    (url.pathname === "/api/track" ||
+      url.pathname === "/api/admin-auth" ||
+      url.pathname === "/api/admin-stats" ||
+      url.pathname === "/api/admin-reset")
+  ) {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-headers": "Content-Type, Authorization, x-admin-password",
+      },
+    });
+  }
+
   // 1. /api/track — Records real visitor
   if (url.pathname === "/api/track" && request.method === "POST") {
     try {
@@ -263,27 +288,28 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
       const { device, browser, os } = parseUserAgent(ua);
       const today = getBstDate();
 
-      // Reset seenToday cache on new day
-      if (lastSeenDay !== today) {
-        seenToday.clear();
-        lastSeenDay = today;
+      // Load stats from persistent Vercel Blob storage
+      const stats = await getStats();
+
+      if (!Array.isArray(stats.seenFingerprints)) {
+        stats.seenFingerprints = [];
       }
 
       // Anonymous identifier for uniqueness without logging raw IP
       const visitorFingerprint = `${today}_${body.vid || clientIp}_${browser}_${device}`;
-      const isUniqueToday = !seenToday.has(visitorFingerprint);
-      seenToday.add(visitorFingerprint);
-
-      // Load & update stats
-      const stats = await getStats();
-
-      stats.totalVisits += 1;
-      stats.todayVisits += 1;
-
+      const isUniqueToday = !stats.seenFingerprints.includes(visitorFingerprint);
+      
       if (isUniqueToday) {
+        stats.seenFingerprints.push(visitorFingerprint);
+        if (stats.seenFingerprints.length > 2500) {
+          stats.seenFingerprints.shift();
+        }
         stats.todayUnique += 1;
         stats.uniqueVisitors += 1;
       }
+
+      stats.totalVisits += 1;
+      stats.todayVisits += 1;
 
       // Daily stats map
       if (!stats.dailyStats[today]) {
@@ -326,10 +352,11 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
         stats.recentLogs = stats.recentLogs.slice(0, 35);
       }
 
-      // Save asynchronously without blocking response
-      saveStats(stats).catch((e) => console.error("Error saving stats async:", e));
+      // CRITICAL FOR SERVERLESS: Must await saveStats before returning response!
+      // Otherwise Vercel terminates/freezes execution environment before put completes.
+      await saveStats(stats);
 
-      return new Response(JSON.stringify({ ok: true }), {
+      return new Response(JSON.stringify({ ok: true, totalVisits: stats.totalVisits }), {
         status: 200,
         headers: {
           "content-type": "application/json",

@@ -49,10 +49,11 @@ function AdminAnalyticsPage() {
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   // Fetch stats using token
-  const fetchStats = useCallback(async (authToken: string) => {
-    setIsLoadingStats(true);
+  const fetchStats = useCallback(async (authToken: string, isSilent = false) => {
+    if (!isSilent) setIsLoadingStats(true);
     try {
-      const res = await fetch("/api/admin-stats", {
+      const res = await fetch(`/api/admin-stats?_t=${Date.now()}`, {
+        cache: "no-store",
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -76,7 +77,7 @@ function AdminAnalyticsPage() {
     } catch (err) {
       console.error("Error fetching admin stats:", err);
     } finally {
-      setIsLoadingStats(false);
+      if (!isSilent) setIsLoadingStats(false);
     }
   }, []);
 
@@ -89,6 +90,15 @@ function AdminAnalyticsPage() {
     }
     setIsCheckingAuth(false);
   }, [fetchStats]);
+
+  // Auto-refresh stats every 6 seconds in the background when logged in
+  useEffect(() => {
+    if (!token) return;
+    const interval = setInterval(() => {
+      fetchStats(token, true);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [token, fetchStats]);
 
   // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -292,9 +302,10 @@ function AdminAnalyticsPage() {
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Live Indicator */}
-            <div className="hidden md:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>রিয়েল ট্র্যাকিং সক্রিয়</span>
+              <span className="hidden sm:inline">লাইভ অটো-আপডেট (প্রতি ৬ সেকেন্ডে)</span>
+              <span className="sm:hidden">লাইভ (৬ সে.)</span>
             </div>
 
             {/* Refresh Button */}
