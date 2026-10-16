@@ -1,4 +1,4 @@
-import { get, put } from "@vercel/blob";
+import { get, put, head } from "@vercel/blob";
 
 export interface VisitorStats {
   totalVisits: number;
@@ -136,20 +136,46 @@ export function parseUserAgent(ua: string): {
   return { device, browser, os };
 }
 
-// Private Blob read & write
+// Private Blob read & write with zero CDN caching
 export async function getStats(): Promise<VisitorStats> {
   try {
-    const res = await get(BLOB_PATH, {
-      token: BLOB_TOKEN,
-      access: "private",
-    });
+    let parsed: VisitorStats | null = null;
 
-    if (!res) {
-      return createEmptyStats();
+    // First try: Read fresh blob directly using head + cache-busting fetch to bypass Vercel CDN cache
+    try {
+      const meta = await head(BLOB_PATH, { token: BLOB_TOKEN });
+      if (meta && meta.url) {
+        const freshUrl = `${meta.url}?_cb=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const res = await fetch(freshUrl, {
+          headers: { Authorization: `Bearer ${BLOB_TOKEN}` },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          parsed = (await res.json()) as VisitorStats;
+        }
+      }
+    } catch {
+      // If head/fetch fails, fall back to get()
     }
 
-    const text = await new Response(res.stream).text();
-    const parsed = JSON.parse(text) as VisitorStats;
+    // Fallback: standard get()
+    if (!parsed) {
+      const res = await get(BLOB_PATH, {
+        token: BLOB_TOKEN,
+        access: "private",
+      });
+
+      if (!res) {
+        return createEmptyStats();
+      }
+
+      const text = await new Response(res.stream).text();
+      parsed = JSON.parse(text) as VisitorStats;
+    }
+
+    if (!parsed) {
+      return createEmptyStats();
+    }
 
     // Reset daily counters if date has changed in BST
     const today = getBstDate();
