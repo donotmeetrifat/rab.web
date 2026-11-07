@@ -97,13 +97,7 @@ export interface PieRelationshipRow {
 }
 
 export type PieNodeType =
-  | "project"
-  | "technology"
-  | "topic"
-  | "conversation"
-  | "goal"
-  | "decision"
-  | "file";
+  "project" | "technology" | "topic" | "conversation" | "goal" | "decision" | "file";
 
 export interface PieStats {
   preferences: number;

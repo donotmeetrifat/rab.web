@@ -12,7 +12,11 @@
  */
 import { db, uid } from "@/lib/db";
 import { fnv1a } from "@/providers/base/hash";
-import { getConversation, getConversationMessages, listConversations } from "@/services/conversations";
+import {
+  getConversation,
+  getConversationMessages,
+  listConversations,
+} from "@/services/conversations";
 import { embed, getSettings, isAIEnabled } from "./AIManager";
 import { getSummary } from "./SummaryEngine";
 import { estimateTokens } from "./TokenCounter";
@@ -20,7 +24,9 @@ import type { AIEmbeddingRow } from "./types";
 
 function cosine(a: number[], b: number[]): number {
   if (a.length !== b.length || a.length === 0) return 0;
-  let dot = 0, na = 0, nb = 0;
+  let dot = 0,
+    na = 0,
+    nb = 0;
   for (let i = 0; i < a.length; i++) {
     const x = a[i]!;
     const y = b[i]!;
@@ -48,7 +54,10 @@ function buildDocForConversation(
     .join("\n");
 }
 
-export async function embedConversation(conversationId: string, force = false): Promise<AIEmbeddingRow | null> {
+export async function embedConversation(
+  conversationId: string,
+  force = false,
+): Promise<AIEmbeddingRow | null> {
   if (!(await isAIEnabled())) return null;
   const conv = await getConversation(conversationId);
   if (!conv) return null;
@@ -59,13 +68,13 @@ export async function embedConversation(conversationId: string, force = false): 
     .sort((a, b) => a.order - b.order)
     .map((m) => `${m.role}: ${(m.content || m.markdown || "").slice(0, 500)}`)
     .join("\n");
-  const summaryText = [sum?.shortSummary, sum?.longSummary, (sum?.topics ?? []).join(", ")].filter(Boolean).join(" | ");
+  const summaryText = [sum?.shortSummary, sum?.longSummary, (sum?.topics ?? []).join(", ")]
+    .filter(Boolean)
+    .join(" | ");
   const text = buildDocForConversation(conv, summaryText, transcript);
   const hash = fnv1a(text);
 
-  const existing = await db.aiEmbeddings
-    .where({ scope: "conversation", conversationId })
-    .first();
+  const existing = await db.aiEmbeddings.where({ scope: "conversation", conversationId }).first();
   if (existing && !force && existing.hash === hash) return existing;
 
   const settings = await getSettings();
@@ -94,10 +103,13 @@ export async function embedAllConversations(
   onProgress?: (done: number, total: number) => void,
 ): Promise<{ embedded: number; skipped: number }> {
   const list = await listConversations();
-  let embedded = 0, skipped = 0;
+  let embedded = 0,
+    skipped = 0;
   for (let i = 0; i < list.length; i++) {
     const c = list[i]!;
-    const before = await db.aiEmbeddings.where({ scope: "conversation", conversationId: c.id }).first();
+    const before = await db.aiEmbeddings
+      .where({ scope: "conversation", conversationId: c.id })
+      .first();
     const row = await embedConversation(c.id).catch(() => null);
     if (row && (!before || row.id !== before.id || row.hash !== before.hash)) embedded += 1;
     else skipped += 1;
@@ -157,7 +169,11 @@ export async function semanticNeighbors(conversationId: string, limit = 5): Prom
   return out.sort((a, b) => b.similarity - a.similarity).slice(0, limit);
 }
 
-export async function embeddingStats(): Promise<{ vectors: number; tokens: number; model: string | null }> {
+export async function embeddingStats(): Promise<{
+  vectors: number;
+  tokens: number;
+  model: string | null;
+}> {
   const rows = await db.aiEmbeddings.toArray();
   const tokens = rows.reduce((n, r) => n + estimateTokens(r.text), 0);
   return { vectors: rows.length, tokens, model: rows[0]?.model ?? null };

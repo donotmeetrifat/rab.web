@@ -128,22 +128,20 @@ export function CommandPalette({ open, onOpenChange, onOpenWorkspace }: Props) {
         raw: p,
       }));
 
-    const convMatches: CommandItem[] = conversations
-      .slice(0, GROUP_LIMIT)
-      .map<CommandItem>((c) => {
-        const meta = providerMeta(c.provider);
-        return {
-          id: `cnv:${c.id}`,
-          kind: "conversation",
-          title: c.title,
-          subtitle: meta?.name ?? c.provider,
-          snippet: convSnippets.get(c.id) ?? undefined,
-          providerColor: meta?.color,
-          providerName: meta?.name,
-          url: c.url,
-          raw: c,
-        };
-      });
+    const convMatches: CommandItem[] = conversations.slice(0, GROUP_LIMIT).map<CommandItem>((c) => {
+      const meta = providerMeta(c.provider);
+      return {
+        id: `cnv:${c.id}`,
+        kind: "conversation",
+        title: c.title,
+        subtitle: meta?.name ?? c.provider,
+        snippet: convSnippets.get(c.id) ?? undefined,
+        providerColor: meta?.color,
+        providerName: meta?.name,
+        url: c.url,
+        raw: c,
+      };
+    });
 
     // Order: Conversations, Memories, Projects.
     return [...convMatches, ...memMatches, ...projMatches];
@@ -242,7 +240,9 @@ export function CommandPalette({ open, onOpenChange, onOpenWorkspace }: Props) {
             aria-activedescendant={items[cursor]?.id}
             className="flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus-visible:outline-none"
           />
-          {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />}
+          {loading && (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />
+          )}
           <button
             type="button"
             onClick={() => onOpenChange(false)}
@@ -326,7 +326,10 @@ export function CommandPalette({ open, onOpenChange, onOpenWorkspace }: Props) {
                             )}
                           </div>
                           {active && (
-                            <CornerDownLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                            <CornerDownLeft
+                              className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                              aria-hidden
+                            />
                           )}
                         </li>
                       );

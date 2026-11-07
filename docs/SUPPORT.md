@@ -1,6 +1,7 @@
 # Support
 
 ## Self-serve
+
 - Open the extension → **Help** for shortcuts, FAQ, and troubleshooting.
 - Open **Diagnostics** to see counts, storage usage, and the version report you can copy into any bug report.
 - Use **Diagnostics → Download full backup** before trying any troubleshooting step that touches data.
@@ -17,4 +18,5 @@ Auto-save is off by default. Enable it in Settings, or use the pill button in th
 Open the target conversation once — the in-memory index rebuilds lazily.
 
 ## Contact
+
 Email **support@memlace.app** (placeholder — replace before store submission).

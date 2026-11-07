@@ -61,11 +61,7 @@ function prune() {
   }
 }
 
-export function auditStart(
-  provider: string,
-  conversationId: string,
-  hash: string,
-): AuditRecord {
+export function auditStart(provider: string, conversationId: string, hash: string): AuditRecord {
   const k = key(provider, conversationId);
   const now = Date.now();
   const existing = audits.get(k);
@@ -139,11 +135,7 @@ export function auditMark(
   }
 }
 
-export function auditFail(
-  provider: string,
-  conversationId: string,
-  error: string,
-): void {
+export function auditFail(provider: string, conversationId: string, error: string): void {
   const rec = audits.get(key(provider, conversationId));
   if (!rec) return;
   rec.status = "failed";
@@ -170,10 +162,17 @@ export interface AuditSummary {
 
 export function auditSummary(): AuditSummary {
   const list = Array.from(audits.values());
-  let ok = 0, failed = 0, integrity = 0, pending = 0;
-  let sumDur = 0, cntDur = 0, maxDur = 0;
-  let sumBroadcast = 0, cntBroadcast = 0;
-  let sumUi = 0, cntUi = 0;
+  let ok = 0,
+    failed = 0,
+    integrity = 0,
+    pending = 0;
+  let sumDur = 0,
+    cntDur = 0,
+    maxDur = 0;
+  let sumBroadcast = 0,
+    cntBroadcast = 0;
+  let sumUi = 0,
+    cntUi = 0;
   for (const r of list) {
     if (r.status === "ok") ok++;
     else if (r.status === "failed") failed++;

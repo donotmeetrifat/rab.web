@@ -52,9 +52,13 @@ export async function updateConfidenceFor(
 
   for (const e of knowledge.entityDetails) {
     const kind: PieConfidenceRow["kind"] =
-      e.type === "language" ? "language" :
-      e.type === "framework" ? "framework" :
-      e.type === "topic" ? "topic" : "technology";
+      e.type === "language"
+        ? "language"
+        : e.type === "framework"
+          ? "framework"
+          : e.type === "topic"
+            ? "topic"
+            : "technology";
     const codeHits = knowledge.codeBlocks.filter(
       (c) => (c.language || "").toLowerCase() === e.name.toLowerCase(),
     ).length;
@@ -83,11 +87,11 @@ export async function updateConfidenceFor(
 
     // Blended score, saturating tanh so single spikes never dominate.
     const raw =
-      0.30 * Math.tanh(repetition / 6) +
-      0.20 * recency +
+      0.3 * Math.tanh(repetition / 6) +
+      0.2 * recency +
       0.15 * Math.tanh(projectRelevance / 3) +
-      0.10 * Math.tanh(decisionSupport / 2) +
-      0.10 * Math.tanh(crossProvider / 3) +
+      0.1 * Math.tanh(decisionSupport / 2) +
+      0.1 * Math.tanh(crossProvider / 3) +
       0.15 * Math.tanh(codeRefs / 4);
 
     rows.push({
@@ -126,5 +130,8 @@ export async function confidenceOf(name: string): Promise<number> {
 
 export async function highConfidence(min = 0.4, limit = 20): Promise<PieConfidenceRow[]> {
   const all = await db.pieConfidence.toArray();
-  return all.filter((r) => r.score >= min).sort((a, b) => b.score - a.score).slice(0, limit);
+  return all
+    .filter((r) => r.score >= min)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
 }

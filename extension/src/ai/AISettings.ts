@@ -39,7 +39,7 @@ export function subscribeAISettings(cb: (s: AISettings) => void): () => void {
     area: chrome.storage.AreaName,
   ) => {
     if (area === "local" && changes[KEY]) {
-      cb({ ...DEFAULT_AI_SETTINGS, ...(changes[KEY].newValue as Partial<AISettings> ?? {}) });
+      cb({ ...DEFAULT_AI_SETTINGS, ...((changes[KEY].newValue as Partial<AISettings>) ?? {}) });
     }
   };
   chrome.storage.onChanged.addListener(listener);

@@ -9,10 +9,7 @@
  */
 import type { ProviderId } from "@/types";
 import type { ContextItem, ContextPackage } from "./types";
-import {
-  CONTINUATION_ADAPTERS,
-  type ContinuationProviderId,
-} from "@/lib/continuation";
+import { CONTINUATION_ADAPTERS, type ContinuationProviderId } from "@/lib/continuation";
 
 const PROVIDER_LABEL: Record<ProviderId, string> = {
   chatgpt: "ChatGPT",

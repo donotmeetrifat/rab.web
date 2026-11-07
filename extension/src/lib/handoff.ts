@@ -22,9 +22,11 @@ type LocalStore = {
 };
 
 function store(): LocalStore | null {
-  const c = (globalThis as {
-    chrome?: { storage?: { local?: LocalStore } };
-  }).chrome;
+  const c = (
+    globalThis as {
+      chrome?: { storage?: { local?: LocalStore } };
+    }
+  ).chrome;
   return c?.storage?.local ?? null;
 }
 

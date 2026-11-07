@@ -13,7 +13,13 @@ function edgeId(aType: PieNodeType, a: string, bType: PieNodeType, b: string): s
   return left < right ? `${left}::${right}` : `${right}::${left}`;
 }
 
-interface EdgeSpec { aType: PieNodeType; a: string; bType: PieNodeType; b: string; weight: number; }
+interface EdgeSpec {
+  aType: PieNodeType;
+  a: string;
+  bType: PieNodeType;
+  b: string;
+  weight: number;
+}
 
 async function upsertEdges(edges: EdgeSpec[]): Promise<void> {
   if (!edges.length) return;
@@ -25,7 +31,15 @@ async function upsertEdges(edges: EdgeSpec[]): Promise<void> {
     const prev = existing[i];
     return prev
       ? { ...prev, weight: prev.weight + e.weight, updatedAt: now }
-      : { id, aType: e.aType, a: e.a.toLowerCase(), bType: e.bType, b: e.b.toLowerCase(), weight: e.weight, updatedAt: now };
+      : {
+          id,
+          aType: e.aType,
+          a: e.a.toLowerCase(),
+          bType: e.bType,
+          b: e.b.toLowerCase(),
+          weight: e.weight,
+          updatedAt: now,
+        };
   });
   await db.pieRelationships.bulkPut(rows);
 }
@@ -42,14 +56,18 @@ export async function updateRelationshipsFor(
   const topics = knowledge?.topics ?? [];
 
   // conversation ↔ technology / topic
-  for (const t of techs) edges.push({ aType: "conversation", a: convId, bType: "technology", b: t, weight: 1 });
-  for (const t of topics) edges.push({ aType: "conversation", a: convId, bType: "topic", b: t, weight: 1 });
+  for (const t of techs)
+    edges.push({ aType: "conversation", a: convId, bType: "technology", b: t, weight: 1 });
+  for (const t of topics)
+    edges.push({ aType: "conversation", a: convId, bType: "topic", b: t, weight: 1 });
 
   // project ↔ technology / topic / conversation
   if (projectId) {
     edges.push({ aType: "project", a: projectId, bType: "conversation", b: convId, weight: 1 });
-    for (const t of techs) edges.push({ aType: "project", a: projectId, bType: "technology", b: t, weight: 1 });
-    for (const t of topics) edges.push({ aType: "project", a: projectId, bType: "topic", b: t, weight: 1 });
+    for (const t of techs)
+      edges.push({ aType: "project", a: projectId, bType: "technology", b: t, weight: 1 });
+    for (const t of topics)
+      edges.push({ aType: "project", a: projectId, bType: "topic", b: t, weight: 1 });
   }
 
   // technology ↔ technology (co-occurrence)

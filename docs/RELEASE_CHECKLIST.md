@@ -1,6 +1,7 @@
 # Release Checklist — Memlace v1.0.0
 
 ## Code
+
 - [x] TypeScript strict — 0 errors
 - [x] Production build clean (`bunx vite build` in `extension/`)
 - [x] No `eval`, `new Function`, or remote `<script>` tags
@@ -8,6 +9,7 @@
 - [x] All dead code and placeholder adapters removed
 
 ## Manifest
+
 - [x] `manifest_version: 3`
 - [x] `version: 1.0.0`
 - [x] Permissions limited to what is used (see `docs/PERMISSIONS.md`)
@@ -17,10 +19,12 @@
 - [x] `web_accessible_resources` scoped to `icons/*` and `src/assets/*`
 
 ## Icons
+
 - [x] `icon-16.png`, `icon-32.png`, `icon-48.png`, `icon-128.png` present in `extension/public/icons/`
 - [x] Transparent background, crisp on Retina
 
 ## Docs
+
 - [x] Privacy Policy — `docs/PRIVACY.md`
 - [x] Terms — `docs/TERMS.md`
 - [x] Permissions — `docs/PERMISSIONS.md`
@@ -31,6 +35,7 @@
 - [x] Changelog — `docs/CHANGELOG.md`
 
 ## Store assets
+
 - [x] Store listing copy — `docs/store-assets/STORE_LISTING.md`
 - [ ] Store icon 128×128 — copy from `extension/public/icons/icon-128.png`
 - [ ] Screenshots 1280×800 ×5 — `docs/store-assets/screenshots/`
@@ -39,6 +44,7 @@
 - [ ] Marquee 1400×560 (optional)
 
 ## In-product QA
+
 - [x] Onboarding flow completes and persists
 - [x] Setup checklist ticks from real usage
 - [x] "What's new" fires once per version
@@ -53,6 +59,7 @@
 - [x] Fully offline: no network requests when AI is disabled
 
 ## Before hitting "Publish"
+
 - [ ] Replace `support@memlace.app`, `memlace.app`, and GitHub URL placeholders
 - [ ] Host Privacy Policy at a public URL and paste it into the store form
 - [ ] Upload the packaged zip: `public/memlace-extension.zip`

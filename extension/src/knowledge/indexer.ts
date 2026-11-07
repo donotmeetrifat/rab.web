@@ -19,84 +19,74 @@ export async function indexConversation(
   messages?: StoredConvMessage[],
 ): Promise<IndexResult> {
   const msgs =
-    messages ??
-    (await db.convMessages.where("conversationId").equals(conversation.id).toArray());
+    messages ?? (await db.convMessages.where("conversationId").equals(conversation.id).toArray());
   msgs.sort((a, b) => a.order - b.order);
 
   const extracted = extractKnowledge(conversation, msgs);
   const now = Date.now();
 
-  return db.transaction(
-    "rw",
-    db.knowledge,
-    db.entities,
-    db.keywords,
-    async () => {
-      const existing = await db.knowledge
-        .where("conversationId")
-        .equals(conversation.id)
-        .first();
+  return db.transaction("rw", db.knowledge, db.entities, db.keywords, async () => {
+    const existing = await db.knowledge.where("conversationId").equals(conversation.id).first();
 
-      // Skip when the conversation hash hasn't moved — the extractor is
-      // pure, so identical input → identical output.
-      if (existing && existing.hash === conversation.hash) {
-        return { knowledgeId: existing.id, changed: false, created: false };
-      }
+    // Skip when the conversation hash hasn't moved — the extractor is
+    // pure, so identical input → identical output.
+    if (existing && existing.hash === conversation.hash) {
+      return { knowledgeId: existing.id, changed: false, created: false };
+    }
 
-      const id = existing?.id ?? uid("kn");
-      const record: KnowledgeRecord = {
-        id,
-        conversationId: conversation.id,
-        provider: conversation.provider,
-        title: conversation.title,
-        hash: conversation.hash,
-        createdAt: existing?.createdAt ?? now,
-        updatedAt: now,
-        entityDetails: extracted.entityDetails,
-        keywordDetails: extracted.keywordDetails,
-        codeBlocks: extracted.codeBlocks,
-        links: extracted.links,
-        attachments: extracted.attachments,
-        stats: extracted.stats,
-        entities: extracted.entities,
-        keywords: extracted.keywords,
-        technologies: extracted.technologies,
-        languages: extracted.languages,
-        topics: extracted.topics,
-      };
+    const id = existing?.id ?? uid("kn");
+    const record: KnowledgeRecord = {
+      id,
+      conversationId: conversation.id,
+      provider: conversation.provider,
+      title: conversation.title,
+      hash: conversation.hash,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+      entityDetails: extracted.entityDetails,
+      keywordDetails: extracted.keywordDetails,
+      codeBlocks: extracted.codeBlocks,
+      links: extracted.links,
+      attachments: extracted.attachments,
+      stats: extracted.stats,
+      entities: extracted.entities,
+      keywords: extracted.keywords,
+      technologies: extracted.technologies,
+      languages: extracted.languages,
+      topics: extracted.topics,
+    };
 
-      await db.knowledge.put(record);
+    await db.knowledge.put(record);
 
-      // Replace normalised lookup rows atomically.
-      await db.entities.where("knowledgeId").equals(id).delete();
-      if (extracted.entityDetails.length) {
-        await db.entities.bulkAdd(
-          extracted.entityDetails.map((e) => ({
-            id: uid("ent"),
-            knowledgeId: id,
-            type: e.type,
-            name: e.name,
-            count: e.count,
-          })),
-        );
-      }
+    // Replace normalised lookup rows atomically.
+    await db.entities.where("knowledgeId").equals(id).delete();
+    if (extracted.entityDetails.length) {
+      await db.entities.bulkAdd(
+        extracted.entityDetails.map((e) => ({
+          id: uid("ent"),
+          knowledgeId: id,
+          type: e.type,
+          name: e.name,
+          count: e.count,
+        })),
+      );
+    }
 
-      await db.keywords.where("knowledgeId").equals(id).delete();
-      if (extracted.keywordDetails.length) {
-        await db.keywords.bulkAdd(
-          extracted.keywordDetails.map((k) => ({
-            id: uid("kw"),
-            knowledgeId: id,
-            term: k.term,
-            count: k.count,
-            score: k.score,
-          })),
-        );
-      }
+    await db.keywords.where("knowledgeId").equals(id).delete();
+    if (extracted.keywordDetails.length) {
+      await db.keywords.bulkAdd(
+        extracted.keywordDetails.map((k) => ({
+          id: uid("kw"),
+          knowledgeId: id,
+          term: k.term,
+          count: k.count,
+          score: k.score,
+        })),
+      );
+    }
 
-      return { knowledgeId: id, changed: true, created: !existing };
-    },
-  );
+    return { knowledgeId: id, changed: true, created: !existing };
+  });
 }
 
 /** Drop the knowledge row and lookup children for a conversation. */

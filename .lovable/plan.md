@@ -64,6 +64,7 @@ Each adapter implements exactly two functions — nothing more:
 - `getProviderId(): 'chatgpt' | 'claude' | ...`
 
 "Continue in Another AI" does **not** try to auto-paste into the destination provider in Phase 1 (fragile, breaks weekly). Instead:
+
 1. Package context as a single well-formatted prompt.
 2. Copy it to the clipboard.
 3. Open the destination provider's new-chat URL in a new tab.

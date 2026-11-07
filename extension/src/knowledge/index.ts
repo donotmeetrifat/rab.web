@@ -1,10 +1,6 @@
 export * from "./types";
 export { extractKnowledge } from "./extractor";
-export {
-  indexConversation,
-  backfillKnowledge,
-  removeKnowledgeForConversation,
-} from "./indexer";
+export { indexConversation, backfillKnowledge, removeKnowledgeForConversation } from "./indexer";
 export {
   listKnowledge,
   getKnowledgeForConversation,
@@ -13,8 +9,4 @@ export {
   buildAggregate,
   listConversationsForTechnology,
 } from "./search";
-export {
-  onConversationSaved,
-  onConversationDeleted,
-  scheduleKnowledgeBackfill,
-} from "./engine";
+export { onConversationSaved, onConversationDeleted, scheduleKnowledgeBackfill } from "./engine";

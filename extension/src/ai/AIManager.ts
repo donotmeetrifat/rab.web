@@ -39,13 +39,20 @@ function build(settings: AISettings): AIProvider {
     maxTokens: settings.maxTokens,
   };
   switch (settings.provider) {
-    case "openai": return createOpenAI(cfg);
-    case "anthropic": return createAnthropic(cfg);
-    case "gemini": return createGemini(cfg);
-    case "openrouter": return createOpenRouter(cfg);
-    case "ollama": return createOllama(cfg);
-    case "lmstudio": return createLMStudio(cfg);
-    case "custom": return createCustom(cfg);
+    case "openai":
+      return createOpenAI(cfg);
+    case "anthropic":
+      return createAnthropic(cfg);
+    case "gemini":
+      return createGemini(cfg);
+    case "openrouter":
+      return createOpenRouter(cfg);
+    case "ollama":
+      return createOllama(cfg);
+    case "lmstudio":
+      return createLMStudio(cfg);
+    case "custom":
+      return createCustom(cfg);
   }
 }
 
@@ -114,12 +121,19 @@ export async function validateKey(): Promise<{ ok: true } | { ok: false; error: 
 
 export function providerLabel(id: AIProviderId): string {
   switch (id) {
-    case "openai": return "OpenAI";
-    case "anthropic": return "Anthropic (Claude)";
-    case "gemini": return "Google Gemini";
-    case "openrouter": return "OpenRouter";
-    case "ollama": return "Ollama (local)";
-    case "lmstudio": return "LM Studio (local)";
-    case "custom": return "Custom endpoint";
+    case "openai":
+      return "OpenAI";
+    case "anthropic":
+      return "Anthropic (Claude)";
+    case "gemini":
+      return "Google Gemini";
+    case "openrouter":
+      return "OpenRouter";
+    case "ollama":
+      return "Ollama (local)";
+    case "lmstudio":
+      return "LM Studio (local)";
+    case "custom":
+      return "Custom endpoint";
   }
 }

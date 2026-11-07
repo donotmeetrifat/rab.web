@@ -140,12 +140,8 @@ export function KnowledgePanel({
 
       <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
         <div className="overflow-y-auto scroll-thin px-4 py-3 space-y-4">
-          {aggregate && !debounced && (
-            <StatsGrid aggregate={aggregate} />
-          )}
-          {aggregate && !debounced && (
-            <FacetSection aggregate={aggregate} />
-          )}
+          {aggregate && !debounced && <StatsGrid aggregate={aggregate} />}
+          {aggregate && !debounced && <FacetSection aggregate={aggregate} />}
           <section aria-labelledby="kn-list">
             <h3
               id="kn-list"
@@ -334,9 +330,7 @@ function KnowledgeRow({
             </li>
           ))}
           {record.technologies.length > 8 && (
-            <li className="text-[10px] text-muted-foreground">
-              +{record.technologies.length - 8}
-            </li>
+            <li className="text-[10px] text-muted-foreground">+{record.technologies.length - 8}</li>
           )}
         </ul>
       )}

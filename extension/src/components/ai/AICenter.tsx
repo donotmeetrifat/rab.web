@@ -3,7 +3,16 @@
  * aggregate token & cost estimate. Everything server-owned by AIQueue.
  */
 import { useEffect, useState } from "react";
-import { Play, X, RefreshCw, CheckCircle2, AlertCircle, Loader2, Clock, Trash2 } from "lucide-react";
+import {
+  Play,
+  X,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Clock,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/Button";
 import { aiQueue } from "@/ai/AIQueue";
 import type { AIJob, AIJobStatus } from "@/ai/AIQueue";
@@ -68,12 +77,21 @@ export function AICenter() {
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-medium truncate">{j.label}</div>
                         <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
-                          <span>{providerLabel(j.provider)} · {j.model}</span>
+                          <span>
+                            {providerLabel(j.provider)} · {j.model}
+                          </span>
                           {j.estInputTokens > 0 && (
-                            <span>~{j.estInputTokens.toLocaleString()} in / {j.estOutputTokens.toLocaleString()} out</span>
+                            <span>
+                              ~{j.estInputTokens.toLocaleString()} in /{" "}
+                              {j.estOutputTokens.toLocaleString()} out
+                            </span>
                           )}
                           {typeof j.costUSD === "number" && <span>{formatCost(j.costUSD)}</span>}
-                          {j.attempts > 1 && <span>attempt {j.attempts}/{j.maxAttempts}</span>}
+                          {j.attempts > 1 && (
+                            <span>
+                              attempt {j.attempts}/{j.maxAttempts}
+                            </span>
+                          )}
                         </div>
                         {j.status === "running" && (
                           <div className="mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
@@ -84,7 +102,9 @@ export function AICenter() {
                           </div>
                         )}
                         {j.error && (
-                          <div className="mt-1 text-[10px] text-rose-500 line-clamp-2">{j.error}</div>
+                          <div className="mt-1 text-[10px] text-rose-500 line-clamp-2">
+                            {j.error}
+                          </div>
                         )}
                       </div>
                       {(j.status === "queued" || j.status === "running") && (
@@ -120,10 +140,15 @@ function Stat({ label, value, tint }: { label: string; value: number; tint: stri
 
 function StatusIcon({ status }: { status: AIJobStatus }) {
   switch (status) {
-    case "queued": return <Clock className="h-4 w-4 text-muted-foreground shrink-0" />;
-    case "running": return <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />;
-    case "done": return <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />;
-    case "failed": return <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />;
-    case "cancelled": return <RefreshCw className="h-4 w-4 text-amber-500 shrink-0" />;
+    case "queued":
+      return <Clock className="h-4 w-4 text-muted-foreground shrink-0" />;
+    case "running":
+      return <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />;
+    case "done":
+      return <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />;
+    case "failed":
+      return <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />;
+    case "cancelled":
+      return <RefreshCw className="h-4 w-4 text-amber-500 shrink-0" />;
   }
 }

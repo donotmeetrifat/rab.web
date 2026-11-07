@@ -40,7 +40,9 @@ function mkConversation(i) {
 
 console.log(`[stress] starting ${N} saves…`);
 const t0 = performance.now();
-let ok = 0, failed = 0, maxMs = 0;
+let ok = 0,
+  failed = 0,
+  maxMs = 0;
 for (let i = 0; i < N; i++) {
   const c = mkConversation(i);
   const hash = hashConversation(c);
@@ -73,9 +75,13 @@ for (const r of rows) {
     title: r.title,
     url: r.url,
     capturedAt: r.capturedAt,
-    messages: (await db.convMessages.where("conversationId").equals(r.id).sortBy("order")).map((m) => ({
-      role: m.role, content: m.content, order: m.order,
-    })),
+    messages: (await db.convMessages.where("conversationId").equals(r.id).sortBy("order")).map(
+      (m) => ({
+        role: m.role,
+        content: m.content,
+        order: m.order,
+      }),
+    ),
   };
   if (hashConversation(c) !== r.hash) corrupted += 1;
 }

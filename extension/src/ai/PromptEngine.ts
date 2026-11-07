@@ -30,7 +30,13 @@ export function hashPrompt(parts: {
   provider: string;
 }): string {
   return fnv1a(
-    [parts.provider, parts.model, parts.temperature.toFixed(2), parts.system ?? "", parts.prompt].join("\u0001"),
+    [
+      parts.provider,
+      parts.model,
+      parts.temperature.toFixed(2),
+      parts.system ?? "",
+      parts.prompt,
+    ].join("\u0001"),
   );
 }
 
@@ -136,7 +142,10 @@ export function tryParseJson<T = unknown>(raw: string): T | null {
   if (!raw) return null;
   let s = raw.trim();
   if (s.startsWith("```")) {
-    s = s.replace(/^```[a-z]*\n?/i, "").replace(/```$/, "").trim();
+    s = s
+      .replace(/^```[a-z]*\n?/i, "")
+      .replace(/```$/, "")
+      .trim();
   }
   const first = s.indexOf("{");
   const last = s.lastIndexOf("}");

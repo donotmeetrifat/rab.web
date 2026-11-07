@@ -18,8 +18,10 @@ const TOPIC_MAP: Array<[RegExp, string]> = [
   [/\b(stripe|paddle|lemon squeezy|paypal)\b/i, "payments"],
 ];
 
-const DECISION_VERB = /\b(use|switch(?:ing)? to|adopt|choose|chose|going with|moved to|migrate[d]? to|prefer)\b/i;
-const REJECT_VERB = /\b(drop|dropped|remove[d]?|stop using|abandon|no longer using|switch away from)\b/i;
+const DECISION_VERB =
+  /\b(use|switch(?:ing)? to|adopt|choose|chose|going with|moved to|migrate[d]? to|prefer)\b/i;
+const REJECT_VERB =
+  /\b(drop|dropped|remove[d]?|stop using|abandon|no longer using|switch away from)\b/i;
 
 function normaliseValue(raw: string): string {
   return raw
@@ -28,7 +30,9 @@ function normaliseValue(raw: string): string {
     .trim();
 }
 
-function extractDecisions(text: string): Array<{ topic: string; value: string; source: "adopt" | "reject" }> {
+function extractDecisions(
+  text: string,
+): Array<{ topic: string; value: string; source: "adopt" | "reject" }> {
   const out: Array<{ topic: string; value: string; source: "adopt" | "reject" }> = [];
   const sentences = text.split(/(?<=[.!?\n])\s+/).slice(0, 400);
   for (const s of sentences) {

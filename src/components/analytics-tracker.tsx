@@ -30,11 +30,7 @@ export function AnalyticsTracker() {
       try {
         vid = localStorage.getItem(VID_KEY) || "";
         if (!vid) {
-          vid =
-            "v_" +
-            Math.random().toString(36).substring(2, 10) +
-            "_" +
-            Date.now().toString(36);
+          vid = "v_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now().toString(36);
           localStorage.setItem(VID_KEY, vid);
           isFirstVisit = true;
         }

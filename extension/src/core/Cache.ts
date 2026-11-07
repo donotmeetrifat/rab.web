@@ -76,8 +76,7 @@ export async function getOrSet<T>(
 }
 
 export function snapshot() {
-  const ratio =
-    stats.hits + stats.misses === 0 ? 0 : stats.hits / (stats.hits + stats.misses);
+  const ratio = stats.hits + stats.misses === 0 ? 0 : stats.hits / (stats.hits + stats.misses);
   return {
     entries: store.size,
     scopes: versions.size,

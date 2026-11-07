@@ -57,10 +57,7 @@ export function HomePanel(props: HomePanelProps) {
     };
   }, []);
 
-  const projectById = useMemo(
-    () => new Map(projects.map((p) => [p.id, p] as const)),
-    [projects],
-  );
+  const projectById = useMemo(() => new Map(projects.map((p) => [p.id, p] as const)), [projects]);
 
   const openConv = async (convId: string) => {
     const conv = await getConversation(convId).catch(() => undefined);
@@ -356,9 +353,7 @@ const ContinueRow = memo(function ContinueRow({
           )}
         </div>
         {item.nextAction && (
-          <div className="mt-1 text-[11px] text-primary line-clamp-1">
-            → {item.nextAction}
-          </div>
+          <div className="mt-1 text-[11px] text-primary line-clamp-1">→ {item.nextAction}</div>
         )}
       </button>
     </li>
@@ -380,7 +375,10 @@ const AttentionRow = memo(function AttentionRow({
         className="group w-full text-left rounded-lg border border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 px-3 py-2.5 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden />
+          <AlertTriangle
+            className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0"
+            aria-hidden
+          />
           <span className="text-xs font-medium truncate">{item.title}</span>
           <span className="ml-auto text-[10px] text-muted-foreground shrink-0">
             {humanAgo(item.lastActive)}
@@ -396,10 +394,7 @@ function SkeletonList({ rows }: { rows: number }) {
   return (
     <ul className="space-y-1.5" aria-hidden>
       {Array.from({ length: rows }).map((_, i) => (
-        <li
-          key={i}
-          className="h-14 rounded-lg border border-border bg-surface animate-pulse"
-        />
+        <li key={i} className="h-14 rounded-lg border border-border bg-surface animate-pulse" />
       ))}
     </ul>
   );

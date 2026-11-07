@@ -47,9 +47,7 @@ function compile(type: EntityType, entry: DictEntry): CompiledEntry {
   const patterns = entry.aliases.map((alias) => {
     const alnum = /^[a-z0-9\s]+$/i.test(alias);
     const escaped = escapeRegex(alias);
-    return alnum
-      ? new RegExp(`\\b${escaped}\\b`, "gi")
-      : new RegExp(escaped, "gi");
+    return alnum ? new RegExp(`\\b${escaped}\\b`, "gi") : new RegExp(escaped, "gi");
   });
   return { type, name: entry.name, patterns };
 }
@@ -196,13 +194,9 @@ export function extractKnowledge(
   const textForKeywords = stripCode(fullText) + "\n" + conversation.title;
   const keywordDetails = extractKeywords(textForKeywords);
 
-  const languages = entityDetails
-    .filter((e) => e.type === "language")
-    .map((e) => e.name);
+  const languages = entityDetails.filter((e) => e.type === "language").map((e) => e.name);
   const topics = entityDetails.filter((e) => e.type === "topic").map((e) => e.name);
-  const technologies = entityDetails
-    .filter((e) => e.type !== "topic")
-    .map((e) => e.name);
+  const technologies = entityDetails.filter((e) => e.type !== "topic").map((e) => e.name);
   const entities = entityDetails.map((e) => e.name);
 
   // Include code-block languages as detected languages too.

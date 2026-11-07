@@ -10,7 +10,15 @@ interface Props {
   size?: "sm" | "md";
 }
 
-export function Dialog({ open, onOpenChange, title, description, children, footer, size = "sm" }: Props) {
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  footer,
+  size = "sm",
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,9 +56,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         className={`relative w-full ${width} rounded-2xl border border-border bg-surface p-5 shadow-2xl animate-scale-in`}
       >
         <h2 className="text-sm font-semibold">{title}</h2>
-        {description && (
-          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
         <div className="mt-4">{children}</div>
         {footer && <div className="mt-5 flex justify-end gap-2">{footer}</div>}
       </div>

@@ -118,8 +118,12 @@ export function runMemoryHealth(): Promise<HealthReport> {
         db.keywords.toArray(),
         db.relationships.toArray(),
       ]);
-      const orphanEntIds = entities.filter((e) => !liveKnowledgeIds.has(e.knowledgeId)).map((e) => e.id);
-      const orphanKwIds = keywords.filter((k) => !liveKnowledgeIds.has(k.knowledgeId)).map((k) => k.id);
+      const orphanEntIds = entities
+        .filter((e) => !liveKnowledgeIds.has(e.knowledgeId))
+        .map((e) => e.id);
+      const orphanKwIds = keywords
+        .filter((k) => !liveKnowledgeIds.has(k.knowledgeId))
+        .map((k) => k.id);
       const orphanRelIds = relationships
         .filter((r) => !liveKnowledgeIds.has(r.fromId) || !liveKnowledgeIds.has(r.toId))
         .map((r) => r.id);
@@ -140,7 +144,6 @@ export function runMemoryHealth(): Promise<HealthReport> {
       // Skip here — memory project links are validated by the memories
       // service on read and repaired on next write.
       void projects;
-
     } catch (err) {
       console.warn("[memlace] memory health sweep failed", err);
     }

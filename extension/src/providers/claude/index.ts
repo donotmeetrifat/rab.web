@@ -56,17 +56,22 @@ export class ClaudeAdapter extends BaseChatAdapter {
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
       const attachments = Array.from(
         node.querySelectorAll<HTMLElement>('[data-testid*="attachment"], a[href^="http"]'),
-      ).slice(0, 8).map((el) => ({
-        kind: el.tagName === "A" ? ("link" as const) : ("file" as const),
-        url: (el as HTMLAnchorElement).href || undefined,
-        name: extractText(el) || undefined,
-      }));
+      )
+        .slice(0, 8)
+        .map((el) => ({
+          kind: el.tagName === "A" ? ("link" as const) : ("file" as const),
+          url: (el as HTMLAnchorElement).href || undefined,
+          name: extractText(el) || undefined,
+        }));
 
-      const id = node.getAttribute("data-testid") + ":"
-        + (node.getAttribute("data-message-id") ?? hashString(markdown || content));
+      const id =
+        node.getAttribute("data-testid") +
+        ":" +
+        (node.getAttribute("data-message-id") ?? hashString(markdown || content));
 
       const thinking = node.querySelector<HTMLElement>(
         '[data-testid*="thinking"], [class*="thinking"]',

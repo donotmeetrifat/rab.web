@@ -14,11 +14,31 @@ const ITEMS: {
   hint: string;
 }[] = [
   { key: "install", title: "Install complete", hint: "Memlace is installed and running." },
-  { key: "savedConversation", title: "Save your first conversation", hint: "Open ChatGPT (or any supported AI) and hit “Save to Memlace”." },
-  { key: "createdProject", title: "Create your first project", hint: "Group related chats and notes into projects from the sidebar." },
-  { key: "usedSearch", title: "Try universal search", hint: "Press Ctrl / ⌘ + K anywhere to search everything." },
-  { key: "continuedElsewhere", title: "Continue in another AI", hint: "Open a saved chat and pick a different provider to hand off context." },
-  { key: "enabledAI", title: "Enable AI (optional)", hint: "Add your own API key to unlock summaries and semantic search." },
+  {
+    key: "savedConversation",
+    title: "Save your first conversation",
+    hint: "Open ChatGPT (or any supported AI) and hit “Save to Memlace”.",
+  },
+  {
+    key: "createdProject",
+    title: "Create your first project",
+    hint: "Group related chats and notes into projects from the sidebar.",
+  },
+  {
+    key: "usedSearch",
+    title: "Try universal search",
+    hint: "Press Ctrl / ⌘ + K anywhere to search everything.",
+  },
+  {
+    key: "continuedElsewhere",
+    title: "Continue in another AI",
+    hint: "Open a saved chat and pick a different provider to hand off context.",
+  },
+  {
+    key: "enabledAI",
+    title: "Enable AI (optional)",
+    hint: "Add your own API key to unlock summaries and semantic search.",
+  },
 ];
 
 export function ChecklistPanel({ onJump }: { onJump?: (target: string) => void }) {
@@ -37,9 +57,7 @@ export function ChecklistPanel({ onJump }: { onJump?: (target: string) => void }
       <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
         <Sparkles className="h-4 w-4 text-primary" />
         <h1 className="text-sm font-semibold">Get started</h1>
-        <span className="ml-2 text-[10px] text-muted-foreground">
-          {progress}% complete
-        </span>
+        <span className="ml-2 text-[10px] text-muted-foreground">{progress}% complete</span>
       </header>
       <div className="px-4 pt-3">
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -51,16 +69,13 @@ export function ChecklistPanel({ onJump }: { onJump?: (target: string) => void }
       </div>
       <ul className="flex-1 overflow-y-auto scroll-thin px-4 py-4 space-y-2">
         {ITEMS.map((item) => {
-          const done =
-            item.key === "install" ? true : state.checklist[item.key];
+          const done = item.key === "install" ? true : state.checklist[item.key];
           return (
             <li
               key={item.key}
               className={
                 "rounded-xl border p-3 flex gap-3 " +
-                (done
-                  ? "border-primary/30 bg-primary/5"
-                  : "border-border bg-background")
+                (done ? "border-primary/30 bg-primary/5" : "border-border bg-background")
               }
             >
               <div

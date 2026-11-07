@@ -8,13 +8,7 @@
  */
 
 export type AIProviderId =
-  | "openai"
-  | "anthropic"
-  | "gemini"
-  | "openrouter"
-  | "ollama"
-  | "lmstudio"
-  | "custom";
+  "openai" | "anthropic" | "gemini" | "openrouter" | "ollama" | "lmstudio" | "custom";
 
 export interface AIModelInfo {
   id: string;
@@ -100,21 +94,9 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
 
 /* ----------------------------------- jobs ---------------------------------- */
 
-export type AIJobKind =
-  | "title"
-  | "summary"
-  | "tags"
-  | "memory"
-  | "embed"
-  | "ask"
-  | "custom";
+export type AIJobKind = "title" | "summary" | "tags" | "memory" | "embed" | "ask" | "custom";
 
-export type AIJobStatus =
-  | "queued"
-  | "running"
-  | "done"
-  | "failed"
-  | "cancelled";
+export type AIJobStatus = "queued" | "running" | "done" | "failed" | "cancelled";
 
 export interface AIJob {
   id: string;

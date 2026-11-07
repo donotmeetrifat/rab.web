@@ -6,6 +6,7 @@ verifiable, and self-healing. No silent data loss.
 ## What was added
 
 ### 1. Save Auditor — `extension/src/core/SaveAuditor.ts`
+
 Tracks the full lifecycle of every save through the pipeline:
 
     extracted → sent → queued → saved → verified → broadcast → received
@@ -20,21 +21,23 @@ Tracks the full lifecycle of every save through the pipeline:
   **reliability score** = `0.7 × successRate + 0.3 × integrityScore`.
 
 ### 2. System Health Monitor — `extension/src/core/HealthCheck.ts`
+
 Runs a lightweight probe every 60 s from the background service worker and
 from every UI surface at boot:
 
-| Probe             | Verifies                                                    |
-| ----------------- | ----------------------------------------------------------- |
-| `indexeddb`       | Dexie is open and a round-trip read succeeds                |
-| `runtime`         | `chrome.runtime.id` is reachable                            |
-| `eventbus`        | At least one subscriber is registered on `conversation.saved` |
-| `queue`           | Background queue processed at least one job without repeated failures |
-| `broadcast`       | Live event bridge has fired within the last window          |
+| Probe       | Verifies                                                              |
+| ----------- | --------------------------------------------------------------------- |
+| `indexeddb` | Dexie is open and a round-trip read succeeds                          |
+| `runtime`   | `chrome.runtime.id` is reachable                                      |
+| `eventbus`  | At least one subscriber is registered on `conversation.saved`         |
+| `queue`     | Background queue processed at least one job without repeated failures |
+| `broadcast` | Live event bridge has fired within the last window                    |
 
 Never surfaces UI on its own — results are visible from **Diagnostics →
 System Health**, with a manual "Run now" button for on-demand checks.
 
 ### 3. Hash-based integrity verification
+
 - `saveConversation()` writes the incoming `hash` field.
 - The service worker re-reads the row after `saveConversation()` returns and
   marks the audit `verified` only if the row exists with the same hash.
@@ -42,6 +45,7 @@ System Health**, with a manual "Run now" button for on-demand checks.
   that matched the hash sent from the content script.
 
 ### 4. Deep memory repair — `extension/src/services/memoryHealth.ts`
+
 Silent, opportunistic sweeps that self-heal the local store:
 
 - Orphan messages (parent conversation gone)
@@ -55,6 +59,7 @@ from `scheduleMemoryHealth()` and on demand from **Diagnostics → Memory
 Health**.
 
 ### 5. Diagnostics surface
+
 `extension/src/components/Diagnostics.tsx` gained three panels:
 
 - **Save Auditor** — reliability score, avg / max durations, list of open

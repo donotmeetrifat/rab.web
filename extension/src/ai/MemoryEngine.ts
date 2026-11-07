@@ -49,9 +49,7 @@ export async function getRelatedConversations(
       }
     }
   }
-  return [...combined.values()]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  return [...combined.values()].sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
 export interface SuggestedProject {
@@ -73,7 +71,9 @@ export async function suggestProject(conversationId: string): Promise<SuggestedP
       ...(sum.technologies ?? []),
       ...(sum.smartTags ?? []),
       sum.category ?? "",
-    ].map((s) => s.toLowerCase().trim()).filter(Boolean),
+    ]
+      .map((s) => s.toLowerCase().trim())
+      .filter(Boolean),
   );
 
   let best: SuggestedProject | null = null;
@@ -82,7 +82,12 @@ export async function suggestProject(conversationId: string): Promise<SuggestedP
     let score = 0;
     for (const t of bag) if (name.includes(t) || t.includes(name)) score += 1;
     if (score > 0 && (!best || score > best.score)) {
-      best = { projectId: p.id, name: p.name, reason: `matches ${score} topic${score > 1 ? "s" : ""}`, score };
+      best = {
+        projectId: p.id,
+        name: p.name,
+        reason: `matches ${score} topic${score > 1 ? "s" : ""}`,
+        score,
+      };
     }
   }
   return best;
@@ -95,13 +100,18 @@ export interface DuplicateCandidate {
 }
 
 /** Duplicates share a summary category + very high semantic similarity. */
-export async function findDuplicates(conversationId: string, threshold = 0.92): Promise<DuplicateCandidate[]> {
+export async function findDuplicates(
+  conversationId: string,
+  threshold = 0.92,
+): Promise<DuplicateCandidate[]> {
   const neighbors = await semanticNeighbors(conversationId, 5).catch(() => []);
-  return neighbors.filter((n) => n.similarity >= threshold).map((n) => ({
-    conversationId: n.conversationId,
-    title: n.title,
-    similarity: n.similarity,
-  }));
+  return neighbors
+    .filter((n) => n.similarity >= threshold)
+    .map((n) => ({
+      conversationId: n.conversationId,
+      title: n.title,
+      similarity: n.similarity,
+    }));
 }
 
 export function scoreImportance(sum: AIConversationSummary): number {

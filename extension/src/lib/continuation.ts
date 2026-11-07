@@ -1,18 +1,11 @@
 import type { ProviderId, StoredConversation, StoredConvMessage } from "@/types";
 
 export type ContinuationProviderId =
-  | "chatgpt"
-  | "claude"
-  | "gemini"
-  | "deepseek"
-  | "copilot"
-  | "perplexity"
-  | "aistudio";
-
+  "chatgpt" | "claude" | "gemini" | "deepseek" | "copilot" | "perplexity" | "aistudio";
 
 export type InputMethod =
-  | "clipboard"       // open new chat; user pastes
-  | "query-param";    // pass prompt via ?q= (short prompts only)
+  | "clipboard" // open new chat; user pastes
+  | "query-param"; // pass prompt via ?q= (short prompts only)
 
 export interface ContinuationAdapter {
   id: ContinuationProviderId;
@@ -64,8 +57,7 @@ export const CONTINUATION_ADAPTERS: Record<ContinuationProviderId, ContinuationA
     newChatUrl: "https://copilot.microsoft.com/",
     inputMethod: "clipboard",
     maxChars: 16000,
-    queryUrl: (prompt) =>
-      `https://copilot.microsoft.com/?q=${encodeURIComponent(prompt)}`,
+    queryUrl: (prompt) => `https://copilot.microsoft.com/?q=${encodeURIComponent(prompt)}`,
   },
   perplexity: {
     id: "perplexity",
@@ -73,8 +65,7 @@ export const CONTINUATION_ADAPTERS: Record<ContinuationProviderId, ContinuationA
     newChatUrl: "https://www.perplexity.ai/",
     inputMethod: "clipboard",
     maxChars: 18000,
-    queryUrl: (prompt) =>
-      `https://www.perplexity.ai/search/new?q=${encodeURIComponent(prompt)}`,
+    queryUrl: (prompt) => `https://www.perplexity.ai/search/new?q=${encodeURIComponent(prompt)}`,
   },
   aistudio: {
     id: "aistudio",
@@ -94,7 +85,6 @@ export const CONTINUATION_PROVIDERS: ContinuationAdapter[] = [
   CONTINUATION_ADAPTERS.perplexity,
   CONTINUATION_ADAPTERS.aistudio,
 ];
-
 
 const PROVIDER_LABEL: Record<ProviderId, string> = {
   chatgpt: "ChatGPT",
@@ -199,8 +189,9 @@ export async function copyToClipboard(text: string): Promise<void> {
 
 /** Open the target provider in a new tab, using chrome.tabs when available. */
 export function openProviderTab(url: string): void {
-  const chromeApi = (globalThis as { chrome?: { tabs?: { create?: (opts: { url: string }) => void } } })
-    .chrome;
+  const chromeApi = (
+    globalThis as { chrome?: { tabs?: { create?: (opts: { url: string }) => void } } }
+  ).chrome;
   if (chromeApi?.tabs?.create) {
     chromeApi.tabs.create({ url });
     return;

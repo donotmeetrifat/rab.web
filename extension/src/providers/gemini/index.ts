@@ -52,7 +52,8 @@ export class GeminiAdapter extends BaseChatAdapter {
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
       const attachments = Array.from(node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'))
         .slice(0, 8)
         .map((a) => ({ kind: "link" as const, url: a.href, name: extractText(a) }));
@@ -61,7 +62,13 @@ export class GeminiAdapter extends BaseChatAdapter {
       const thinking = node.querySelector<HTMLElement>('[class*="thought"], model-thoughts');
 
       messages.push({
-        id, role, content, markdown, images, attachments, order: idx,
+        id,
+        role,
+        content,
+        markdown,
+        images,
+        attachments,
+        order: idx,
         metadata: { ...(thinking ? { thinking: extractText(thinking) } : {}) },
       });
     });

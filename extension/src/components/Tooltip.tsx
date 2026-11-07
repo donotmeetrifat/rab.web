@@ -15,7 +15,6 @@ export function Tooltip({
   if (!isValidElement(children)) return children;
   return cloneElement(children, {
     title: label,
-    "aria-label":
-      (children.props as { "aria-label"?: string })["aria-label"] ?? label,
+    "aria-label": (children.props as { "aria-label"?: string })["aria-label"] ?? label,
   });
 }

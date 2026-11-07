@@ -103,9 +103,7 @@ const Bucket = memo(function Bucket({
     <section aria-label={bucket.label}>
       <h3 className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         {bucket.label}
-        <span className="ml-1.5 font-normal opacity-70 tabular-nums">
-          {bucket.count}
-        </span>
+        <span className="ml-1.5 font-normal opacity-70 tabular-nums">{bucket.count}</span>
       </h3>
       <div className="space-y-2">
         {bucket.sessions.map((s) =>
@@ -162,10 +160,10 @@ function Session({
     for (const c of session.conversations) set.add(c.provider);
     return set.size;
   }, [session]);
-  const timeRange = useMemo(() => formatRange(session.startedAt, session.endedAt), [
-    session.startedAt,
-    session.endedAt,
-  ]);
+  const timeRange = useMemo(
+    () => formatRange(session.startedAt, session.endedAt),
+    [session.startedAt, session.endedAt],
+  );
 
   return (
     <div className="rounded-lg border border-border/70 bg-surface/40">

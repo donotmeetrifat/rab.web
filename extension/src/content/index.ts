@@ -34,8 +34,12 @@ import { dispatchSaveConversation } from "./saveTransport";
 console.log("[Memlace Content] runtime", chrome.runtime.id, window.location.origin);
 
 let currentSettings: Settings = DEFAULT_SETTINGS;
-loadSettings().then((s) => { currentSettings = s; });
-subscribeSettings((s) => { currentSettings = s; });
+loadSettings().then((s) => {
+  currentSettings = s;
+});
+subscribeSettings((s) => {
+  currentSettings = s;
+});
 
 const manager = new ProviderManager(buildAdapters(), {
   isAutoSaveEnabled: () => currentSettings.autoSaveConversations,
@@ -81,7 +85,6 @@ const manager = new ProviderManager(buildAdapters(), {
       detail: result,
     });
     return { ok: true, verified: result.verified, conversationId: result.conversationId } as const;
-
   },
 });
 

@@ -11,12 +11,7 @@
 import { db } from "@/lib/db";
 import type { StoredConversation } from "@/types";
 import type { KnowledgeRecord } from "@/knowledge/types";
-import type {
-  GraphEdgeRow,
-  GraphNodeRow,
-  GraphNodeType,
-  GraphRelation,
-} from "./types";
+import type { GraphEdgeRow, GraphNodeRow, GraphNodeType, GraphRelation } from "./types";
 
 const DECAY_HALF_LIFE = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -107,7 +102,9 @@ async function upsertEdges(edges: EdgeSpec[], now: number): Promise<void> {
     const left = nodeId(spec.aType, spec.a);
     const right = nodeId(spec.bType, spec.b);
     const [aFirst] = left < right ? [true] : [false];
-    const A = aFirst ? spec : { ...spec, aType: spec.bType, a: spec.b, bType: spec.aType, b: spec.a };
+    const A = aFirst
+      ? spec
+      : { ...spec, aType: spec.bType, a: spec.b, bType: spec.aType, b: spec.a };
     return prev
       ? { ...prev, weight: prev.weight + weight, lastSeen: now }
       : {
@@ -145,7 +142,11 @@ export async function updateGraphForConversation(
   const projectId = (conversation as { projectId?: string }).projectId ?? null;
   const kr =
     knowledge ??
-    (await db.knowledge.where("conversationId").equals(convId).first().catch(() => undefined)) ??
+    (await db.knowledge
+      .where("conversationId")
+      .equals(convId)
+      .first()
+      .catch(() => undefined)) ??
     null;
 
   const techs = kr?.technologies ?? [];
@@ -154,9 +155,7 @@ export async function updateGraphForConversation(
   const frameworks = (kr?.entityDetails ?? [])
     .filter((e) => e.type === "framework")
     .map((e) => e.name);
-  const files = (kr?.codeBlocks ?? [])
-    .map((c) => c.filename)
-    .filter((f): f is string => !!f);
+  const files = (kr?.codeBlocks ?? []).map((c) => c.filename).filter((f): f is string => !!f);
   const codeLangs = (kr?.codeBlocks ?? [])
     .map((c) => (c.language ?? "").toLowerCase())
     .filter(Boolean);
@@ -180,44 +179,77 @@ export async function updateGraphForConversation(
 
   // Provider chain
   edges.push({
-    aType: "conversation", a: convId,
-    bType: "provider", b: conversation.provider,
+    aType: "conversation",
+    a: convId,
+    bType: "provider",
+    b: conversation.provider,
     rel: "provider-chain",
   });
 
   // Session grouping
   const sess = sessionKeyFor(conversation.updatedAt);
   edges.push({
-    aType: "conversation", a: convId,
-    bType: "session", b: sess,
+    aType: "conversation",
+    a: convId,
+    bType: "session",
+    b: sess,
     rel: "same-session",
   });
 
   // Project links
   if (projectId) {
-    edges.push({ aType: "conversation", a: convId, bType: "project", b: projectId, rel: "same-project" });
-    for (const t of techs) edges.push({ aType: "project", a: projectId, bType: "technology", b: t, rel: "uses" });
-    for (const t of topics) edges.push({ aType: "project", a: projectId, bType: "topic", b: t, rel: "related-topic" });
-    for (const f of files) edges.push({ aType: "project", a: projectId, bType: "file", b: f, rel: "shared-file" });
+    edges.push({
+      aType: "conversation",
+      a: convId,
+      bType: "project",
+      b: projectId,
+      rel: "same-project",
+    });
+    for (const t of techs)
+      edges.push({ aType: "project", a: projectId, bType: "technology", b: t, rel: "uses" });
+    for (const t of topics)
+      edges.push({ aType: "project", a: projectId, bType: "topic", b: t, rel: "related-topic" });
+    for (const f of files)
+      edges.push({ aType: "project", a: projectId, bType: "file", b: f, rel: "shared-file" });
   }
 
   // Conversation ↔ knowledge facets
-  if (kr) edges.push({ aType: "conversation", a: convId, bType: "knowledge", b: kr.id, rel: "derived-from" });
-  for (const t of techs) edges.push({ aType: "conversation", a: convId, bType: "technology", b: t, rel: "mentions" });
-  for (const l of langs) edges.push({ aType: "conversation", a: convId, bType: "language", b: l, rel: "implements" });
-  for (const t of topics) edges.push({ aType: "conversation", a: convId, bType: "topic", b: t, rel: "related-topic" });
-  for (const f of frameworks) edges.push({ aType: "conversation", a: convId, bType: "framework", b: f, rel: "uses" });
-  for (const f of files) edges.push({ aType: "conversation", a: convId, bType: "file", b: f, rel: "shared-file" });
-  for (const l of codeLangs) edges.push({ aType: "conversation", a: convId, bType: "code", b: l, rel: "shared-code" });
+  if (kr)
+    edges.push({
+      aType: "conversation",
+      a: convId,
+      bType: "knowledge",
+      b: kr.id,
+      rel: "derived-from",
+    });
+  for (const t of techs)
+    edges.push({ aType: "conversation", a: convId, bType: "technology", b: t, rel: "mentions" });
+  for (const l of langs)
+    edges.push({ aType: "conversation", a: convId, bType: "language", b: l, rel: "implements" });
+  for (const t of topics)
+    edges.push({ aType: "conversation", a: convId, bType: "topic", b: t, rel: "related-topic" });
+  for (const f of frameworks)
+    edges.push({ aType: "conversation", a: convId, bType: "framework", b: f, rel: "uses" });
+  for (const f of files)
+    edges.push({ aType: "conversation", a: convId, bType: "file", b: f, rel: "shared-file" });
+  for (const l of codeLangs)
+    edges.push({ aType: "conversation", a: convId, bType: "code", b: l, rel: "shared-code" });
 
   // Framework depends-on language (heuristic co-occurrence)
   for (const fw of frameworks) {
-    for (const l of langs) edges.push({ aType: "framework", a: fw, bType: "language", b: l, rel: "depends-on" });
+    for (const l of langs)
+      edges.push({ aType: "framework", a: fw, bType: "language", b: l, rel: "depends-on" });
   }
   // Tech ↔ Tech co-occurrence
   for (let i = 0; i < techs.length; i++) {
     for (let j = i + 1; j < techs.length; j++) {
-      edges.push({ aType: "technology", a: techs[i], bType: "technology", b: techs[j], rel: "technology" });
+      edges.push({
+        aType: "technology",
+        a: techs[i],
+        bType: "technology",
+        b: techs[j],
+        rel: "technology",
+      });
     }
   }
 
@@ -228,12 +260,16 @@ export async function updateGraphForConversation(
       for (const d of decisions.filter((d) => d.active)) {
         nodes.push({ type: "decision", key: d.id, label: d.current });
         edges.push({
-          aType: "conversation", a: convId,
-          bType: "decision", b: d.id,
+          aType: "conversation",
+          a: convId,
+          bType: "decision",
+          b: d.id,
           rel: "same-decision",
         });
       }
-    } catch { /* empty pie table pre-migration */ }
+    } catch {
+      /* empty pie table pre-migration */
+    }
   }
 
   // Goals — link this conversation to active goal chains it mentions.
@@ -244,13 +280,17 @@ export async function updateGraphForConversation(
       if (text.includes(g.key)) {
         nodes.push({ type: "goal", key: g.id, label: g.label });
         edges.push({
-          aType: "conversation", a: convId,
-          bType: "goal", b: g.id,
+          aType: "conversation",
+          a: convId,
+          bType: "goal",
+          b: g.id,
           rel: "same-goal",
         });
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   await upsertNodes(nodes, now);
   await upsertEdges(edges, now);
@@ -268,7 +308,8 @@ export async function removeConversationFromGraph(conversationId: string): Promi
     db.graphEdges.where("b").equals(normKey(conversationId)).toArray(),
   ]);
   const ids = new Set<string>();
-  for (const e of [...asA, ...asB]) if (e.a === normKey(conversationId) || e.b === normKey(conversationId)) ids.add(e.id);
+  for (const e of [...asA, ...asB])
+    if (e.a === normKey(conversationId) || e.b === normKey(conversationId)) ids.add(e.id);
   if (ids.size) await db.graphEdges.bulkDelete([...ids]);
   await db.graphNodes.delete(id);
 }

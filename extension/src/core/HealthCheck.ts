@@ -35,7 +35,9 @@ const report: HealthReport = {
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
-async function timed<T>(fn: () => Promise<T> | T): Promise<{ ok: boolean; ms: number; err?: string }> {
+async function timed<T>(
+  fn: () => Promise<T> | T,
+): Promise<{ ok: boolean; ms: number; err?: string }> {
   const t = performance.now();
   try {
     await fn();
@@ -60,7 +62,13 @@ export async function runHealthCheck(): Promise<HealthReport> {
   probes.push({ key: "indexedDB", ok: dbProbe.ok, ms: dbProbe.ms, detail: dbProbe.err });
 
   // 2. Event bus — must have at least the core subscribers wired.
-  const busCount = (() => { try { return _subscriberCount(); } catch { return -1; } })();
+  const busCount = (() => {
+    try {
+      return _subscriberCount();
+    } catch {
+      return -1;
+    }
+  })();
   probes.push({
     key: "eventBus",
     ok: busCount >= 0,
@@ -69,7 +77,13 @@ export async function runHealthCheck(): Promise<HealthReport> {
   });
 
   // 3. Background queue — must not have accumulated many failures.
-  const q = (() => { try { return queueSnapshot(); } catch { return null; } })();
+  const q = (() => {
+    try {
+      return queueSnapshot();
+    } catch {
+      return null;
+    }
+  })();
   probes.push({
     key: "queue",
     ok: q !== null,
@@ -98,10 +112,17 @@ export function readHealthReport(): Readonly<HealthReport> {
 export function startHealthLoop(): void {
   if (timer) return;
   // First run on next idle tick.
-  setTimeout(() => { void runHealthCheck(); }, 2000);
-  timer = setInterval(() => { void runHealthCheck(); }, 60_000);
+  setTimeout(() => {
+    void runHealthCheck();
+  }, 2000);
+  timer = setInterval(() => {
+    void runHealthCheck();
+  }, 60_000);
 }
 
 export function stopHealthLoop(): void {
-  if (timer) { clearInterval(timer); timer = null; }
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
 }

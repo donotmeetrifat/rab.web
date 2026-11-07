@@ -29,12 +29,12 @@ Each client provides one file that implements
 Chrome/Edge/Firefox implementation lives in
 `extension/src/platform/chrome.ts` (~80 LOC).
 
-| Platform          | Storage         | Clipboard      | Notifications        | Navigation      |
-|-------------------|-----------------|----------------|----------------------|-----------------|
-| Chrome/Edge/FF    | chrome.storage  | navigator.clip | chrome.notifications | chrome.tabs     |
-| Desktop (future)  | fs + sqlite     | Electron       | native OS            | shell.openExt.  |
-| VS Code (future)  | ExtensionContext| vscode.env     | vscode.window        | vscode.env.open |
-| Mobile (future)   | AsyncStorage    | Expo Clipboard | Expo Notifications   | Linking         |
+| Platform         | Storage          | Clipboard      | Notifications        | Navigation      |
+| ---------------- | ---------------- | -------------- | -------------------- | --------------- |
+| Chrome/Edge/FF   | chrome.storage   | navigator.clip | chrome.notifications | chrome.tabs     |
+| Desktop (future) | fs + sqlite      | Electron       | native OS            | shell.openExt.  |
+| VS Code (future) | ExtensionContext | vscode.env     | vscode.window        | vscode.env.open |
+| Mobile (future)  | AsyncStorage     | Expo Clipboard | Expo Notifications   | Linking         |
 
 ## Provider SDK
 

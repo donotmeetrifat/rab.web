@@ -185,10 +185,7 @@ export function ContinueAnywherePanel({ open, conversation, messages, onClose }:
         to: selected,
         size: build.pkg.size,
       });
-      toast.success(
-        `Opened ${adapter.name}`,
-        "Context copied. Press Ctrl+V in the prompt box.",
-      );
+      toast.success(`Opened ${adapter.name}`, "Context copied. Press Ctrl+V in the prompt box.");
       onClose();
       void import("@/services/onboarding").then((m) => m.markChecklist("continuedElsewhere"));
     } catch (err) {
@@ -250,10 +247,14 @@ export function ContinueAnywherePanel({ open, conversation, messages, onClose }:
         </header>
 
         {showHistory ? (
-          <HistoryList history={history} onClose={() => setShowHistory(false)} onReopen={(e) => {
-            setSelected(e.to);
-            setShowHistory(false);
-          }} />
+          <HistoryList
+            history={history}
+            onClose={() => setShowHistory(false)}
+            onReopen={(e) => {
+              setSelected(e.to);
+              setShowHistory(false);
+            }}
+          />
         ) : (
           <div className="px-4 py-3 space-y-3">
             {/* Recommendation */}
@@ -291,9 +292,7 @@ export function ContinueAnywherePanel({ open, conversation, messages, onClose }:
                       aria-checked={active}
                       onClick={() => setSelected(p.id)}
                       className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus:outline-none ${
-                        active
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:bg-muted"
+                        active ? "border-primary bg-primary/10" : "border-border hover:bg-muted"
                       }`}
                     >
                       <span
@@ -349,10 +348,7 @@ export function ContinueAnywherePanel({ open, conversation, messages, onClose }:
                   </p>
                   <ul className="space-y-0.5">
                     {build.pkg.summary.slice(0, 5).map((line) => (
-                      <li
-                        key={line}
-                        className="flex items-start gap-1.5 text-xs text-foreground"
-                      >
+                      <li key={line} className="flex items-start gap-1.5 text-xs text-foreground">
                         <span className="text-primary mt-0.5">✓</span>
                         <span className="truncate">{line}</span>
                       </li>
@@ -391,20 +387,13 @@ export function ContinueAnywherePanel({ open, conversation, messages, onClose }:
                       {INCLUDED_ROWS.map((row) => {
                         const has = row.kinds.some((k) => includedMap.has(k));
                         return (
-                          <li
-                            key={row.label}
-                            className="flex items-center gap-1.5 text-[11px]"
-                          >
+                          <li key={row.label} className="flex items-center gap-1.5 text-[11px]">
                             {has ? (
                               <Check className="h-3 w-3 text-primary" />
                             ) : (
                               <span className="h-3 w-3 rounded-full border border-border" />
                             )}
-                            <span
-                              className={
-                                has ? "text-foreground" : "text-muted-foreground/70"
-                              }
-                            >
+                            <span className={has ? "text-foreground" : "text-muted-foreground/70"}>
                               {row.label}
                               {!has && (
                                 <span className="ml-1 text-muted-foreground/60">
@@ -464,11 +453,7 @@ function HistoryList({
       <div className="px-4 py-8 text-center text-xs text-muted-foreground">
         No recent transfers yet.
         <div className="mt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-primary hover:underline"
-          >
+          <button type="button" onClick={onClose} className="text-primary hover:underline">
             Back
           </button>
         </div>
@@ -486,8 +471,7 @@ function HistoryList({
       </button>
       <ul className="mt-1 space-y-0.5">
         {history.map((e) => {
-          const targetName =
-            CONTINUATION_PROVIDERS.find((p) => p.id === e.to)?.name ?? e.to;
+          const targetName = CONTINUATION_PROVIDERS.find((p) => p.id === e.to)?.name ?? e.to;
           return (
             <li key={e.id}>
               <button
@@ -504,9 +488,7 @@ function HistoryList({
                     {e.conversationTitle}
                   </span>
                 </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {relativeTime(e.at)}
-                </span>
+                <span className="text-[10px] text-muted-foreground">{relativeTime(e.at)}</span>
               </button>
             </li>
           );

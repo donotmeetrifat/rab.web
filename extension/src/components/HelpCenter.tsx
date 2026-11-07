@@ -27,7 +27,9 @@ const SECTIONS: Section[] = [
     body: (
       <ol className="list-decimal pl-4 space-y-1.5 text-xs text-muted-foreground">
         <li>Open any supported AI (ChatGPT, Claude, Gemini, …).</li>
-        <li>Look for the <b>Save to Memlace</b> pill in the composer.</li>
+        <li>
+          Look for the <b>Save to Memlace</b> pill in the composer.
+        </li>
         <li>Your conversation is saved locally and appears in the Chats tab.</li>
         <li>Group chats into projects, search with ⌘K, or continue in another AI.</li>
       </ol>
@@ -47,9 +49,7 @@ const SECTIONS: Section[] = [
         ].map(([k, l]) => (
           <li key={k} className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">{l}</span>
-            <kbd className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px]">
-              {k}
-            </kbd>
+            <kbd className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px]">{k}</kbd>
           </li>
         ))}
       </ul>
@@ -61,8 +61,8 @@ const SECTIONS: Section[] = [
     icon: Sparkles,
     body: (
       <p className="text-xs text-muted-foreground">
-        ChatGPT, Claude, Gemini, DeepSeek, Perplexity, Microsoft Copilot and
-        Google AI Studio. Each has a native <em>Save to Memlace</em> button.
+        ChatGPT, Claude, Gemini, DeepSeek, Perplexity, Microsoft Copilot and Google AI Studio. Each
+        has a native <em>Save to Memlace</em> button.
       </p>
     ),
   },
@@ -75,8 +75,8 @@ const SECTIONS: Section[] = [
         <div>
           <b>Where are my conversations stored?</b>
           <p className="text-muted-foreground mt-0.5">
-            Locally in this browser's IndexedDB. Nothing leaves your device
-            unless you enable optional AI features with your own key.
+            Locally in this browser's IndexedDB. Nothing leaves your device unless you enable
+            optional AI features with your own key.
           </p>
         </div>
         <div>
@@ -99,7 +99,9 @@ const SECTIONS: Section[] = [
     body: (
       <ul className="space-y-1.5 text-xs text-muted-foreground list-disc pl-4">
         <li>“Save” button missing? Refresh the AI tab — SPA nav sometimes hides it briefly.</li>
-        <li>Shortcut not firing? Reassign it at <code>chrome://extensions/shortcuts</code>.</li>
+        <li>
+          Shortcut not firing? Reassign it at <code>chrome://extensions/shortcuts</code>.
+        </li>
         <li>Storage almost full? Export a backup, then clear old items from Trash.</li>
         <li>AI features failing? Re-check your API key in Settings → AI.</li>
       </ul>
@@ -171,10 +173,7 @@ export function HelpCenter() {
           const Icon = s.icon;
           const open = openId === s.id;
           return (
-            <section
-              key={s.id}
-              className="rounded-xl border border-border bg-background"
-            >
+            <section key={s.id} className="rounded-xl border border-border bg-background">
               <button
                 type="button"
                 onClick={() => setOpenId(open ? "" : s.id)}
@@ -190,11 +189,7 @@ export function HelpCenter() {
                   }
                 />
               </button>
-              {open && (
-                <div className="px-3 pb-3 pt-1 border-t border-border">
-                  {s.body}
-                </div>
-              )}
+              {open && <div className="px-3 pb-3 pt-1 border-t border-border">{s.body}</div>}
             </section>
           );
         })}

@@ -49,28 +49,35 @@ export class AIStudioAdapter extends BaseChatAdapter {
       const role = classifyRole(node);
       if (!role) return;
       const contentEl =
-        node.querySelector<HTMLElement>(
-          "ms-cmark-node, ms-text-chunk, .turn-content, .markdown",
-        ) ?? node;
+        node.querySelector<HTMLElement>("ms-cmark-node, ms-text-chunk, .turn-content, .markdown") ??
+        node;
       const markdown = htmlToMarkdown(contentEl);
       const content = extractText(contentEl);
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
       const attachments = Array.from(node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'))
         .slice(0, 8)
         .map((a) => ({ kind: "link" as const, url: a.href, name: extractText(a) }));
 
-      const id = node.getAttribute("id")
-        ?? node.getAttribute("data-turn-id")
-        ?? `${role}:${idx}:${hashString(markdown || content)}`;
+      const id =
+        node.getAttribute("id") ??
+        node.getAttribute("data-turn-id") ??
+        `${role}:${idx}:${hashString(markdown || content)}`;
       const thinking = node.querySelector<HTMLElement>(
         'ms-thought-chunk, [class*="thinking"], [class*="thought"]',
       );
 
       messages.push({
-        id, role, content, markdown, images, attachments, order: idx,
+        id,
+        role,
+        content,
+        markdown,
+        images,
+        attachments,
+        order: idx,
         metadata: { ...(thinking ? { thinking: extractText(thinking) } : {}) },
       });
     });

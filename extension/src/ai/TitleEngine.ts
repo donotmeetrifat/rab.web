@@ -20,7 +20,8 @@ export async function generateTitle(
   const body = serializeConversation(conv, messages, { maxTokens: 1200 });
 
   const result = await runPrompt({
-    system: "You write short, specific, five-to-eight-word titles for chat transcripts. Reply with only the title text.",
+    system:
+      "You write short, specific, five-to-eight-word titles for chat transcripts. Reply with only the title text.",
     prompt: `Suggest a title for this chat:\n\n${body}`,
     temperature: 0.4,
     maxTokens: 30,
@@ -28,7 +29,10 @@ export async function generateTitle(
     skipCache: opts.force,
   });
 
-  const title = result.text.trim().replace(/^["'\s]+|["'\s]+$/g, "").slice(0, 120);
+  const title = result.text
+    .trim()
+    .replace(/^["'\s]+|["'\s]+$/g, "")
+    .slice(0, 120);
   if (!title) return null;
 
   // Persist onto the summary row (creating one if needed).

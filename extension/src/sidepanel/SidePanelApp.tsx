@@ -67,7 +67,15 @@ import { Diagnostics } from "@/components/Diagnostics";
 import { ProjectHome } from "@/components/projects/ProjectHome";
 import { HomePanel } from "@/components/home/HomePanel";
 import { markChecklist } from "@/services/onboarding";
-import type { Memory, Project, ProjectIcon, ProviderId, SortKey, StoredConversation, TagMeta } from "@/types";
+import type {
+  Memory,
+  Project,
+  ProjectIcon,
+  ProviderId,
+  SortKey,
+  StoredConversation,
+  TagMeta,
+} from "@/types";
 
 const NAV: { id: SidebarView; label: string; icon: typeof Folder }[] = [
   { id: "recent", label: "Recent", icon: Clock },
@@ -88,13 +96,29 @@ const SORTS: { id: SortKey; label: string }[] = [
 ];
 
 const PROJECT_COLORS = [
-  "#2563EB", "#7C3AED", "#DB2777", "#DC2626", "#EA580C",
-  "#CA8A04", "#16A34A", "#0EA5E9", "#0F766E", "#475569",
+  "#2563EB",
+  "#7C3AED",
+  "#DB2777",
+  "#DC2626",
+  "#EA580C",
+  "#CA8A04",
+  "#16A34A",
+  "#0EA5E9",
+  "#0F766E",
+  "#475569",
 ];
 
 const PROJECT_ICONS: ProjectIcon[] = [
-  "folder", "sparkles", "bookmark", "beaker", "brain",
-  "code", "heart", "briefcase", "graduation", "rocket",
+  "folder",
+  "sparkles",
+  "bookmark",
+  "beaker",
+  "brain",
+  "code",
+  "heart",
+  "briefcase",
+  "graduation",
+  "rocket",
 ];
 
 const PAGE_SIZE = 60;
@@ -149,13 +173,25 @@ export function SidePanelApp() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Dialogs
-  const [projectDialog, setProjectDialog] = useState<null | { mode: "new" } | { mode: "edit"; project: Project }>(null);
+  const [projectDialog, setProjectDialog] = useState<
+    null | { mode: "new" } | { mode: "edit"; project: Project }
+  >(null);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [movingId, setMovingId] = useState<string | null>(null);
   const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
 
   // Conversations
-  const [section, setSection] = useState<"home" | "memories" | "conversations" | "knowledge" | "ask" | "ai-center" | "checklist" | "help" | "diagnostics">("home");
+  const [section, setSection] = useState<
+    | "home"
+    | "memories"
+    | "conversations"
+    | "knowledge"
+    | "ask"
+    | "ai-center"
+    | "checklist"
+    | "help"
+    | "diagnostics"
+  >("home");
   const [convFilters, setConvFilters] = useState<ConvFiltersState>(emptyConvFilters);
   const [convHits, setConvHits] = useState<ConvSearchHit[]>([]);
   const [convTotal, setConvTotal] = useState(0);
@@ -186,13 +222,10 @@ export function SidePanelApp() {
         });
         setConvHits(hits);
         setSelectedConv((prev) =>
-          prev ? hits.find((h) => h.conversation.id === prev.id)?.conversation ?? null : null,
+          prev ? (hits.find((h) => h.conversation.id === prev.id)?.conversation ?? null) : null,
         );
         const unfiltered =
-          !q &&
-          filters.providers.length === 0 &&
-          !filters.dateFrom &&
-          !filters.dateTo;
+          !q && filters.providers.length === 0 && !filters.dateFrom && !filters.dateTo;
         if (unfiltered) setConvTotal(hits.length);
       } finally {
         if (opts.showLoading) setConvLoading(false);
@@ -209,9 +242,6 @@ export function SidePanelApp() {
     const initial = convHits.length === 0 && !convLoading;
     void runConvSearch(debouncedConvQuery, convFilters, { showLoading: initial });
   }, [ready, debouncedConvQuery, convFilters, runConvSearch]); // eslint-disable-line react-hooks/exhaustive-deps
-
-
-
 
   useEffect(() => {
     bootstrap();
@@ -297,13 +327,10 @@ export function SidePanelApp() {
   const headerTitle =
     activeView === "projects" && activeProject
       ? activeProject.name
-      : NAV.find((n) => n.id === activeView)?.label ?? "Workspace";
+      : (NAV.find((n) => n.id === activeView)?.label ?? "Workspace");
 
   const visibleMemories = useMemo(() => memories.slice(0, visibleCount), [memories, visibleCount]);
-  const filteredConversations = useMemo(
-    () => convHits.map((h) => h.conversation),
-    [convHits],
-  );
+  const filteredConversations = useMemo(() => convHits.map((h) => h.conversation), [convHits]);
   const conversationSnippets = useMemo(() => {
     const map = new Map<string, ConvSnippet | null>();
     for (const h of convHits) map.set(h.conversation.id, h.snippet);
@@ -368,9 +395,7 @@ export function SidePanelApp() {
                 aria-current={isActive ? "page" : undefined}
                 className={
                   "w-full flex items-center gap-2 px-2 h-8 rounded-md text-xs font-medium text-left transition-colors " +
-                  (isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground/80 hover:bg-muted")
+                  (isActive ? "bg-primary/10 text-primary" : "text-foreground/80 hover:bg-muted")
                 }
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -483,7 +508,6 @@ export function SidePanelApp() {
           </button>
         </nav>
 
-
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Projects
@@ -519,7 +543,9 @@ export function SidePanelApp() {
                 >
                   <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
                   <span className="truncate flex-1">{p.name}</span>
-                  {p.favorite && <Star className="h-3 w-3 fill-amber-400 text-amber-500 shrink-0" />}
+                  {p.favorite && (
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-500 shrink-0" />
+                  )}
                   {p.pinned && <Pin className="h-3 w-3 text-primary shrink-0" />}
                   <span className="text-[10px] text-muted-foreground tabular-nums">{count}</span>
                 </button>
@@ -536,9 +562,18 @@ export function SidePanelApp() {
                   <ProjectContextMenu
                     project={p}
                     onClose={() => setProjectMenuFor(null)}
-                    onEdit={() => { setProjectDialog({ mode: "edit", project: p }); setProjectMenuFor(null); }}
-                    onTogglePin={() => { togglePinProject(p.id); setProjectMenuFor(null); }}
-                    onToggleFavorite={() => { toggleFavoriteProject(p.id); setProjectMenuFor(null); }}
+                    onEdit={() => {
+                      setProjectDialog({ mode: "edit", project: p });
+                      setProjectMenuFor(null);
+                    }}
+                    onTogglePin={() => {
+                      togglePinProject(p.id);
+                      setProjectMenuFor(null);
+                    }}
+                    onToggleFavorite={() => {
+                      toggleFavoriteProject(p.id);
+                      setProjectMenuFor(null);
+                    }}
                     onDelete={() => {
                       if (window.confirm(`Delete project "${p.name}"? Memories will be kept.`)) {
                         deleteProject(p.id);
@@ -582,7 +617,9 @@ export function SidePanelApp() {
             scopedProjectId={activeProject?.id ?? null}
             scopedProjectName={activeProject?.name ?? null}
             onOpenConversation={async (convId) => {
-              const conv = await import("@/services/conversations").then((m) => m.getConversation(convId));
+              const conv = await import("@/services/conversations").then((m) =>
+                m.getConversation(convId),
+              );
               if (conv) {
                 setSection("conversations");
                 setSelectedConv(conv);
@@ -593,7 +630,6 @@ export function SidePanelApp() {
               setSection("memories");
             }}
           />
-
         ) : section === "knowledge" ? (
           <KnowledgePanel
             onOpenConversation={async (convId) => {
@@ -703,283 +739,313 @@ export function SidePanelApp() {
           />
         ) : (
           <>
-
-        <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-          <h1 className="text-sm font-semibold truncate">{headerTitle}</h1>
-          {provider && (
-            <span className="ml-2 text-[10px] text-muted-foreground">On {provider.name}</span>
-          )}
-          <div className="ml-auto flex items-center gap-2">
-            <SortMenu value={settings.sort} onChange={setSort} />
-            <button
-              type="button"
-              onClick={() => setShowFilters((v) => !v)}
-              aria-expanded={showFilters}
-              aria-label="Toggle filters"
-              className={
-                "h-8 px-2.5 rounded-md text-xs inline-flex items-center gap-1.5 border border-border " +
-                (showFilters ? "bg-primary/10 text-primary border-primary/30" : "bg-surface hover:bg-muted")
-              }
-            >
-              <Filter className="h-3.5 w-3.5" /> Filters
-            </button>
-            <Button size="sm" variant="secondary" onClick={captureFromPage}>
-              <Plus className="h-3.5 w-3.5" />
-              Capture
-            </Button>
-            {activeView === "trash" && memories.length > 0 && (
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={async () => {
-                  if (!window.confirm("Permanently delete all trashed memories?")) return;
-                  const n = await emptyTrash();
-                  toast.success(`Deleted ${n} memor${n === 1 ? "y" : "ies"}`);
-                }}
-              >
-                Empty trash
-              </Button>
-            )}
-          </div>
-        </header>
-
-        <div className="px-4 pt-3">
-          <label className="relative block">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-            <input
-              type="search"
-              placeholder="Search titles, content, tags, or provider…"
-              value={filters.search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search memories"
-              className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-            />
-          </label>
-        </div>
-
-        {showFilters && (
-          <div className="px-4 pt-3 flex flex-wrap items-center gap-2 animate-fade-in">
-            <select
-              value={filters.provider}
-              onChange={(e) => setFilters({ provider: e.target.value as ProviderId | "all" })}
-              className="h-8 rounded-md border border-border bg-surface px-2 text-xs"
-              aria-label="Filter by provider"
-            >
-              <option value="all">All providers</option>
-              {PROVIDERS.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-            <select
-              value={filters.tag ?? ""}
-              onChange={(e) => setFilters({ tag: e.target.value || null })}
-              className="h-8 rounded-md border border-border bg-surface px-2 text-xs"
-              aria-label="Filter by tag"
-            >
-              <option value="">All tags</option>
-              {tags.map((t) => (
-                <option key={t.name} value={t.name}>#{t.name} ({t.count})</option>
-              ))}
-            </select>
-            <DateInput
-              label="From"
-              value={filters.dateFrom}
-              onChange={(v) => setFilters({ dateFrom: v })}
-            />
-            <DateInput
-              label="To"
-              value={filters.dateTo}
-              onChange={(v) => setFilters({ dateTo: v })}
-            />
-            {(filters.provider !== "all" || filters.tag || filters.dateFrom || filters.dateTo) && (
-              <button
-                type="button"
-                onClick={() => setFilters({ provider: "all", tag: null, dateFrom: null, dateTo: null })}
-                className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-              >
-                <X className="h-3 w-3" /> Clear
-              </button>
-            )}
-          </div>
-        )}
-
-        {selectedIds.length > 0 && (
-          <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs animate-fade-in">
-            <span className="font-medium text-primary">{selectedIds.length} selected</span>
-            <button
-              type="button"
-              onClick={toggleSelectAll}
-              className="text-primary hover:underline"
-            >
-              {allSelected ? "Deselect all" : "Select all"}
-            </button>
-            <div className="ml-auto flex items-center gap-1.5">
-              <Button size="sm" variant="secondary" onClick={() => setBulkMoveOpen(true)}>
-                Move…
-              </Button>
-              {activeView === "trash" ? (
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={async () => {
-                    if (!window.confirm(`Delete ${selectedIds.length} memories permanently?`)) return;
-                    await bulkDeleteHard(selectedIds);
-                    toast.success("Deleted");
-                  }}
-                >
-                  Delete
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={async () => {
-                    await bulkTrash(selectedIds);
-                    toast.success("Moved to trash");
-                  }}
-                >
-                  Trash
-                </Button>
+            <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+              <h1 className="text-sm font-semibold truncate">{headerTitle}</h1>
+              {provider && (
+                <span className="ml-2 text-[10px] text-muted-foreground">On {provider.name}</span>
               )}
-              <button
-                type="button"
-                onClick={clearSelection}
-                aria-label="Clear selection"
-                className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
-          <div className="overflow-y-auto scroll-thin px-4 py-3">
-            {!ready || loading ? (
-              <MemoryListSkeleton rows={5} />
-            ) : memories.length === 0 ? (
-              <Empty
-                icon={<Inbox className="h-5 w-5" />}
-                title={
-                  activeView === "trash"
-                    ? "Trash is empty."
-                    : activeView === "favorites"
-                      ? "No favorites yet."
-                      : activeView === "pinned"
-                        ? "Nothing pinned yet."
-                        : activeView === "archived"
-                          ? "No archived memories."
-                          : filters.search
-                            ? "No matches."
-                            : "No memories here yet."
-                }
-                description={
-                  activeView === "trash"
-                    ? "Deleted memories appear here until you empty the trash."
-                    : "Capture text from any AI conversation and it will show up in your workspace."
-                }
-                action={
-                  activeView !== "trash" && (
-                    <Button variant="primary" onClick={captureFromPage}>
-                      <Plus className="h-3.5 w-3.5" />
-                      Capture selection
-                    </Button>
-                  )
-                }
-              />
-            ) : (
-              <>
-                <ul className="space-y-2 max-w-2xl" role="list">
-                  {visibleMemories.map((m) => (
-                    <MemoryRow
-                      key={m.id}
-                      memory={m}
-                      selected={selection.has(m.id)}
-                      onSelectChange={(id) => toggleSelected(id)}
-                      onOpen={setSelected}
-                      onToggleFavorite={activeView !== "trash" ? toggleFavorite : undefined}
-                      onTogglePin={activeView !== "trash" ? togglePinMemory : undefined}
-                      onTrash={activeView !== "trash" && activeView !== "archived" ? doTrash : undefined}
-                      onRestore={activeView === "trash" ? restoreMemory : undefined}
-                      onDelete={activeView === "trash" ? doDeleteHard : undefined}
-                      onArchive={activeView !== "trash" && activeView !== "archived" ? archiveMemory : undefined}
-                      onUnarchive={activeView === "archived" ? unarchiveMemory : undefined}
-                      onDuplicate={activeView !== "trash" ? doDuplicate : undefined}
-                      onCopy={copyMemoryContent}
-                      onEdit={activeView !== "trash" ? (id) => {
-                        const m2 = memories.find((x) => x.id === id);
-                        if (m2) setEditingMemory(m2);
-                      } : undefined}
-                      onMove={activeView !== "trash" ? setMovingId : undefined}
-                    />
-                  ))}
-                </ul>
-                {visibleCount < memories.length && (
-                  <div className="mt-3 flex justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                    >
-                      Show {Math.min(PAGE_SIZE, memories.length - visibleCount)} more
-                    </Button>
-                  </div>
+              <div className="ml-auto flex items-center gap-2">
+                <SortMenu value={settings.sort} onChange={setSort} />
+                <button
+                  type="button"
+                  onClick={() => setShowFilters((v) => !v)}
+                  aria-expanded={showFilters}
+                  aria-label="Toggle filters"
+                  className={
+                    "h-8 px-2.5 rounded-md text-xs inline-flex items-center gap-1.5 border border-border " +
+                    (showFilters
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "bg-surface hover:bg-muted")
+                  }
+                >
+                  <Filter className="h-3.5 w-3.5" /> Filters
+                </button>
+                <Button size="sm" variant="secondary" onClick={captureFromPage}>
+                  <Plus className="h-3.5 w-3.5" />
+                  Capture
+                </Button>
+                {activeView === "trash" && memories.length > 0 && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={async () => {
+                      if (!window.confirm("Permanently delete all trashed memories?")) return;
+                      const n = await emptyTrash();
+                      toast.success(`Deleted ${n} memor${n === 1 ? "y" : "ies"}`);
+                    }}
+                  >
+                    Empty trash
+                  </Button>
                 )}
-              </>
-            )}
-          </div>
+              </div>
+            </header>
 
-          <aside className="hidden md:flex flex-col border-l border-border bg-surface min-w-0">
-            {selected ? (
-              <>
-                <div className="flex items-start gap-2 px-4 py-3 border-b border-border">
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-sm font-semibold truncate">{selected.title}</h2>
-                    <p className="text-[11px] text-muted-foreground">
-                      {providerMeta(selected.provider)?.name ?? "Other"} ·{" "}
-                      {new Date(selected.updatedAt).toLocaleString()}
-                    </p>
-                  </div>
+            <div className="px-4 pt-3">
+              <label className="relative block">
+                <Search
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
+                  aria-hidden
+                />
+                <input
+                  type="search"
+                  placeholder="Search titles, content, tags, or provider…"
+                  value={filters.search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  aria-label="Search memories"
+                  className="w-full h-9 pl-8 pr-2.5 rounded-lg bg-surface border border-border text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                />
+              </label>
+            </div>
+
+            {showFilters && (
+              <div className="px-4 pt-3 flex flex-wrap items-center gap-2 animate-fade-in">
+                <select
+                  value={filters.provider}
+                  onChange={(e) => setFilters({ provider: e.target.value as ProviderId | "all" })}
+                  className="h-8 rounded-md border border-border bg-surface px-2 text-xs"
+                  aria-label="Filter by provider"
+                >
+                  <option value="all">All providers</option>
+                  {PROVIDERS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filters.tag ?? ""}
+                  onChange={(e) => setFilters({ tag: e.target.value || null })}
+                  className="h-8 rounded-md border border-border bg-surface px-2 text-xs"
+                  aria-label="Filter by tag"
+                >
+                  <option value="">All tags</option>
+                  {tags.map((t) => (
+                    <option key={t.name} value={t.name}>
+                      #{t.name} ({t.count})
+                    </option>
+                  ))}
+                </select>
+                <DateInput
+                  label="From"
+                  value={filters.dateFrom}
+                  onChange={(v) => setFilters({ dateFrom: v })}
+                />
+                <DateInput
+                  label="To"
+                  value={filters.dateTo}
+                  onChange={(v) => setFilters({ dateTo: v })}
+                />
+                {(filters.provider !== "all" ||
+                  filters.tag ||
+                  filters.dateFrom ||
+                  filters.dateTo) && (
                   <button
                     type="button"
-                    aria-label="Close details"
-                    onClick={() => setSelected(null)}
-                    className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground"
+                    onClick={() =>
+                      setFilters({ provider: "all", tag: null, dateFrom: null, dateTo: null })
+                    }
+                    className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" /> Clear
+                  </button>
+                )}
+              </div>
+            )}
+
+            {selectedIds.length > 0 && (
+              <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs animate-fade-in">
+                <span className="font-medium text-primary">{selectedIds.length} selected</span>
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="text-primary hover:underline"
+                >
+                  {allSelected ? "Deselect all" : "Select all"}
+                </button>
+                <div className="ml-auto flex items-center gap-1.5">
+                  <Button size="sm" variant="secondary" onClick={() => setBulkMoveOpen(true)}>
+                    Move…
+                  </Button>
+                  {activeView === "trash" ? (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={async () => {
+                        if (!window.confirm(`Delete ${selectedIds.length} memories permanently?`))
+                          return;
+                        await bulkDeleteHard(selectedIds);
+                        toast.success("Deleted");
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={async () => {
+                        await bulkTrash(selectedIds);
+                        toast.success("Moved to trash");
+                      }}
+                    >
+                      Trash
+                    </Button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={clearSelection}
+                    aria-label="Clear selection"
+                    className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto scroll-thin px-4 py-3">
-                  <pre className="whitespace-pre-wrap text-xs leading-relaxed font-sans text-foreground/90">
-                    {selected.content}
-                  </pre>
-                </div>
-                <div className="border-t border-border px-4 py-2 flex items-center gap-2 text-[11px]">
-                  <Button size="sm" variant="ghost" onClick={() => copyMemoryContent(selected.id)}>
-                    Copy
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingMemory(selected)}>
-                    Edit
-                  </Button>
-                  {selected.sourceUrl && (
-                    <a
-                      href={selected.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ml-auto truncate text-primary hover:underline max-w-[180px]"
-                    >
-                      {selected.sourceUrl}
-                    </a>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 grid place-items-center text-xs text-muted-foreground px-6 text-center">
-                Select a memory to see its full content here.
               </div>
             )}
-          </aside>
-        </div>
+
+            <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+              <div className="overflow-y-auto scroll-thin px-4 py-3">
+                {!ready || loading ? (
+                  <MemoryListSkeleton rows={5} />
+                ) : memories.length === 0 ? (
+                  <Empty
+                    icon={<Inbox className="h-5 w-5" />}
+                    title={
+                      activeView === "trash"
+                        ? "Trash is empty."
+                        : activeView === "favorites"
+                          ? "No favorites yet."
+                          : activeView === "pinned"
+                            ? "Nothing pinned yet."
+                            : activeView === "archived"
+                              ? "No archived memories."
+                              : filters.search
+                                ? "No matches."
+                                : "No memories here yet."
+                    }
+                    description={
+                      activeView === "trash"
+                        ? "Deleted memories appear here until you empty the trash."
+                        : "Capture text from any AI conversation and it will show up in your workspace."
+                    }
+                    action={
+                      activeView !== "trash" && (
+                        <Button variant="primary" onClick={captureFromPage}>
+                          <Plus className="h-3.5 w-3.5" />
+                          Capture selection
+                        </Button>
+                      )
+                    }
+                  />
+                ) : (
+                  <>
+                    <ul className="space-y-2 max-w-2xl" role="list">
+                      {visibleMemories.map((m) => (
+                        <MemoryRow
+                          key={m.id}
+                          memory={m}
+                          selected={selection.has(m.id)}
+                          onSelectChange={(id) => toggleSelected(id)}
+                          onOpen={setSelected}
+                          onToggleFavorite={activeView !== "trash" ? toggleFavorite : undefined}
+                          onTogglePin={activeView !== "trash" ? togglePinMemory : undefined}
+                          onTrash={
+                            activeView !== "trash" && activeView !== "archived"
+                              ? doTrash
+                              : undefined
+                          }
+                          onRestore={activeView === "trash" ? restoreMemory : undefined}
+                          onDelete={activeView === "trash" ? doDeleteHard : undefined}
+                          onArchive={
+                            activeView !== "trash" && activeView !== "archived"
+                              ? archiveMemory
+                              : undefined
+                          }
+                          onUnarchive={activeView === "archived" ? unarchiveMemory : undefined}
+                          onDuplicate={activeView !== "trash" ? doDuplicate : undefined}
+                          onCopy={copyMemoryContent}
+                          onEdit={
+                            activeView !== "trash"
+                              ? (id) => {
+                                  const m2 = memories.find((x) => x.id === id);
+                                  if (m2) setEditingMemory(m2);
+                                }
+                              : undefined
+                          }
+                          onMove={activeView !== "trash" ? setMovingId : undefined}
+                        />
+                      ))}
+                    </ul>
+                    {visibleCount < memories.length && (
+                      <div className="mt-3 flex justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                        >
+                          Show {Math.min(PAGE_SIZE, memories.length - visibleCount)} more
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <aside className="hidden md:flex flex-col border-l border-border bg-surface min-w-0">
+                {selected ? (
+                  <>
+                    <div className="flex items-start gap-2 px-4 py-3 border-b border-border">
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-sm font-semibold truncate">{selected.title}</h2>
+                        <p className="text-[11px] text-muted-foreground">
+                          {providerMeta(selected.provider)?.name ?? "Other"} ·{" "}
+                          {new Date(selected.updatedAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Close details"
+                        onClick={() => setSelected(null)}
+                        className="h-7 w-7 grid place-items-center rounded-md hover:bg-muted text-muted-foreground"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto scroll-thin px-4 py-3">
+                      <pre className="whitespace-pre-wrap text-xs leading-relaxed font-sans text-foreground/90">
+                        {selected.content}
+                      </pre>
+                    </div>
+                    <div className="border-t border-border px-4 py-2 flex items-center gap-2 text-[11px]">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => copyMemoryContent(selected.id)}
+                      >
+                        Copy
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingMemory(selected)}>
+                        Edit
+                      </Button>
+                      {selected.sourceUrl && (
+                        <a
+                          href={selected.sourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ml-auto truncate text-primary hover:underline max-w-[180px]"
+                        >
+                          {selected.sourceUrl}
+                        </a>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 grid place-items-center text-xs text-muted-foreground px-6 text-center">
+                    Select a memory to see its full content here.
+                  </div>
+                )}
+              </aside>
+            </div>
           </>
         )}
       </main>
@@ -1035,7 +1101,9 @@ export function SidePanelApp() {
           onClose={() => setBulkMoveOpen(false)}
           onMove={async (projectId) => {
             await moveMemories(selectedIds, projectId);
-            toast.success(`Moved ${selectedIds.length} memor${selectedIds.length === 1 ? "y" : "ies"}`);
+            toast.success(
+              `Moved ${selectedIds.length} memor${selectedIds.length === 1 ? "y" : "ies"}`,
+            );
             setBulkMoveOpen(false);
             clearSelection();
           }}
@@ -1065,17 +1133,27 @@ function SortMenu({ value, onChange }: { value: SortKey; onChange: (s: SortKey) 
         <ChevronDown className="h-3 w-3 opacity-60" />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 top-9 z-30 w-40 rounded-lg border border-border bg-surface shadow-xl py-1 text-xs animate-scale-in">
+        <div
+          role="menu"
+          className="absolute right-0 top-9 z-30 w-40 rounded-lg border border-border bg-surface shadow-xl py-1 text-xs animate-scale-in"
+        >
           {SORTS.map((s) => (
             <button
               key={s.id}
               type="button"
               role="menuitemradio"
               aria-checked={s.id === value}
-              onClick={() => { onChange(s.id); setOpen(false); }}
+              onClick={() => {
+                onChange(s.id);
+                setOpen(false);
+              }}
               className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-muted text-left"
             >
-              {s.id === value ? <Check className="h-3.5 w-3.5 text-primary" /> : <span className="w-3.5" />}
+              {s.id === value ? (
+                <Check className="h-3.5 w-3.5 text-primary" />
+              ) : (
+                <span className="w-3.5" />
+              )}
               {s.label}
             </button>
           ))}
@@ -1086,8 +1164,14 @@ function SortMenu({ value, onChange }: { value: SortKey; onChange: (s: SortKey) 
 }
 
 function DateInput({
-  label, value, onChange,
-}: { label: string; value: number | null; onChange: (v: number | null) => void }) {
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number | null;
+  onChange: (v: number | null) => void;
+}) {
   const iso = value ? new Date(value).toISOString().slice(0, 10) : "";
   return (
     <label className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -1106,7 +1190,12 @@ function DateInput({
 }
 
 function ProjectContextMenu({
-  project, onClose, onEdit, onTogglePin, onToggleFavorite, onDelete,
+  project,
+  onClose,
+  onEdit,
+  onTogglePin,
+  onToggleFavorite,
+  onDelete,
 }: {
   project: Project;
   onClose: () => void;
@@ -1122,17 +1211,37 @@ function ProjectContextMenu({
       role="menu"
       className="absolute right-1 top-8 z-30 w-44 rounded-lg border border-border bg-surface shadow-xl py-1 text-xs animate-scale-in"
     >
-      <button type="button" role="menuitem" onClick={onEdit} className="w-full text-left px-2.5 py-1.5 hover:bg-muted">
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onEdit}
+        className="w-full text-left px-2.5 py-1.5 hover:bg-muted"
+      >
         Edit project…
       </button>
-      <button type="button" role="menuitem" onClick={onTogglePin} className="w-full text-left px-2.5 py-1.5 hover:bg-muted">
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onTogglePin}
+        className="w-full text-left px-2.5 py-1.5 hover:bg-muted"
+      >
         {project.pinned ? "Unpin" : "Pin"} project
       </button>
-      <button type="button" role="menuitem" onClick={onToggleFavorite} className="w-full text-left px-2.5 py-1.5 hover:bg-muted">
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onToggleFavorite}
+        className="w-full text-left px-2.5 py-1.5 hover:bg-muted"
+      >
         {project.favorite ? "Remove from favorites" : "Add to favorites"}
       </button>
       <div className="my-1 h-px bg-border" />
-      <button type="button" role="menuitem" onClick={onDelete} className="w-full text-left px-2.5 py-1.5 hover:bg-muted text-red-600">
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onDelete}
+        className="w-full text-left px-2.5 py-1.5 hover:bg-muted text-red-600"
+      >
         Delete project
       </button>
     </div>
@@ -1140,12 +1249,18 @@ function ProjectContextMenu({
 }
 
 function ProjectDialog({
-  project, onClose, onCreate, onUpdate,
+  project,
+  onClose,
+  onCreate,
+  onUpdate,
 }: {
   project: Project | null;
   onClose: () => void;
   onCreate: (input: { name: string; color: string; icon: ProjectIcon }) => Promise<void> | void;
-  onUpdate: (id: string, patch: { name: string; color: string; icon: ProjectIcon }) => Promise<void> | void;
+  onUpdate: (
+    id: string,
+    patch: { name: string; color: string; icon: ProjectIcon },
+  ) => Promise<void> | void;
 }) {
   const [name, setName] = useState(project?.name ?? "");
   const [color, setColor] = useState(project?.color ?? PROJECT_COLORS[0]);
@@ -1159,13 +1274,19 @@ function ProjectDialog({
       description={isEdit ? "Update the project details." : "Group related memories."}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
             onClick={() => {
               if (!name.trim()) return;
               const payload = { name, color, icon };
-              isEdit ? onUpdate(project!.id, payload) : onCreate(payload);
+              if (isEdit) {
+                onUpdate(project!.id, payload);
+              } else {
+                onCreate(payload);
+              }
             }}
           >
             {isEdit ? "Save" : "Create"}
@@ -1196,7 +1317,9 @@ function ProjectDialog({
                 onClick={() => setColor(c)}
                 className={
                   "h-7 w-7 rounded-full border-2 transition " +
-                  (color === c ? "border-foreground" : "border-transparent hover:border-foreground/30")
+                  (color === c
+                    ? "border-foreground"
+                    : "border-transparent hover:border-foreground/30")
                 }
                 style={{ background: c }}
               />
@@ -1230,12 +1353,20 @@ function ProjectDialog({
 }
 
 function MemoryEditDialog({
-  memory, projects, onClose, onSave,
+  memory,
+  projects,
+  onClose,
+  onSave,
 }: {
   memory: Memory;
   projects: Project[];
   onClose: () => void;
-  onSave: (patch: { title: string; content: string; tags: string[]; projectId: string | null }) => Promise<void> | void;
+  onSave: (patch: {
+    title: string;
+    content: string;
+    tags: string[];
+    projectId: string | null;
+  }) => Promise<void> | void;
 }) {
   const [title, setTitle] = useState(memory.title);
   const [content, setContent] = useState(memory.content);
@@ -1249,14 +1380,19 @@ function MemoryEditDialog({
       size="md"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
             onClick={() =>
               onSave({
                 title,
                 content,
-                tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+                tags: tags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean),
                 projectId,
               })
             }
@@ -1287,7 +1423,9 @@ function MemoryEditDialog({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium">Tags <span className="text-muted-foreground">(comma separated)</span></label>
+            <label className="text-xs font-medium">
+              Tags <span className="text-muted-foreground">(comma separated)</span>
+            </label>
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
@@ -1304,7 +1442,9 @@ function MemoryEditDialog({
             >
               <option value="">No project</option>
               {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
           </div>
@@ -1315,7 +1455,10 @@ function MemoryEditDialog({
 }
 
 function MoveDialog({
-  projects, currentProjectId, onClose, onMove,
+  projects,
+  currentProjectId,
+  onClose,
+  onMove,
 }: {
   projects: Project[];
   currentProjectId: string | null;
@@ -1330,8 +1473,12 @@ function MoveDialog({
       title="Move to project"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" onClick={() => onMove(id)}>Move</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => onMove(id)}>
+            Move
+          </Button>
         </>
       }
     >
@@ -1343,7 +1490,9 @@ function MoveDialog({
       >
         <option value="">No project</option>
         {projects.map((p) => (
-          <option key={p.id} value={p.id}>{p.name}</option>
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
         ))}
       </select>
     </Dialog>

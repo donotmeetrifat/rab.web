@@ -1,0 +1,400 @@
+{
+  "url": "https://railwayautobooker.vercel.app/",
+  "title": "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং",
+  "titleLength": 53,
+  "metaDescription": "বাংলাদেশ রেলওয়ে ট্রেনের টিকিট কাটার দ্রুততম এক্সটেনশন। সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে অটোমেটিক বগি, সিট সিলেক্ট ও ফাস্ট চেকআউট।",
+  "descLength": 136,
+  "canonical": "https://railwayautobooker.vercel.app/",
+  "robots": "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+  "og": {
+    "title": "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং",
+    "description": "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই কার্যকর।",
+    "image": "https://railwayautobooker.vercel.app/railway-thumbnail.webp",
+    "url": "https://railwayautobooker.vercel.app/"
+  },
+  "twitter": {
+    "card": "summary_large_image",
+    "title": "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং",
+    "description": "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে।",
+    "image": "https://railwayautobooker.vercel.app/railway-thumbnail.webp"
+  },
+  "preloads": [
+    "<link rel=\"preload\" as=\"image\" href=\"/railway-icon.png\"/>",
+    "<link rel=\"preload\" as=\"image\" href=\"/railway-thumbnail.webp\" fetchPriority=\"high\"/>"
+  ],
+  "preconnects": [
+    "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"/>",
+    "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin=\"anonymous\"/>"
+  ],
+  "h1s": ["বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুনমিলিসেকেন্ডে, সম্পূর্ণ অটোমেটিক!"],
+  "h2s": [
+    "ভিডিওতে দেখুন কীভাবে কাজ করে",
+    "ম্যানুয়ালি টিকিট কাটার চেয়ে অটো-বুকার কেন বেশি কার্যকর?",
+    "BD Railway Auto-Booker এর সাবস্ক্রিপশন প্ল্যানসমূহ",
+    "মাত্র ২ মিনিটে এক্সটেনশনটি সেটআপ করে নিন",
+    "প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী (FAQ)",
+    "আপনার ট্রেনের টিকিট এখনই সহজে ও দ্রুত কনফার্ম করুন"
+  ],
+  "h3s": [
+    "সকাল ৮:০০ ও দুপুর ২:০০ টার মিলি-সেকেন্ড অটো-ট্রিগার",
+    "কম্পিউটার ও মোবাইল উভয় ডিভাইসে সাপোর্ট",
+    "স্মার্ট সিট ও বগি (Coach) অটো-সিলেকশন",
+    "অটো ওটিপি ও দ্রুত পেমেন্ট পেজ জাম্প",
+    "১০০% লোকাল, প্রাইভেট ও নিরাপদ",
+    "ফেইলসেফ ব্যাকআপ ও অ্যান্টি-ব্যান প্রযুক্তি",
+    "রেগুলার ও লং-টার্ম প্যাকেজ (সবচেয়ে জনপ্রিয়)",
+    "ট্রায়াল ও শর্ট-টার্ম প্ল্যান",
+    "ফাইলটি আনজিপ (Unzip) করুন",
+    "ক্রোম বা ব্রাউজারের এক্সটেনশন পেজে যান",
+    "Developer Mode চালু করুন",
+    "এক্সটেনশনটি ব্রাউজারে লোড করুন (Load unpacked)",
+    "এক্সটেনশনটি পিন করুন ও লাইসেন্স কি দিয়ে অ্যাক্টিভ করুন"
+  ],
+  "h4s": [
+    "৩০ দিন (১ মাস)",
+    "৯০ দিন (৩ মাস)",
+    "১৮০ দিন (৬ মাস)",
+    "১ বছর (৩৬৫ দিন)",
+    "৩ দিনের পাস",
+    "৭ দিনের পাস",
+    "১৫ দিনের পাস",
+    "ডিসক্লেইমার / Disclaimer"
+  ],
+  "images": [
+    {
+      "src": "/railway-icon.png",
+      "alt": "Railway Auto-Booker",
+      "width": "36",
+      "height": "36"
+    },
+    {
+      "src": "/railway-thumbnail.webp",
+      "alt": "Railway Auto-Booker Video Demo Thumbnail",
+      "width": "1280",
+      "height": "720"
+    },
+    {
+      "src": "/railway-icon.png",
+      "alt": "Railway Auto-Booker",
+      "width": "24",
+      "height": "24"
+    }
+  ],
+  "schemas": [
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://railwayautobooker.vercel.app/#software",
+          "name": "Railway Auto-Booker",
+          "alternateName": ["Bangladesh Railway Auto-Booker", "রেলওয়ে ট্রেনের টিকিট অটো বুকিং"],
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Windows 10, Windows 11, Android (Kiwi Browser), macOS, ChromeOS",
+          "url": "https://railwayautobooker.vercel.app/",
+          "downloadUrl": "https://railwayautobooker.vercel.app/downloads/Railway-Auto-Booker-PC.zip",
+          "image": "https://railwayautobooker.vercel.app/railway-icon.png",
+          "screenshot": "https://railwayautobooker.vercel.app/railway-thumbnail.webp",
+          "description": "High-speed browser extension for Bangladesh Railway (eticket.railway.gov.bd). Automatically books train tickets during 8:00 AM rush hour with instant seat picking, coach selection, and fast checkout.",
+          "softwareVersion": "2.4.0",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "128",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "BDT",
+            "lowPrice": "49",
+            "highPrice": "999",
+            "offerCount": "6",
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "30 Days (1 Month) Standard Plan",
+                "price": "249",
+                "priceCurrency": "BDT",
+                "availability": "https://schema.org/InStock",
+                "url": "https://railwayautobooker.vercel.app/#pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "90 Days (3 Months) Popular Plan",
+                "price": "599",
+                "priceCurrency": "BDT",
+                "availability": "https://schema.org/InStock",
+                "url": "https://railwayautobooker.vercel.app/#pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "180 Days (6 Months) Extended Plan",
+                "price": "999",
+                "priceCurrency": "BDT",
+                "availability": "https://schema.org/InStock",
+                "url": "https://railwayautobooker.vercel.app/#pricing"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://railwayautobooker.vercel.app/#website",
+          "url": "https://railwayautobooker.vercel.app/",
+          "name": "Railway Auto-Booker",
+          "description": "বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটার দ্রুততম এক্সটেনশন",
+          "inLanguage": "bn-BD"
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://railwayautobooker.vercel.app/#organization",
+          "name": "Railway Auto-Booker",
+          "url": "https://railwayautobooker.vercel.app/",
+          "logo": "https://railwayautobooker.vercel.app/railway-icon.png",
+          "sameAs": ["https://www.facebook.com/meetrifat", "https://wa.me/meetrifat.ai"]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://railwayautobooker.vercel.app/#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://railwayautobooker.vercel.app/"
+            }
+          ]
+        },
+        {
+          "@type": "VideoObject",
+          "@id": "https://railwayautobooker.vercel.app/#video",
+          "name": "Railway Auto-Booker Live Video Demonstration",
+          "description": "Watch how Railway Auto-Booker automatically selects train seats, coaches, and proceeds to checkout in milliseconds on Bangladesh Railway portal.",
+          "thumbnailUrl": ["https://railwayautobooker.vercel.app/railway-thumbnail.webp"],
+          "uploadDate": "2026-10-22T08:00:00+06:00",
+          "contentUrl": "https://railwayautobooker.vercel.app/railway-demo.mp4",
+          "embedUrl": "https://railwayautobooker.vercel.app/",
+          "duration": "PT1M30S"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://railwayautobooker.vercel.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Railway Auto-Booker কি আসলেই সকাল ৮:০০ টায় টিকিট কাটতে পারে?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "হ্যাঁ, সম্পূর্ণ কার্যকর! এটি বাংলাদেশ রেলওয়ে সার্ভার ঘড়ির সাথে মিলি-সেকেন্ড নিখুঁতভাবে সিঙ্ক হয়ে ঠিক সকাল ৮:০০:০০ এবং দুপুর ২:০০:০০ টায় মিলি-সেকেন্ডে অটোমেটিক ট্রেনের বগি, সিট সিলেক্ট ও ওটিপি পেজে নিয়ে যায়। সাধারণ মানুষের ক্লিক করার চেয়ে এটি ৫০ গুণ দ্রুত কাজ করে।"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "অ্যান্ড্রয়েড মোবাইল ফোনে কীভাবে এক্সটেনশনটি ব্যবহার করব?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "গুগল প্লে-স্টোর থেকে Kiwi Browser ইনস্টল করুন। এরপর আমাদের দেওয়া জিপ ফাইলটি আনজিপ করে Kiwi ব্রাউজারের Extensions মেনু থেকে 'Developer Mode' অন করে 'Load unpacked'-এর মাধ্যমে এক্সটেনশনটি লোড করুন। মোবাইলেও এটি পিসির মতো সমান গতিতে কাজ করে।"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "আমার বাংলাদেশ রেলওয়ে অ্যাকাউন্ট কি ব্যান হওয়ার কোনো ঝুঁকি আছে?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "না, সম্পূর্ণ নিরাপদ। এক্সটেনশনে হিউম্যানাইজড টাইম ডিলে ও স্মার্ট অ্যান্টি-ব্যান অ্যালগরিদম যুক্ত রয়েছে যা মানুষের সাধারণ ব্রাউজিং প্যাটার্ন বজায় রাখে। তাছাড়া এটি কোনো স্ক্র্যাপার নয়—সম্পূর্ণ লোকালভাবে আপনার নিজস্ব ব্রাউজারের ভেতরে কাজ করে।"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "পেমেন্ট করার পর লাইসেন্স কি কতক্ষণের মধ্যে পাব?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "বিকাশ বা নগদে পেমেন্ট সম্পন্ন করার পর আমাদের হোয়াটসঅ্যাপ বা ফেসবুক মেসেঞ্জারে ট্রানজেকশন আইডি পাঠালে তাৎক্ষণিকভাবে (১ থেকে ৫ মিনিটের মধ্যে) লাইসেন্স কি এবং ডাউনলোড লিঙ্ক প্রদান করা হয়।"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "আমার পছন্দের বগি বা সিট খালি না থাকলে কি টিকিট মিস হবে?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "না! এক্সটেনশনটিতে স্মার্ট ফেইলসেফ ব্যাকআপ অপশন রয়েছে। আপনার পছন্দের নির্দিষ্ট সিট না পেলে এটি তাৎক্ষণিকভাবে উক্ত ক্লাসের অন্য যেকোনো খালি সিট স্বয়ংক্রিয়ভাবে লক করে নেয়, যাতে টিকিট পাওয়ার সুযোগ শতভাগ নিশ্চিত থাকে।"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "এক লাইসেন্স দিয়ে কয়টি ডিভাইসে চালানো যাবে?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "প্রতিটি লাইসেন্স কি একটি অনুমোদিত ডিভাইসে সক্রিয় করার জন্য বরাদ্দ। তবে ডিভাইস পরিবর্তন বা উইন্ডোজ রিলোড দিলে আমাদের সাপোর্টে যোগাযোগ করলে তাৎক্ষণিক মাইগ্রেশন সহায়তা দেওয়া হয়।"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "internalLinksCount": 21,
+  "internalLinks": [
+    {
+      "href": "/",
+      "text": "Railway Auto-Booker"
+    },
+    {
+      "href": "#pricing",
+      "text": "সাবস্ক্রিপশন প্ল্যান"
+    },
+    {
+      "href": "#video-demo",
+      "text": "ভিডিও ডেমো"
+    },
+    {
+      "href": "#features",
+      "text": "ফিচারসমূহ"
+    },
+    {
+      "href": "#install",
+      "text": "ইনস্টলেশন গাইড"
+    },
+    {
+      "href": "#faq",
+      "text": "FAQ"
+    },
+    {
+      "href": "#contact",
+      "text": "যোগাযোগ ও ক্রয়"
+    },
+    {
+      "href": "#pricing",
+      "text": "প্যাকেজ দেখুন"
+    },
+    {
+      "href": "#pricing",
+      "text": "সাবস্ক্রিপশন প্ল্যান"
+    },
+    {
+      "href": "#video-demo",
+      "text": "ভিডিও ডেমো"
+    },
+    {
+      "href": "#features",
+      "text": "ফিচারসমূহ"
+    },
+    {
+      "href": "#install",
+      "text": "ইনস্টলেশন গাইড"
+    },
+    {
+      "href": "#faq",
+      "text": "FAQ"
+    },
+    {
+      "href": "#contact",
+      "text": "যোগাযোগ ও ক্রয়"
+    },
+    {
+      "href": "#pricing",
+      "text": "প্যাকেজ ও মূল্য তালিকা"
+    },
+    {
+      "href": "#video-demo",
+      "text": "ভিডিও ডেমো দেখুন"
+    },
+    {
+      "href": "/downloads/Railway-Auto-Booker-PC.zip",
+      "text": "পিসি জিপ ডাউনলোড (.zip)"
+    },
+    {
+      "href": "/privacy",
+      "text": "প্রাইভেসি পলিসি"
+    },
+    {
+      "href": "/terms",
+      "text": "শর্তাবলী ও ডিসক্লেইমার"
+    },
+    {
+      "href": "#faq",
+      "text": "FAQ"
+    },
+    {
+      "href": "#pricing",
+      "text": "প্ল্যানসমূহ"
+    }
+  ],
+  "externalLinksCount": 18,
+  "externalLinks": [
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "হোয়াটসঅ্যাপে কিনুন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "ফেসবুকে মেসেজ দিন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "WhatsApp এ মেসেজ দিন"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "Facebook এ যোগাযোগ করুন"
+    },
+    {
+      "href": "https://wa.me/meetrifat.ai?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81%20%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE!%20%E0%A6%86%E0%A6%AE%E0%A6%BF%20BD%20Railway%20Auto-Booker%20%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%9F%E0%A7%87%E0%A6%A8%E0%A6%B6%E0%A6%A8%E0%A6%9F%E0%A6%BF%E0%A6%B0%20%E0%A6%B8%E0%A6%BE%E0%A6%AC%E0%A6%B8%E0%A7%8D%E0%A6%95%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%AA%E0%A6%B6%E0%A6%A8%20%E0%A6%A8%E0%A6%BF%E0%A6%A4%E0%A7%87%20%E0%A6%9A%E0%A6%BE%E0%A6%87%E0%A5%A4",
+      "text": "WhatsApp"
+    },
+    {
+      "href": "https://www.facebook.com/meetrifat",
+      "text": "Facebook"
+    }
+  ],
+  "approxWords": 1428
+}

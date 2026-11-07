@@ -14,7 +14,7 @@ export const config = {
   // Skip the static asset routes that already have their own header rules in
   // vercel.json and would only be slowed down by middleware execution.
   matcher: [
-    "/((?!_next/static|_next/image|assets/|favicon\\.png|favicon\\.ico|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|memlace-extension\\.zip).*)",
+    "/((?!_next/static|_next/image|assets/|favicon\\.png|favicon\\.ico|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|llms\\.txt|.*\\.txt|.*\\.webp|.*\\.zip).*)",
   ],
 };
 

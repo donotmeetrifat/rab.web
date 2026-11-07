@@ -9,7 +9,7 @@ import type { DetectedGoal } from "./types";
 
 const GOAL_PATTERNS: RegExp[] = [
   /\b(?:i\s+(?:want|need|would like)\s+to|help\s+me|let'?s|please)\s+([a-z][^.\n!?]{4,120})/gi,
-  /\b(?:goal|objective|task)\s*[:\-]\s*([^.\n!?]{4,120})/gi,
+  /\b(?:goal|objective|task)\s*[:-]\s*([^.\n!?]{4,120})/gi,
   /\b(?:trying\s+to|working\s+on|building)\s+([a-z][^.\n!?]{4,120})/gi,
 ];
 

@@ -6,9 +6,7 @@
 import { db } from "@/lib/db";
 import { getSummary, summarizeConversation } from "./SummaryEngine";
 
-const STOP = new Set([
-  "the", "and", "for", "with", "this", "that", "your", "from", "have", "chat",
-]);
+const STOP = new Set(["the", "and", "for", "with", "this", "that", "your", "from", "have", "chat"]);
 
 function normalize(tag: string): string {
   return tag
@@ -23,7 +21,9 @@ export async function generateTags(
   opts: { limit?: number; force?: boolean } = {},
 ): Promise<string[]> {
   const limit = opts.limit ?? 8;
-  const sum = (await getSummary(conversationId)) ?? (await summarizeConversation(conversationId, { force: opts.force }));
+  const sum =
+    (await getSummary(conversationId)) ??
+    (await summarizeConversation(conversationId, { force: opts.force }));
   if (!sum) return [];
 
   const raw = [

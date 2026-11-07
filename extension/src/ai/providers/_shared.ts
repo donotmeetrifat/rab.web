@@ -123,9 +123,7 @@ export async function openaiEmbed(
     signal: req.signal,
   });
 
-  const vectors = (data.data ?? [])
-    .sort((a, b) => a.index - b.index)
-    .map((d) => d.embedding);
+  const vectors = (data.data ?? []).sort((a, b) => a.index - b.index).map((d) => d.embedding);
   const inputTokens = data.usage?.prompt_tokens ?? input.reduce((n, s) => n + estimateTokens(s), 0);
   return { vectors, model, inputTokens };
 }

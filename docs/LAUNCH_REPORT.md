@@ -6,15 +6,15 @@
 
 ## Executive scoring
 
-| Dimension | Score | Notes |
-| --- | ---: | --- |
-| Performance | **96 / 100** | All SLOs met; index rebuild at 10 k convs is only sub-optimality. |
-| Accessibility | **97 / 100** | axe-core clean; VoiceOver + NVDA verified. |
-| Security | **98 / 100** | MV3 compliant, no remote code, host perms scoped; API keys local-only. |
-| Stability | **95 / 100** | 362/363 test cases pass; no P0/P1 open. |
-| Maintainability | **93 / 100** | Provider adapters share base class; docs suite complete; strict TS. |
-| Chrome Web Store readiness | **94 / 100** | Only placeholder URLs and store imagery remain (content, not code). |
-| **Overall readiness** | **95 / 100** | — |
+| Dimension                  |        Score | Notes                                                                  |
+| -------------------------- | -----------: | ---------------------------------------------------------------------- |
+| Performance                | **96 / 100** | All SLOs met; index rebuild at 10 k convs is only sub-optimality.      |
+| Accessibility              | **97 / 100** | axe-core clean; VoiceOver + NVDA verified.                             |
+| Security                   | **98 / 100** | MV3 compliant, no remote code, host perms scoped; API keys local-only. |
+| Stability                  | **95 / 100** | 362/363 test cases pass; no P0/P1 open.                                |
+| Maintainability            | **93 / 100** | Provider adapters share base class; docs suite complete; strict TS.    |
+| Chrome Web Store readiness | **94 / 100** | Only placeholder URLs and store imagery remain (content, not code).    |
+| **Overall readiness**      | **95 / 100** | —                                                                      |
 
 ## Issue ledger
 

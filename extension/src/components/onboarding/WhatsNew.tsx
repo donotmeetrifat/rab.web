@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/Button";
-import {
-  MEMLACE_VERSION,
-  acknowledgeVersion,
-  loadOnboarding,
-} from "@/services/onboarding";
+import { MEMLACE_VERSION, acknowledgeVersion, loadOnboarding } from "@/services/onboarding";
 
 interface ChangelogEntry {
   version: string;

@@ -46,13 +46,22 @@ function walk(node: Node, out: string[], ctx: WalkCtx): void {
       return;
     case "strong":
     case "b":
-      out.push("**"); walkChildren(el, out, ctx); out.push("**"); return;
+      out.push("**");
+      walkChildren(el, out, ctx);
+      out.push("**");
+      return;
     case "em":
     case "i":
-      out.push("*"); walkChildren(el, out, ctx); out.push("*"); return;
+      out.push("*");
+      walkChildren(el, out, ctx);
+      out.push("*");
+      return;
     case "del":
     case "s":
-      out.push("~~"); walkChildren(el, out, ctx); out.push("~~"); return;
+      out.push("~~");
+      walkChildren(el, out, ctx);
+      out.push("~~");
+      return;
     case "a": {
       const href = (el as HTMLAnchorElement).href;
       out.push("[");
@@ -77,12 +86,20 @@ function walk(node: Node, out: string[], ctx: WalkCtx): void {
     case "blockquote": {
       const buf: string[] = [];
       walkChildren(el, buf, ctx);
-      const quoted = buf.join("").split("\n").map((l) => (l ? `> ${l}` : ">")).join("\n");
+      const quoted = buf
+        .join("")
+        .split("\n")
+        .map((l) => (l ? `> ${l}` : ">"))
+        .join("\n");
       out.push(`\n\n${quoted}\n\n`);
       return;
     }
-    case "h1": case "h2": case "h3":
-    case "h4": case "h5": case "h6": {
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6": {
       const level = Number(tag[1]);
       out.push(`\n\n${"#".repeat(level)} `);
       walkChildren(el, out, ctx);
@@ -103,9 +120,7 @@ function walk(node: Node, out: string[], ctx: WalkCtx): void {
       for (const child of Array.from(el.children)) {
         if (child.tagName.toLowerCase() !== "li") continue;
         const indent = "  ".repeat(ctx.listDepth - 1);
-        const marker = ordered
-          ? `${ctx.ordered[ctx.ordered.length - 1]!.index++}.`
-          : "-";
+        const marker = ordered ? `${ctx.ordered[ctx.ordered.length - 1]!.index++}.` : "-";
         out.push(`${indent}${marker} `);
         walkChildren(child as HTMLElement, out, ctx);
         out.push("\n");

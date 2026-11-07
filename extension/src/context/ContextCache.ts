@@ -31,11 +31,7 @@ export function getCached(
   return hit;
 }
 
-export function setCached(
-  conversationId: string,
-  hash: string,
-  pkg: ContextPackage,
-): void {
+export function setCached(conversationId: string, hash: string, pkg: ContextPackage): void {
   const k = key(conversationId, hash, pkg.target);
   cache.set(k, pkg);
   if (cache.size > MAX) {

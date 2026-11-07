@@ -10,10 +10,35 @@ import {
 } from "./_shared";
 
 const MODELS: AIModelInfo[] = [
-  { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", context: 1_000_000, inputPer1M: 0.1, outputPer1M: 0.4 },
-  { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash", context: 1_000_000, inputPer1M: 0.075, outputPer1M: 0.3 },
-  { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro", context: 2_000_000, inputPer1M: 1.25, outputPer1M: 5 },
-  { id: "text-embedding-004", label: "Gemini Embeddings", context: 2048, inputPer1M: 0, outputPer1M: 0, supportsEmbeddings: true },
+  {
+    id: "gemini-2.0-flash",
+    label: "Gemini 2.0 Flash",
+    context: 1_000_000,
+    inputPer1M: 0.1,
+    outputPer1M: 0.4,
+  },
+  {
+    id: "gemini-1.5-flash",
+    label: "Gemini 1.5 Flash",
+    context: 1_000_000,
+    inputPer1M: 0.075,
+    outputPer1M: 0.3,
+  },
+  {
+    id: "gemini-1.5-pro",
+    label: "Gemini 1.5 Pro",
+    context: 2_000_000,
+    inputPer1M: 1.25,
+    outputPer1M: 5,
+  },
+  {
+    id: "text-embedding-004",
+    label: "Gemini Embeddings",
+    context: 2048,
+    inputPer1M: 0,
+    outputPer1M: 0,
+    supportsEmbeddings: true,
+  },
 ];
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
@@ -36,7 +61,9 @@ export function createGemini(cfg: ProviderConfig): AIProvider {
       }
 
       const contents = [
-        ...(req.system ? [{ role: "user", parts: [{ text: `System instructions:\n${req.system}` }] }] : []),
+        ...(req.system
+          ? [{ role: "user", parts: [{ text: `System instructions:\n${req.system}` }] }]
+          : []),
         { role: "user", parts: [{ text: req.prompt }] },
       ];
       const data = await httpJson<Resp>(
@@ -56,10 +83,9 @@ export function createGemini(cfg: ProviderConfig): AIProvider {
         },
       );
 
-      const text = (data.candidates?.[0]?.content?.parts ?? [])
-        .map((p) => p.text ?? "")
-        .join("");
-      const inputTokens = data.usageMetadata?.promptTokenCount ?? estimateTokens(req.prompt + (req.system ?? ""));
+      const text = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("");
+      const inputTokens =
+        data.usageMetadata?.promptTokenCount ?? estimateTokens(req.prompt + (req.system ?? ""));
       const outputTokens = data.usageMetadata?.candidatesTokenCount ?? estimateTokens(text);
       return buildGenerateResult("gemini", model, text, { inputTokens, outputTokens });
     },

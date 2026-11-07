@@ -30,9 +30,7 @@ const PENDING_KEY = "memlace.pendingCapture";
 
 async function ensureContextMenu(): Promise<void> {
   try {
-    await new Promise<void>((resolve) =>
-      chrome.contextMenus.removeAll(() => resolve()),
-    );
+    await new Promise<void>((resolve) => chrome.contextMenus.removeAll(() => resolve()));
     chrome.contextMenus.create({
       id: CONTEXT_MENU_ID,
       title: "Save selection to Memlace",
@@ -170,7 +168,10 @@ chrome.runtime.onMessage.addListener(
           case "OPEN_SIDE_PANEL": {
             const tabId = sender.tab?.id;
             const opened = await openSidePanelForTab(tabId);
-            sendResponse({ ok: opened, ...(opened ? {} : { error: "Could not open side panel" }) } as RuntimeResponse);
+            sendResponse({
+              ok: opened,
+              ...(opened ? {} : { error: "Could not open side panel" }),
+            } as RuntimeResponse);
             return;
           }
           case "OPEN_POPUP": {
@@ -178,7 +179,10 @@ chrome.runtime.onMessage.addListener(
               await chrome.action.openPopup?.();
               sendResponse({ ok: true });
             } catch (err) {
-              sendResponse({ ok: false, error: err instanceof Error ? err.message : "unavailable" });
+              sendResponse({
+                ok: false,
+                error: err instanceof Error ? err.message : "unavailable",
+              });
             }
             return;
           }
@@ -195,7 +199,9 @@ chrome.runtime.onMessage.addListener(
             const t0 = performance.now();
             const captured = msg.payload.conversation as CapturedConversation;
             auditStart(captured.provider, captured.conversationId, msg.payload.hash);
-            auditMark(captured.provider, captured.conversationId, "sent", { hash: msg.payload.hash });
+            auditMark(captured.provider, captured.conversationId, "sent", {
+              hash: msg.payload.hash,
+            });
             auditMark(captured.provider, captured.conversationId, "queued");
             try {
               const { conversation, created, changed } = await saveConversation(captured, {
@@ -204,11 +210,16 @@ chrome.runtime.onMessage.addListener(
                 saveImages: msg.payload.options?.saveImages,
                 saveAttachments: msg.payload.options?.saveAttachments,
               });
-              auditMark(conversation.provider, conversation.id, "saved", { hash: msg.payload.hash });
+              auditMark(conversation.provider, conversation.id, "saved", {
+                hash: msg.payload.hash,
+              });
               // Background is the sole verifier — content never reads the DB.
               const row = await db.conversations.get(conversation.id);
               const verified = Boolean(row);
-              if (verified) auditMark(conversation.provider, conversation.id, "verified", { hash: msg.payload.hash });
+              if (verified)
+                auditMark(conversation.provider, conversation.id, "verified", {
+                  hash: msg.payload.hash,
+                });
               const durationMs = Math.round(performance.now() - t0);
               const result: SaveConversationResult = {
                 ok: true,
@@ -238,7 +249,9 @@ chrome.runtime.onMessage.addListener(
               // surface. Fire-and-forget: broadcast MUST NOT block the ack.
               if (verified) {
                 try {
-                  auditMark(conversation.provider, conversation.id, "broadcast", { hash: msg.payload.hash });
+                  auditMark(conversation.provider, conversation.id, "broadcast", {
+                    hash: msg.payload.hash,
+                  });
                   void chrome.runtime
                     .sendMessage({
                       type: "MEMLACE_CONVERSATION_UPDATED",
@@ -252,13 +265,18 @@ chrome.runtime.onMessage.addListener(
                       },
                     } satisfies RuntimeMessage)
                     .catch(() => undefined);
-                } catch { /* no receivers → ignore */ }
+                } catch {
+                  /* no receivers → ignore */
+                }
               }
               sendResponse({ ok: true, data: result });
-
             } catch (err) {
               console.error("[Memlace] SAVE_CONVERSATION failed", err);
-              auditFail(captured.provider, captured.conversationId, err instanceof Error ? err.message : "save failed");
+              auditFail(
+                captured.provider,
+                captured.conversationId,
+                err instanceof Error ? err.message : "save failed",
+              );
               sendResponse({
                 ok: false,
                 error: err instanceof Error ? err.message : "save failed",

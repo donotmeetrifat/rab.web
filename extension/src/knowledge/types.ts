@@ -1,14 +1,7 @@
 import type { ProviderId } from "@/types";
 
 export type EntityType =
-  | "language"
-  | "framework"
-  | "database"
-  | "cloud"
-  | "devops"
-  | "ai"
-  | "library"
-  | "topic";
+  "language" | "framework" | "database" | "cloud" | "devops" | "ai" | "library" | "topic";
 
 export interface KnowledgeEntity {
   type: EntityType;
@@ -36,13 +29,7 @@ export interface KnowledgeCodeBlock {
   order: number;
 }
 
-export type LinkKind =
-  | "github"
-  | "docs"
-  | "youtube"
-  | "pdf"
-  | "image"
-  | "url";
+export type LinkKind = "github" | "docs" | "youtube" | "pdf" | "image" | "url";
 
 export interface KnowledgeLink {
   url: string;

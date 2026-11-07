@@ -96,9 +96,7 @@ export function checklistProgress(c: ChecklistState): number {
   return Math.round((done / total) * 100);
 }
 
-export function subscribeOnboarding(
-  cb: (s: OnboardingState) => void,
-): () => void {
+export function subscribeOnboarding(cb: (s: OnboardingState) => void): () => void {
   const listener = (
     changes: { [k: string]: chrome.storage.StorageChange },
     area: chrome.storage.AreaName,

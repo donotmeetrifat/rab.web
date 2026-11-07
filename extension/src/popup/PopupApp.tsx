@@ -134,7 +134,6 @@ export function PopupApp() {
     void runConvSearch(debouncedQuery, convFilters, initial);
   }, [ready, debouncedQuery, convFilters, runConvSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
-
   useEffect(() => {
     chrome.storage.local.get(PENDING_KEY).then((v) => {
       const p = v[PENDING_KEY] as typeof pending | undefined;
@@ -150,7 +149,6 @@ export function PopupApp() {
     };
     chrome.storage.onChanged.addListener(onChange);
     return () => chrome.storage.onChanged.removeListener(onChange);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -296,7 +294,10 @@ export function PopupApp() {
       <div className="px-3 pt-2.5">
         {tab === "memories" ? (
           <label className="relative block">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <Search
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
+              aria-hidden
+            />
             <input
               type="search"
               placeholder="Search memories, projects, tags…"
@@ -316,12 +317,10 @@ export function PopupApp() {
         aria-label="Popup section"
         className="mx-3 mt-2.5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
       >
-        {(
-          [
-            { id: "memories" as Tab, label: "Memories", icon: StickyNote },
-            { id: "conversations" as Tab, label: "Chats", icon: MessagesSquare },
-          ]
-        ).map((t) => {
+        {[
+          { id: "memories" as Tab, label: "Memories", icon: StickyNote },
+          { id: "conversations" as Tab, label: "Chats", icon: MessagesSquare },
+        ].map((t) => {
           const Icon = t.icon;
           const active = tab === t.id;
           return (
@@ -360,8 +359,12 @@ export function PopupApp() {
           </div>
           <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{pending.text}</p>
           <div className="mt-2 flex gap-1.5">
-            <Button size="sm" variant="primary" onClick={savePendingCapture}>Save memory</Button>
-            <Button size="sm" variant="ghost" onClick={dismissPending}>Dismiss</Button>
+            <Button size="sm" variant="primary" onClick={savePendingCapture}>
+              Save memory
+            </Button>
+            <Button size="sm" variant="ghost" onClick={dismissPending}>
+              Dismiss
+            </Button>
           </div>
         </div>
       )}
@@ -369,10 +372,13 @@ export function PopupApp() {
       <div className="flex-1 overflow-y-auto scroll-thin px-3 py-2.5 space-y-4">
         {tab === "memories" ? (
           <>
-            {(pinnedProjects.length + recentProjects.length > 0) && (
+            {pinnedProjects.length + recentProjects.length > 0 && (
               <section aria-labelledby="popup-projects">
                 <div className="flex items-center justify-between mb-1.5">
-                  <h3 id="popup-projects" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <h3
+                    id="popup-projects"
+                    className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
                     Projects
                   </h3>
                   <button
@@ -391,7 +397,10 @@ export function PopupApp() {
                         onClick={openSidePanel}
                         className="w-full flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs hover:border-primary/40 text-left"
                       >
-                        <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
+                        <span
+                          className="h-2 w-2 rounded-full shrink-0"
+                          style={{ background: p.color }}
+                        />
                         <span className="truncate flex-1">{p.name}</span>
                         {p.pinned && <Pin className="h-3 w-3 text-primary" />}
                       </button>
@@ -403,7 +412,10 @@ export function PopupApp() {
 
             {pinned.length > 0 && (
               <section aria-labelledby="popup-pinned">
-                <h3 id="popup-pinned" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                <h3
+                  id="popup-pinned"
+                  className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5"
+                >
                   Favorites
                 </h3>
                 <ul className="space-y-1.5">
@@ -422,7 +434,10 @@ export function PopupApp() {
 
             <section aria-labelledby="popup-recent">
               <div className="flex items-center justify-between mb-1.5">
-                <h3 id="popup-recent" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3
+                  id="popup-recent"
+                  className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                >
                   {query ? "Results" : "Recent"}
                 </h3>
                 <Button size="sm" variant="ghost" onClick={captureFromPage}>
@@ -467,7 +482,10 @@ export function PopupApp() {
         ) : (
           <section aria-labelledby="popup-conversations" className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 id="popup-conversations" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3
+                id="popup-conversations"
+                className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              >
                 {debouncedQuery ? `Results (${displayedConversations.length})` : "Recent chats"}
               </h3>
               <button

@@ -19,9 +19,7 @@ function clamp(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
 
-export async function contextReadiness(
-  conv: StoredConversation,
-): Promise<number> {
+export async function contextReadiness(conv: StoredConversation): Promise<number> {
   const cached = cache.get(conv.id);
   if (cached && cached.hash === conv.hash) return cached.score;
 
@@ -31,7 +29,11 @@ export async function contextReadiness(
   score += Math.min(0.25, conv.messageCount * 0.03);
 
   // Knowledge extraction present.
-  const kn = await db.knowledge.where("conversationId").equals(conv.id).first().catch(() => null);
+  const kn = await db.knowledge
+    .where("conversationId")
+    .equals(conv.id)
+    .first()
+    .catch(() => null);
   if (kn) {
     if ((kn.topics?.length ?? 0) > 0) score += 0.1;
     if ((kn.technologies?.length ?? 0) > 0) score += 0.1;

@@ -44,7 +44,7 @@ export interface PortableKnowledge {
 export interface PortableArchive {
   version: typeof PORTABLE_ARCHIVE_VERSION;
   exportedAt: number;
-  source: string;                       // "memlace-chrome@1.0.0", …
+  source: string; // "memlace-chrome@1.0.0", …
   conversations: PortableConversation[];
   projects?: PortableProject[];
   knowledge?: PortableKnowledge;
@@ -53,12 +53,12 @@ export interface PortableArchive {
 // -------------------- import parsers -----------------------------------
 
 export type ImportKind =
-  | "memlace"      // native portable archive
-  | "chatgpt"      // OpenAI data export
-  | "claude"       // Anthropic data export
-  | "gemini"       // Google Takeout for Gemini
-  | "markdown"     // .md file(s)
-  | "json";        // generic JSON
+  | "memlace" // native portable archive
+  | "chatgpt" // OpenAI data export
+  | "claude" // Anthropic data export
+  | "gemini" // Google Takeout for Gemini
+  | "markdown" // .md file(s)
+  | "json"; // generic JSON
 
 export interface ImportResult {
   kind: ImportKind;
@@ -114,11 +114,16 @@ export function parseChatGPTExport(payload: unknown): ImportResult {
       title?: string;
       create_time?: number;
       update_time?: number;
-      mapping?: Record<string, { message?: {
-        author?: { role?: string };
-        content?: { parts?: string[] };
-        create_time?: number;
-      } }>;
+      mapping?: Record<
+        string,
+        {
+          message?: {
+            author?: { role?: string };
+            content?: { parts?: string[] };
+            create_time?: number;
+          };
+        }
+      >;
     };
     const messages: PortableMessage[] = [];
     for (const node of Object.values(conv.mapping ?? {})) {
@@ -186,9 +191,17 @@ export function conversationToMarkdown(c: PortableConversation): string {
 
 export function conversationToHtml(c: PortableConversation): string {
   const escape = (s: string) =>
-    s.replace(/[&<>"']/g, (ch) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-    }[ch]!));
+    s.replace(
+      /[&<>"']/g,
+      (ch) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[ch]!,
+    );
   const body = c.messages
     .map(
       (m) =>

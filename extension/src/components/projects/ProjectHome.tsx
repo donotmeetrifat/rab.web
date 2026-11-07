@@ -24,11 +24,7 @@ import {
 import type { Project, StoredConversation } from "@/types";
 import { providerMeta } from "@/lib/providers";
 import { Button } from "@/components/Button";
-import {
-  getProjectBrain,
-  renderProjectSummary,
-  type ProjectBrain,
-} from "@/services/projectBrain";
+import { getProjectBrain, renderProjectSummary, type ProjectBrain } from "@/services/projectBrain";
 import { exportAll } from "@/services/memories";
 import { useToast } from "@/components/Toast";
 
@@ -151,11 +147,7 @@ export function ProjectHome({
               <Sparkles className="h-3.5 w-3.5" />
               Ask Memlace
             </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => onSearchProject?.(project.name)}
-            >
+            <Button size="sm" variant="secondary" onClick={() => onSearchProject?.(project.name)}>
               <Search className="h-3.5 w-3.5" />
               Search Project
             </Button>
@@ -210,8 +202,7 @@ export function ProjectHome({
             )}
 
             {/* Knowledge ------------------------------------------- */}
-            {(brain.knowledge.technologies.length > 0 ||
-              brain.knowledge.topics.length > 0) && (
+            {(brain.knowledge.technologies.length > 0 || brain.knowledge.topics.length > 0) && (
               <Section title="Knowledge" icon={<BookOpen className="h-3.5 w-3.5" />}>
                 <div className="space-y-2">
                   {brain.knowledge.technologies.length > 0 && (
@@ -279,10 +270,7 @@ export function ProjectHome({
 
             {/* Decisions ------------------------------------------- */}
             {brain.decisions.length > 0 && (
-              <Section
-                title="Important Decisions"
-                icon={<CheckCircle2 className="h-3.5 w-3.5" />}
-              >
+              <Section title="Important Decisions" icon={<CheckCircle2 className="h-3.5 w-3.5" />}>
                 <ol className="relative border-l border-border/70 pl-4 space-y-3">
                   {brain.decisions.slice(0, 12).map((d) => {
                     const superseded = brain.decisions.some((x) => x.supersedes === d.id);
@@ -308,11 +296,7 @@ export function ProjectHome({
                                   ? "Open"
                                   : "Adopted"}
                           </span>
-                          <span
-                            className={
-                              superseded ? "text-muted-foreground line-through" : ""
-                            }
-                          >
+                          <span className={superseded ? "text-muted-foreground line-through" : ""}>
                             {d.statement}
                           </span>
                           {!superseded && d.polarity === "adopt" && (
@@ -360,8 +344,7 @@ export function ProjectHome({
             )}
 
             {/* Related --------------------------------------------- */}
-            {(brain.related.conversations.length > 0 ||
-              brain.related.projects.length > 0) && (
+            {(brain.related.conversations.length > 0 || brain.related.projects.length > 0) && (
               <Section title="Related Work" icon={<Layers className="h-3.5 w-3.5" />}>
                 {brain.related.projects.length > 0 && (
                   <div className="mb-3">

@@ -103,7 +103,10 @@ export async function deleteSummary(conversationId: string): Promise<void> {
   await db.aiSummaries.where("conversationId").equals(conversationId).delete();
 }
 
-export function estimateSummaryCost(charCount: number): { inputTokens: number; outputTokens: number } {
+export function estimateSummaryCost(charCount: number): {
+  inputTokens: number;
+  outputTokens: number;
+} {
   const inputTokens = estimateTokens("x".repeat(Math.min(24000, charCount))) + 400;
   return { inputTokens, outputTokens: 800 };
 }

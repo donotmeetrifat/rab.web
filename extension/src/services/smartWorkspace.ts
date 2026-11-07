@@ -14,13 +14,7 @@
  *   later back a desktop, VS Code, or mobile surface unchanged.
  */
 import { db } from "@/lib/db";
-import type {
-  Memory,
-  Project,
-  ProviderId,
-  StoredConversation,
-  StoredConvMessage,
-} from "@/types";
+import type { Memory, Project, ProviderId, StoredConversation, StoredConvMessage } from "@/types";
 import type { KnowledgeRecord } from "@/knowledge/types";
 import { extractDecisions } from "@/context/DecisionExtractor";
 import { detectGoals } from "@/context/GoalDetector";
@@ -156,8 +150,7 @@ const R_TODO = /\b(TODO|FIXME|@?todo|next\s+step|next\s+time|later[:,]?\s+)/i;
 const R_UNRESOLVED =
   /\b(still\s+(?:broken|failing|not\s+working)|not\s+fixed|still\s+errors?|unresolved|blocked)\b/i;
 const R_DEPLOY = /\b(deploy|ship|publish|release|push\s+to\s+prod)\b/i;
-const R_DEPLOY_DONE =
-  /\b(deployed|shipped|published|released|live\s+in\s+prod|in\s+production)\b/i;
+const R_DEPLOY_DONE = /\b(deployed|shipped|published|released|live\s+in\s+prod|in\s+production)\b/i;
 const R_BUG = /\b(bug|error|exception|traceback|crash|500|nullpointer)\b/i;
 const R_BUG_DONE = /\b(fixed|resolved|patched|works\s+now|solved)\b/i;
 
@@ -187,7 +180,8 @@ function classifyAttention(
 function nextActionFromGoal(g: DetectedGoal): string {
   const verb = /^(deploy|ship|test|fix|write|implement|build|research)/i.exec(g.label);
   const body = g.label.replace(/^(please|help me|let's|we should)\s+/i, "");
-  if (verb) return `${verb[0][0].toUpperCase()}${verb[0].slice(1).toLowerCase()} ${body.replace(verb[0], "").trim()}`.trim();
+  if (verb)
+    return `${verb[0][0].toUpperCase()}${verb[0].slice(1).toLowerCase()} ${body.replace(verb[0], "").trim()}`.trim();
   return `Continue: ${body}`;
 }
 
@@ -219,21 +213,16 @@ function nextActionFromAttention(a: NeedsAttentionItem): string {
 async function build(): Promise<Workspace> {
   const started = performance.now();
 
-  const [conversations, projects, memories, knowledgeRows, mappings, history] =
-    await Promise.all([
-      db.conversations.toArray().catch(() => [] as StoredConversation[]),
-      db.projects.toArray().catch(() => [] as Project[]),
-      db.memories.toArray().catch(() => [] as Memory[]),
-      db.knowledge.toArray().catch(() => [] as KnowledgeRecord[]),
-      allProjectMappings().catch(
-        () =>
-          ({}) as Record<
-            string,
-            { projectId: string | null; reason: string; ts: number }
-          >,
-      ),
-      getContinueHistory().catch(() => []),
-    ]);
+  const [conversations, projects, memories, knowledgeRows, mappings, history] = await Promise.all([
+    db.conversations.toArray().catch(() => [] as StoredConversation[]),
+    db.projects.toArray().catch(() => [] as Project[]),
+    db.memories.toArray().catch(() => [] as Memory[]),
+    db.knowledge.toArray().catch(() => [] as KnowledgeRecord[]),
+    allProjectMappings().catch(
+      () => ({}) as Record<string, { projectId: string | null; reason: string; ts: number }>,
+    ),
+    getContinueHistory().catch(() => []),
+  ]);
 
   const now = Date.now();
   const todayStart = startOfToday();
@@ -269,7 +258,10 @@ async function build(): Promise<Workspace> {
   for (const conv of recent) {
     const msgs = msgsByConv.get(conv.id) ?? [];
     if (!msgs.length) continue;
-    const tail = msgs.slice(-2).map((m) => m.markdown || m.content || "").join("\n");
+    const tail = msgs
+      .slice(-2)
+      .map((m) => m.markdown || m.content || "")
+      .join("\n");
     if (!tail.trim()) continue;
     const cls = classifyAttention(conv, tail.slice(-1200));
     if (!cls) continue;
@@ -301,9 +293,7 @@ async function build(): Promise<Workspace> {
   goals.sort((a, b) => b.updatedAt - a.updatedAt);
 
   const activeGoals = goals.filter((g) => g.status === "active");
-  const completedToday = goals.filter(
-    (g) => g.status === "completed" && g.updatedAt >= todayStart,
-  );
+  const completedToday = goals.filter((g) => g.status === "completed" && g.updatedAt >= todayStart);
 
   // Latest decision per conversation — used as a "progress" hint.
   const decisionByConv = new Map<string, ExtractedDecision>();
@@ -586,10 +576,7 @@ function rankContinue(item: ContinueItem): number {
 
 export async function getWorkspace(force = false): Promise<Workspace> {
   const fresh =
-    !force &&
-    CACHE &&
-    CACHE_AT === CACHE_VERSION &&
-    Date.now() - CACHE.builtAt < TTL_MS;
+    !force && CACHE && CACHE_AT === CACHE_VERSION && Date.now() - CACHE.builtAt < TTL_MS;
   if (fresh && CACHE) return CACHE;
   const w = await build();
   CACHE = w;

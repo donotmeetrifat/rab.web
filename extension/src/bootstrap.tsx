@@ -67,10 +67,7 @@ function installGlobalErrorListeners() {
   }
 }
 
-async function runStage(
-  name: string,
-  fn: () => Promise<void> | void,
-): Promise<BootStageReport> {
+async function runStage(name: string, fn: () => Promise<void> | void): Promise<BootStageReport> {
   const t0 = performance.now();
   try {
     await fn();
@@ -95,37 +92,43 @@ export async function bootstrap(options: {
   const t0 = performance.now();
   const stages: BootStageReport[] = [];
 
-  stages.push(await runStage("global-error-listeners", () => {
-    installGlobalErrorListeners();
-  }));
+  stages.push(
+    await runStage("global-error-listeners", () => {
+      installGlobalErrorListeners();
+    }),
+  );
 
-  stages.push(await runStage("open-database", async () => {
-    // Import lazily so a module-load failure surfaces as a stage error
-    // rather than a top-level import crash.
-    const { db } = await import("@/lib/db");
-    // Force Dexie to open now so schema errors are attributed here.
-    await db.open();
-  }));
+  stages.push(
+    await runStage("open-database", async () => {
+      // Import lazily so a module-load failure surfaces as a stage error
+      // rather than a top-level import crash.
+      const { db } = await import("@/lib/db");
+      // Force Dexie to open now so schema errors are attributed here.
+      await db.open();
+    }),
+  );
 
-  stages.push(await runStage("install-platform", async () => {
-    // Subscribers module installs platform adapters + local API + wires
-    // event bus listeners. All calls inside are idempotent.
-    await import("@/core/subscribers");
-    // Phase 14.4 — subscribe once to MEMLACE_CONVERSATION_UPDATED so
-    // every UI surface stays live without polling or reopening.
-    const [{ installLiveEventBridge, subscribeLiveEvents }, { useMemlace }, { startHealthLoop }] = await Promise.all([
-      import("@/core/liveEvents"),
-      import("@/store/useMemlace"),
-      import("@/core/HealthCheck"),
-    ]);
-    installLiveEventBridge();
-    subscribeLiveEvents(() => {
-      const s = useMemlace.getState();
-      if (s.ready) void s.refresh();
-    });
-    startHealthLoop();
-  }));
-
+  stages.push(
+    await runStage("install-platform", async () => {
+      // Subscribers module installs platform adapters + local API + wires
+      // event bus listeners. All calls inside are idempotent.
+      await import("@/core/subscribers");
+      // Phase 14.4 — subscribe once to MEMLACE_CONVERSATION_UPDATED so
+      // every UI surface stays live without polling or reopening.
+      const [{ installLiveEventBridge, subscribeLiveEvents }, { useMemlace }, { startHealthLoop }] =
+        await Promise.all([
+          import("@/core/liveEvents"),
+          import("@/store/useMemlace"),
+          import("@/core/HealthCheck"),
+        ]);
+      installLiveEventBridge();
+      subscribeLiveEvents(() => {
+        const s = useMemlace.getState();
+        if (s.ready) void s.refresh();
+      });
+      startHealthLoop();
+    }),
+  );
 
   const container = document.getElementById(options.rootId ?? "root");
   if (!container) {
@@ -145,28 +148,26 @@ export async function bootstrap(options: {
     stages,
   };
 
-  stages.push(await runStage("mount-react", () => {
-    const root = createRoot(container);
-    if (failed) {
+  stages.push(
+    await runStage("mount-react", () => {
+      const root = createRoot(container);
+      if (failed) {
+        root.render(
+          <React.StrictMode>
+            <StartupError surface={options.surface} report={report} failedStage={failed} />
+          </React.StrictMode>,
+        );
+        return;
+      }
       root.render(
         <React.StrictMode>
-          <StartupError
-            surface={options.surface}
-            report={report}
-            failedStage={failed}
-          />
+          <ErrorBoundary>
+            <ToastProvider>{options.render()}</ToastProvider>
+          </ErrorBoundary>
         </React.StrictMode>,
       );
-      return;
-    }
-    root.render(
-      <React.StrictMode>
-        <ErrorBoundary>
-          <ToastProvider>{options.render()}</ToastProvider>
-        </ErrorBoundary>
-      </React.StrictMode>,
-    );
-  }));
+    }),
+  );
 
   // If React mount itself failed, replace with a plain-DOM fallback so
   // the popup is never blank.
@@ -190,7 +191,15 @@ export async function bootstrap(options: {
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c] as string));
+  return s.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c] as string,
+  );
 }

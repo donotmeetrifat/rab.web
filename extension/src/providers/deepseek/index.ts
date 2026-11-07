@@ -16,7 +16,8 @@ export class DeepSeekAdapter extends BaseChatAdapter {
   protected readonly buttonId = "memlace-save-btn-deepseek";
 
   getConversationId(): string | null {
-    const match = location.pathname.match(/\/a\/chat\/s\/([\w-]+)/) ||
+    const match =
+      location.pathname.match(/\/a\/chat\/s\/([\w-]+)/) ||
       location.pathname.match(/\/chat\/([\w-]+)/);
     if (match) return match[1]!;
     const first = document.querySelector(MESSAGE_SELECTOR);
@@ -54,19 +55,24 @@ export class DeepSeekAdapter extends BaseChatAdapter {
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
       const attachments = Array.from(node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'))
         .slice(0, 8)
         .map((a) => ({ kind: "link" as const, url: a.href, name: extractText(a) }));
 
-      const id = node.getAttribute("data-message-id")
-        ?? `${role}:${idx}:${hashString(markdown || content)}`;
-      const thinking = node.querySelector<HTMLElement>(
-        '[class*="thinking"], [class*="reasoning"]',
-      );
+      const id =
+        node.getAttribute("data-message-id") ?? `${role}:${idx}:${hashString(markdown || content)}`;
+      const thinking = node.querySelector<HTMLElement>('[class*="thinking"], [class*="reasoning"]');
 
       messages.push({
-        id, role, content, markdown, images, attachments, order: idx,
+        id,
+        role,
+        content,
+        markdown,
+        images,
+        attachments,
+        order: idx,
         metadata: { ...(thinking ? { thinking: extractText(thinking) } : {}) },
       });
     });

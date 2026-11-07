@@ -41,9 +41,7 @@ import type { AIConversationSummary } from "@/ai/types";
 
 export { invalidateContext };
 
-export async function buildContextPackage(
-  input: BuildContextInput,
-): Promise<ContextPackage> {
+export async function buildContextPackage(input: BuildContextInput): Promise<ContextPackage> {
   const { conversation, target } = input;
   const cached = getCached(conversation.id, conversation.hash, target);
   if (cached) return cached;
@@ -91,7 +89,13 @@ export async function buildContextPackage(
     }),
     size: "medium",
     truncated,
-    counts: countIngredients(compressed, items.length, messages.length, decisions.length, goals.length),
+    counts: countIngredients(
+      compressed,
+      items.length,
+      messages.length,
+      decisions.length,
+      goals.length,
+    ),
     qualityScore: qualityScoreFor({
       conversation,
       knowledge,
@@ -125,9 +129,7 @@ async function loadKnowledge(conversationId: string): Promise<KnowledgeRecord | 
 
 async function loadSummary(conversationId: string): Promise<AIConversationSummary | null> {
   try {
-    return (
-      (await db.aiSummaries.where("conversationId").equals(conversationId).first()) ?? null
-    );
+    return (await db.aiSummaries.where("conversationId").equals(conversationId).first()) ?? null;
   } catch {
     return null;
   }
@@ -178,8 +180,17 @@ interface CollectArgs {
 
 function collectItems(args: CollectArgs): ContextItem[] {
   const items: ContextItem[] = [];
-  
-  const { conversation, messages, knowledge, summary, decisions, goals, sessionSiblings, projectName } = args;
+
+  const {
+    conversation,
+    messages,
+    knowledge,
+    summary,
+    decisions,
+    goals,
+    sessionSiblings,
+    projectName,
+  } = args;
 
   // Project header — cheap anchor for the receiving AI.
   if (projectName) {
@@ -275,9 +286,7 @@ function collectItems(args: CollectArgs): ContextItem[] {
       });
     }
     // Important code blocks — trim heavily.
-    const code = (knowledge.codeBlocks ?? [])
-      .slice(0, 3)
-      .filter((b) => b.charCount > 0);
+    const code = (knowledge.codeBlocks ?? []).slice(0, 3).filter((b) => b.charCount > 0);
     for (const block of code) {
       const fence = block.language || "";
       const body = block.preview.length > 800 ? `${block.preview.slice(0, 800)}\n…` : block.preview;
@@ -424,7 +433,8 @@ function buildSummaryBullets(
   if (knowledge) out.push("Relevant knowledge");
   if (codeBlocks) out.push(`${codeBlocks} code snippet${codeBlocks === 1 ? "" : "s"}`);
   if (extras.hasSummary) out.push("Prior work summary");
-  if (extras.relatedCount) out.push(`${extras.relatedCount} nearby chat${extras.relatedCount === 1 ? "" : "s"}`);
+  if (extras.relatedCount)
+    out.push(`${extras.relatedCount} nearby chat${extras.relatedCount === 1 ? "" : "s"}`);
   return out;
 }
 

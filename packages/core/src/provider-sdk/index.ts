@@ -7,10 +7,10 @@
  */
 
 export type ProviderCapability =
-  | "capture"          // can capture live conversations
-  | "continue"         // can accept a pasted continuation
-  | "import"           // can parse exported archives
-  | "codeAware"        // exposes rich code blocks
+  | "capture" // can capture live conversations
+  | "continue" // can accept a pasted continuation
+  | "import" // can parse exported archives
+  | "codeAware" // exposes rich code blocks
   | "images"
   | "attachments";
 

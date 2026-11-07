@@ -50,11 +50,20 @@ function formatRelative(ts: number): string {
 
 function MemoryRowInner(props: Props) {
   const {
-    memory, selected, onSelectChange,
-    onToggleFavorite, onTogglePin,
-    onTrash, onRestore, onDelete,
-    onArchive, onUnarchive,
-    onDuplicate, onCopy, onEdit, onMove,
+    memory,
+    selected,
+    onSelectChange,
+    onToggleFavorite,
+    onTogglePin,
+    onTrash,
+    onRestore,
+    onDelete,
+    onArchive,
+    onUnarchive,
+    onDuplicate,
+    onCopy,
+    onEdit,
+    onMove,
     onOpen,
   } = props;
 
@@ -93,25 +102,17 @@ function MemoryRowInner(props: Props) {
               style={{ background: meta?.color ?? "#94a3b8" }}
               aria-hidden
             />
-            {memory.pinned && (
-              <Pin className="h-3 w-3 text-primary shrink-0" aria-label="Pinned" />
-            )}
-            <h4 className="text-sm font-medium text-foreground truncate flex-1">
-              {memory.title}
-            </h4>
+            {memory.pinned && <Pin className="h-3 w-3 text-primary shrink-0" aria-label="Pinned" />}
+            <h4 className="text-sm font-medium text-foreground truncate flex-1">{memory.title}</h4>
             <time className="text-[11px] text-muted-foreground shrink-0">
               {formatRelative(memory.updatedAt)}
             </time>
           </div>
           {preview && (
-            <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">
-              {preview}
-            </p>
+            <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">{preview}</p>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="rounded-md bg-muted px-1.5 py-0.5">
-              {meta?.name ?? "Other"}
-            </span>
+            <span className="rounded-md bg-muted px-1.5 py-0.5">{meta?.name ?? "Other"}</span>
             {memory.archived && (
               <span className="rounded-md bg-amber-100 text-amber-800 px-1.5 py-0.5 dark:bg-amber-950 dark:text-amber-200">
                 Archived
@@ -135,10 +136,7 @@ function MemoryRowInner(props: Props) {
 
       <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
         {onTogglePin && (
-          <IconBtn
-            label={memory.pinned ? "Unpin" : "Pin"}
-            onClick={() => onTogglePin(memory.id)}
-          >
+          <IconBtn label={memory.pinned ? "Unpin" : "Pin"} onClick={() => onTogglePin(memory.id)}>
             <Pin className={"h-3.5 w-3.5 " + (memory.pinned ? "text-primary" : "")} />
           </IconBtn>
         )}
@@ -148,10 +146,7 @@ function MemoryRowInner(props: Props) {
             onClick={() => onToggleFavorite(memory.id)}
           >
             <Star
-              className={
-                "h-3.5 w-3.5 " +
-                (memory.favorite ? "fill-amber-400 text-amber-500" : "")
-              }
+              className={"h-3.5 w-3.5 " + (memory.favorite ? "fill-amber-400 text-amber-500" : "")}
             />
           </IconBtn>
         )}
@@ -197,32 +192,68 @@ function MemoryRowInner(props: Props) {
                 className="absolute right-0 top-8 z-20 w-44 rounded-lg border border-border bg-surface shadow-xl py-1 text-xs animate-scale-in"
               >
                 {onEdit && (
-                  <MenuItem icon={Pencil} onClick={() => { setMenuOpen(false); onEdit(memory.id); }}>
+                  <MenuItem
+                    icon={Pencil}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEdit(memory.id);
+                    }}
+                  >
                     Edit
                   </MenuItem>
                 )}
                 {onDuplicate && (
-                  <MenuItem icon={Copy} onClick={() => { setMenuOpen(false); onDuplicate(memory.id); }}>
+                  <MenuItem
+                    icon={Copy}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onDuplicate(memory.id);
+                    }}
+                  >
                     Duplicate
                   </MenuItem>
                 )}
                 {onCopy && (
-                  <MenuItem icon={Copy} onClick={() => { setMenuOpen(false); onCopy(memory.id); }}>
+                  <MenuItem
+                    icon={Copy}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onCopy(memory.id);
+                    }}
+                  >
                     Copy content
                   </MenuItem>
                 )}
                 {onMove && (
-                  <MenuItem icon={FolderInput} onClick={() => { setMenuOpen(false); onMove(memory.id); }}>
+                  <MenuItem
+                    icon={FolderInput}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onMove(memory.id);
+                    }}
+                  >
                     Move to project…
                   </MenuItem>
                 )}
                 {onArchive && !memory.archived && (
-                  <MenuItem icon={Archive} onClick={() => { setMenuOpen(false); onArchive(memory.id); }}>
+                  <MenuItem
+                    icon={Archive}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onArchive(memory.id);
+                    }}
+                  >
                     Archive
                   </MenuItem>
                 )}
                 {onUnarchive && memory.archived && (
-                  <MenuItem icon={ArchiveRestore} onClick={() => { setMenuOpen(false); onUnarchive(memory.id); }}>
+                  <MenuItem
+                    icon={ArchiveRestore}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onUnarchive(memory.id);
+                    }}
+                  >
                     Unarchive
                   </MenuItem>
                 )}

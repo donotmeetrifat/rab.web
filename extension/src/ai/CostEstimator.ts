@@ -31,18 +31,14 @@ const PRICES: Record<string, Price> = {
   "gemini-2.0-flash": { input: 0.1, output: 0.4 },
   "text-embedding-004": { input: 0, output: 0, embed: 0 },
   // Local / self-hosted
-  "__local__": { input: 0, output: 0, embed: 0 },
+  __local__: { input: 0, output: 0, embed: 0 },
 };
 
 export function priceOf(model: string): Price {
   return PRICES[model] ?? { input: null, output: null };
 }
 
-export function estimateCostUSD(
-  model: string,
-  inputTokens: number,
-  outputTokens: number,
-): number {
+export function estimateCostUSD(model: string, inputTokens: number, outputTokens: number): number {
   const p = priceOf(model);
   const inCost = p.input == null ? 0 : (inputTokens / 1_000_000) * p.input;
   const outCost = p.output == null ? 0 : (outputTokens / 1_000_000) * p.output;

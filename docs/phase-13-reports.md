@@ -25,7 +25,7 @@ recorded (`pipelineSnapshot()`). Steps: knowledge → projectDetection
 events into scope invalidations:
 
 | Event                | Scopes invalidated                            |
-|----------------------|-----------------------------------------------|
+| -------------------- | --------------------------------------------- |
 | conversation.saved   | workspace, projects, context, answers, search |
 | conversation.deleted | workspace, projects, context, answers, search |
 | knowledge.updated    | knowledge, answers, search                    |

@@ -1,0 +1,59 @@
+{
+  "url": "https://railwayautobooker.vercel.app/",
+  "status": 200,
+  "ttfbMs": 750,
+  "htmlSizeKB": "126.65",
+  "googlebot2MBCapPass": true,
+  "headers": {
+    "server": "Vercel",
+    "strictTransportSecurity": "max-age=63072000; includeSubDomains; preload",
+    "contentSecurityPolicy": "PRESENT",
+    "xFrameOptions": "DENY",
+    "xContentTypeOptions": "nosniff",
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "permissionsPolicy": "PRESENT"
+  },
+  "crawlability": {
+    "robotsStatus": 200,
+    "robotsSitemapPresent": true,
+    "robotsAdminBlocked": true,
+    "robotsApiBlocked": true,
+    "aiCrawlersAllowed": true,
+    "sitemapStatus": 200,
+    "sitemapHasAbsoluteUrls": true,
+    "sitemapUrlCount": 3
+  },
+  "indexability": {
+    "canonical": "https://railwayautobooker.vercel.app/",
+    "canonicalMatch": true,
+    "robotsMeta": "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+    "adminNoindexPresent": true
+  },
+  "security": {
+    "httpsEnforced": true,
+    "hstsPreload": true,
+    "backButtonHijackFree": true,
+    "stackCveExposureRisk": "Zero (Vercel Serverless Edge, Node.js runtime, no PHP)"
+  },
+  "structuredData": {
+    "present": true,
+    "serverRendered": true,
+    "types": [
+      "SoftwareApplication",
+      "WebSite",
+      "WebPage",
+      "Organization",
+      "BreadcrumbList",
+      "VideoObject",
+      "FAQPage"
+    ]
+  },
+  "preloads": [
+    "<link rel=\"preload\" as=\"image\" href=\"/railway-icon.png\"/>",
+    "<link rel=\"preload\" as=\"image\" href=\"/railway-thumbnail.webp\" fetchPriority=\"high\"/>"
+  ],
+  "indexNow": {
+    "key1Status": 200,
+    "key2Status": 200
+  }
+}

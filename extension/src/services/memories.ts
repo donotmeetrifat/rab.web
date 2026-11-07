@@ -145,10 +145,7 @@ export async function duplicateMemory(id: string): Promise<Memory | null> {
   });
 }
 
-export async function moveMemories(
-  ids: string[],
-  projectId: string | null,
-): Promise<void> {
+export async function moveMemories(ids: string[], projectId: string | null): Promise<void> {
   const now = Date.now();
   await db.memories.bulkUpdate(
     ids.map((id) => ({ key: id, changes: { projectId, updatedAt: now } })),
@@ -289,8 +286,16 @@ export function sortMemories(rows: Memory[], sort: SortKey): Memory[] {
 /* ------------------------------------------------------------------ */
 
 const TAG_PALETTE = [
-  "#2563EB", "#7C3AED", "#DB2777", "#DC2626", "#EA580C",
-  "#CA8A04", "#16A34A", "#0EA5E9", "#0F766E", "#475569",
+  "#2563EB",
+  "#7C3AED",
+  "#DB2777",
+  "#DC2626",
+  "#EA580C",
+  "#CA8A04",
+  "#16A34A",
+  "#0EA5E9",
+  "#0F766E",
+  "#475569",
 ];
 
 export function colorForTag(tag: string): string {
@@ -427,7 +432,9 @@ function validateConvMessage(v: unknown): StoredConvMessage | null {
     content: typeof v.content === "string" ? v.content : "",
     markdown: typeof v.markdown === "string" ? v.markdown : "",
     order: typeof v.order === "number" ? v.order : 0,
-    images: Array.isArray(v.images) ? v.images.filter((s): s is string => typeof s === "string") : [],
+    images: Array.isArray(v.images)
+      ? v.images.filter((s): s is string => typeof s === "string")
+      : [],
     attachments: Array.isArray(v.attachments)
       ? (v.attachments.filter((a) => isRecord(a)) as StoredConvMessage["attachments"])
       : [],
@@ -443,7 +450,8 @@ function validateSettingsPatch(v: unknown): Partial<Settings> | null {
   if (typeof v.defaultProvider === "string") out.defaultProvider = v.defaultProvider as ProviderId;
   if (typeof v.shortcutCapture === "string") out.shortcutCapture = v.shortcutCapture;
   if (typeof v.shortcutOpenPopup === "string") out.shortcutOpenPopup = v.shortcutOpenPopup;
-  if (typeof v.notificationsEnabled === "boolean") out.notificationsEnabled = v.notificationsEnabled;
+  if (typeof v.notificationsEnabled === "boolean")
+    out.notificationsEnabled = v.notificationsEnabled;
   if (typeof v.autoSaveConversations === "boolean")
     out.autoSaveConversations = v.autoSaveConversations;
   if (typeof v.saveImages === "boolean") out.saveImages = v.saveImages;
@@ -496,27 +504,38 @@ export async function importAll(json: string, opts: ImportOptions = {}): Promise
 
   for (const p of projectsRaw) {
     const v = validateProject(p);
-    v ? projects.push(v) : skipped++;
+    if (v) {
+      projects.push(v);
+    } else {
+      skipped++;
+    }
   }
   for (const m of memoriesRaw) {
     const v = validateMemory(m);
-    v ? memories.push(v) : skipped++;
+    if (v) {
+      memories.push(v);
+    } else {
+      skipped++;
+    }
   }
   for (const c of conversationsRaw) {
     const v = validateConversation(c);
-    v ? conversations.push(v) : skipped++;
+    if (v) {
+      conversations.push(v);
+    } else {
+      skipped++;
+    }
   }
   for (const m of messagesRaw) {
     const v = validateConvMessage(m);
-    v ? messages.push(v) : skipped++;
+    if (v) {
+      messages.push(v);
+    } else {
+      skipped++;
+    }
   }
 
-  if (
-    !projects.length &&
-    !memories.length &&
-    !conversations.length &&
-    !messages.length
-  ) {
+  if (!projects.length && !memories.length && !conversations.length && !messages.length) {
     throw new Error("No valid records found in export");
   }
 

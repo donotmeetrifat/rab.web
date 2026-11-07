@@ -15,7 +15,7 @@
  *
  * Diagnostics counters are exposed for the Live Event Monitor.
  */
-import type { RuntimeMessage } from "@/types";
+import type { RuntimeMessage, StoredConversation } from "@/types";
 import { invalidate } from "./Cache";
 import { emit } from "./EventBus";
 import { auditMark } from "./SaveAuditor";
@@ -79,9 +79,22 @@ export function installLiveEventBridge(): void {
     auditMark(payload.provider, payload.conversationId, "received");
 
     // Invalidate only the affected scopes — never a full wipe.
-    const scopes = ["workspace", "projects", "context", "answers", "search", "knowledge", "timeline"];
+    const scopes = [
+      "workspace",
+      "projects",
+      "context",
+      "answers",
+      "search",
+      "knowledge",
+      "timeline",
+    ];
     for (const scope of scopes) {
-      try { invalidate(scope); diag.cacheInvalidations += 1; } catch { /* noop */ }
+      try {
+        invalidate(scope);
+        diag.cacheInvalidations += 1;
+      } catch {
+        /* noop */
+      }
     }
     auditMark(payload.provider, payload.conversationId, "cacheInvalidated");
 
@@ -89,17 +102,25 @@ export function installLiveEventBridge(): void {
     // smart workspace, onboarding, etc.) refresh through the same wiring.
     try {
       emit("conversation.saved", {
-        // Minimal shape — subscribers rely on `created`/`source` only.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conversation: { id: payload.conversationId, provider: payload.provider, projectId: payload.projectId } as any,
+        conversation: {
+          id: payload.conversationId,
+          provider: payload.provider,
+          projectId: payload.projectId,
+        } as unknown as StoredConversation,
         created: payload.created,
         source: payload.source,
       });
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
 
     // Notify local subscribers (store refresh + component listeners).
     for (const l of listeners) {
-      try { l(msg); } catch (err) { console.warn("[Memlace][liveEvents] listener threw", err); }
+      try {
+        l(msg);
+      } catch (err) {
+        console.warn("[Memlace][liveEvents] listener threw", err);
+      }
     }
     diag.lastRefreshAt = Date.now();
     auditMark(payload.provider, payload.conversationId, "rendered");

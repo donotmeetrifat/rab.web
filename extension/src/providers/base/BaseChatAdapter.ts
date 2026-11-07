@@ -6,7 +6,6 @@ import { consumePendingHandoff } from "@/lib/handoff";
 import type { ContinuationProviderId } from "@/lib/continuation";
 import { traceStateFlow } from "./stateTrace";
 
-
 /**
  * Shared skeleton for provider adapters. Owns the parts that are identical
  * across every AI site: MutationObserver plumbing, indicator lifecycle,
@@ -49,13 +48,18 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
   abstract getTitle(): string;
   abstract getMessages(): CapturedMessage[];
   /** Provider-specific model detection. Default: none. */
-  protected getModel(): string | null { return null; }
+  protected getModel(): string | null {
+    return null;
+  }
 
   /* ---------------- ProviderAdapter surface ---------------- */
 
   matches(url: string): boolean {
-    try { return this.hostPattern.test(new URL(url).hostname); }
-    catch { return false; }
+    try {
+      return this.hostPattern.test(new URL(url).hostname);
+    } catch {
+      return false;
+    }
   }
 
   detect(): boolean {
@@ -148,12 +152,16 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
       this.reinjectObserver = null;
       if (this.stateListener) {
         window.removeEventListener("memlace:watch-state", this.stateListener);
-        traceStateFlow("memlace:watch-state listener removed", "BaseChatAdapter.injectIndicator disposer", {
-          conversationId: this.getConversationId(),
-          provider: this.id,
-          currentWatchState: this.handlers?.getState(),
-          previousWatchState: this.handlers?.getState(),
-        });
+        traceStateFlow(
+          "memlace:watch-state listener removed",
+          "BaseChatAdapter.injectIndicator disposer",
+          {
+            conversationId: this.getConversationId(),
+            provider: this.id,
+            currentWatchState: this.handlers?.getState(),
+            previousWatchState: this.handlers?.getState(),
+          },
+        );
         this.stateListener = null;
       }
       this.indicatorEl?.remove();
@@ -230,8 +238,6 @@ export abstract class BaseChatAdapter implements ProviderAdapter {
     if (!pending) return;
     showFloatingReminder(pending.message);
   }
-
-
 
   protected applyIndicatorState(state: WatchState): void {
     if (!this.indicatorEl) {
@@ -313,14 +319,14 @@ export function findToolbarByButtonCluster(
 type StateConfig = { text: string; tooltip: string };
 
 const STATE_MAP: Record<WatchState, StateConfig> = {
-  watching:   { text: "Watching",   tooltip: "Memlace is watching this conversation" },
+  watching: { text: "Watching", tooltip: "Memlace is watching this conversation" },
   extracting: { text: "Extracting", tooltip: "Reading the latest conversation…" },
-  sending:    { text: "Sending",    tooltip: "Handing off to the background writer…" },
-  saving:     { text: "Saving",     tooltip: "Writing to local storage…" },
-  indexing:   { text: "Indexing",   tooltip: "Updating knowledge & projects…" },
-  synced:     { text: "Synced",     tooltip: "Latest snapshot saved locally" },
-  skipped:    { text: "No changes", tooltip: "Nothing new to save" },
-  error:      { text: "Error",      tooltip: "Last save failed — will retry on next change" },
+  sending: { text: "Sending", tooltip: "Handing off to the background writer…" },
+  saving: { text: "Saving", tooltip: "Writing to local storage…" },
+  indexing: { text: "Indexing", tooltip: "Updating knowledge & projects…" },
+  synced: { text: "Synced", tooltip: "Latest snapshot saved locally" },
+  skipped: { text: "No changes", tooltip: "Nothing new to save" },
+  error: { text: "Error", tooltip: "Last save failed — will retry on next change" },
 };
 
 const INDICATOR_MARKUP = `
@@ -450,4 +456,3 @@ function showFloatingReminder(message: string): void {
     setTimeout(() => el.remove(), 250);
   }, 6000);
 }
-

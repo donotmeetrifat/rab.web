@@ -160,7 +160,13 @@ class Queue {
     void this.tick();
   }
 
-  totals(): { queued: number; running: number; done: number; failed: number; totalCostUSD: number } {
+  totals(): {
+    queued: number;
+    running: number;
+    done: number;
+    failed: number;
+    totalCostUSD: number;
+  } {
     const all = this.snapshot();
     return {
       queued: all.filter((j) => j.status === "queued").length,

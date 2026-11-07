@@ -1,17 +1,10 @@
 import { db, uid } from "@/lib/db";
-import type {
-  ProviderId,
-  StoredConversation,
-  StoredConvMessage,
-} from "@/types";
+import type { ProviderId, StoredConversation, StoredConvMessage } from "@/types";
 import type { CapturedConversation } from "@/providers/base/types";
 import { hashConversation } from "@/providers/base/hash";
 import { invalidateReadiness } from "@/services/contextReadiness";
 import { invalidateContext } from "@/context";
-import {
-  dispatchConversationSaved,
-  dispatchConversationDeleted,
-} from "@/core";
+import { dispatchConversationSaved, dispatchConversationDeleted } from "@/core";
 // Static import — content scripts must not load onboarding as a chunk.
 import { markChecklist } from "@/services/onboarding";
 import { traceStateFlow } from "@/providers/base/stateTrace";
@@ -88,11 +81,15 @@ function debugEnabled(): boolean {
   try {
     const w = globalThis as unknown as { memlaceDebug?: boolean };
     if (w.memlaceDebug) return true;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   try {
     if (typeof localStorage !== "undefined" && localStorage.getItem("memlaceDebug") === "1")
       return true;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return false;
 }
 function dlog(stage: number, name: string, extra?: unknown) {
@@ -120,7 +117,7 @@ export async function saveConversation(
     runtimeId: chrome.runtime.id,
     origin: globalThis.location.origin,
   });
-  const t0 = (typeof performance !== "undefined" ? performance.now() : Date.now());
+  const t0 = typeof performance !== "undefined" ? performance.now() : Date.now();
   const hash = opts.hash ?? hashConversation(captured);
   const keepImages = opts.saveImages !== false;
   const keepAttachments = opts.saveAttachments !== false;
@@ -155,109 +152,101 @@ export async function saveConversation(
     dlog(2, "Beginning transaction");
     lastStage = 2;
 
-    const result = await db.transaction(
-      "rw",
-      db.conversations,
-      db.convMessages,
-      async () => {
-        let existing: StoredConversation | undefined;
-        try {
-          existing = await db.conversations
-            .where("[provider+providerConversationId]")
-            .equals([captured.provider, captured.conversationId])
-            .first();
-          dlog(3, "Existing conversation lookup finished", {
-            found: !!existing,
-            id: existing?.id,
-          });
-          lastStage = 3;
-        } catch (err) {
-          derr(3, "Existing conversation lookup", err);
-          throw err;
-        }
+    const result = await db.transaction("rw", db.conversations, db.convMessages, async () => {
+      let existing: StoredConversation | undefined;
+      try {
+        existing = await db.conversations
+          .where("[provider+providerConversationId]")
+          .equals([captured.provider, captured.conversationId])
+          .first();
+        dlog(3, "Existing conversation lookup finished", {
+          found: !!existing,
+          id: existing?.id,
+        });
+        lastStage = 3;
+      } catch (err) {
+        derr(3, "Existing conversation lookup", err);
+        throw err;
+      }
 
-        if (existing && existing.hash === hash) {
-          dlog(3, "No-op: hash unchanged");
-          return { conversation: existing, changed: false, created: false };
-        }
+      if (existing && existing.hash === hash) {
+        dlog(3, "No-op: hash unchanged");
+        return { conversation: existing, changed: false, created: false };
+      }
 
-        const conversation: StoredConversation = existing
-          ? {
-              ...existing,
-              title: captured.title || existing.title,
-              url: captured.url || existing.url,
-              model: captured.model ?? existing.model,
-              messageCount: captured.messages.length,
-              hash,
-              lastSyncAt: now,
-              updatedAt: now,
-            }
-          : {
-              id: uid("conv"),
-              provider: captured.provider,
-              providerConversationId: captured.conversationId,
-              title: captured.title || "Untitled conversation",
-              url: captured.url,
-              model: captured.model,
-              messageCount: captured.messages.length,
-              hash,
-              createdAt: now,
-              updatedAt: now,
-              lastSyncAt: now,
-              source: opts.source,
-            };
+      const conversation: StoredConversation = existing
+        ? {
+            ...existing,
+            title: captured.title || existing.title,
+            url: captured.url || existing.url,
+            model: captured.model ?? existing.model,
+            messageCount: captured.messages.length,
+            hash,
+            lastSyncAt: now,
+            updatedAt: now,
+          }
+        : {
+            id: uid("conv"),
+            provider: captured.provider,
+            providerConversationId: captured.conversationId,
+            title: captured.title || "Untitled conversation",
+            url: captured.url,
+            model: captured.model,
+            messageCount: captured.messages.length,
+            hash,
+            createdAt: now,
+            updatedAt: now,
+            lastSyncAt: now,
+            source: opts.source,
+          };
 
-        try {
-          dlog(4, "Writing conversation row", { id: conversation.id });
-          await db.conversations.put(conversation);
-          lastStage = 5;
-          dlog(5, "Conversation row written", { id: conversation.id });
-        } catch (err) {
-          derr(4, "Writing conversation row", err);
-          throw err;
-        }
+      try {
+        dlog(4, "Writing conversation row", { id: conversation.id });
+        await db.conversations.put(conversation);
+        lastStage = 5;
+        dlog(5, "Conversation row written", { id: conversation.id });
+      } catch (err) {
+        derr(4, "Writing conversation row", err);
+        throw err;
+      }
 
-        try {
-          const prevCount = await db.convMessages
-            .where("conversationId")
-            .equals(conversation.id)
-            .count();
-          dlog(6, "Deleting previous messages", { count: prevCount });
-          await db.convMessages
-            .where("conversationId")
-            .equals(conversation.id)
-            .delete();
-          lastStage = 6;
-        } catch (err) {
-          derr(6, "Deleting previous messages", err);
-          throw err;
-        }
+      try {
+        const prevCount = await db.convMessages
+          .where("conversationId")
+          .equals(conversation.id)
+          .count();
+        dlog(6, "Deleting previous messages", { count: prevCount });
+        await db.convMessages.where("conversationId").equals(conversation.id).delete();
+        lastStage = 6;
+      } catch (err) {
+        derr(6, "Deleting previous messages", err);
+        throw err;
+      }
 
-        const rows: StoredConvMessage[] = captured.messages.map((m) => ({
-          id: uid("msg"),
-          conversationId: conversation.id,
-          providerMessageId: m.id,
-          role: m.role,
-          content: m.content,
-          markdown: m.markdown,
-          order: m.order,
-          images: keepImages ? m.images : [],
-          attachments: keepAttachments ? m.attachments : [],
-          metadata: m.metadata,
-          createdAt: now,
-        }));
-        try {
-          dlog(7, "Writing messages", { count: rows.length });
-          if (rows.length) await db.convMessages.bulkAdd(rows);
-          lastStage = 7;
-        } catch (err) {
-          derr(7, "Writing messages", err);
-          throw err;
-        }
+      const rows: StoredConvMessage[] = captured.messages.map((m) => ({
+        id: uid("msg"),
+        conversationId: conversation.id,
+        providerMessageId: m.id,
+        role: m.role,
+        content: m.content,
+        markdown: m.markdown,
+        order: m.order,
+        images: keepImages ? m.images : [],
+        attachments: keepAttachments ? m.attachments : [],
+        metadata: m.metadata,
+        createdAt: now,
+      }));
+      try {
+        dlog(7, "Writing messages", { count: rows.length });
+        if (rows.length) await db.convMessages.bulkAdd(rows);
+        lastStage = 7;
+      } catch (err) {
+        derr(7, "Writing messages", err);
+        throw err;
+      }
 
-        return { conversation, changed: true, created: !existing };
-      },
-    );
+      return { conversation, changed: true, created: !existing };
+    });
 
     traceStateFlow("IndexedDB transaction committed", "saveConversation", {
       conversationId: result.conversation.id,
@@ -315,7 +304,11 @@ export async function saveConversation(
       }
     }
     if (result.created) {
-      try { void markChecklist("savedConversation"); } catch { /* ignore */ }
+      try {
+        void markChecklist("savedConversation");
+      } catch {
+        /* ignore */
+      }
     }
 
     const duration = (typeof performance !== "undefined" ? performance.now() : Date.now()) - t0;
@@ -420,9 +413,7 @@ function makeSnippet(source: string, query: string, hint = -1): ConvSnippet | nu
   return { text, matchStart, matchLength: q.length };
 }
 
-export async function searchConversations(
-  opts: ConvSearchOptions = {},
-): Promise<ConvSearchHit[]> {
+export async function searchConversations(opts: ConvSearchOptions = {}): Promise<ConvSearchHit[]> {
   const all = await db.conversations.toArray();
   const query = (opts.query || "").trim();
   const q = query.toLowerCase();

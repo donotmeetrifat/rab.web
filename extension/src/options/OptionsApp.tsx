@@ -46,7 +46,9 @@ export function OptionsApp() {
     bootstrap();
     void storageEstimate().then(setStorage);
     void counts().then(setStats);
-    void estimateExportSize().then(setExportSize).catch(() => setExportSize(null));
+    void estimateExportSize()
+      .then(setExportSize)
+      .catch(() => setExportSize(null));
   }, [bootstrap]);
 
   const refreshStats = async () => {
@@ -126,9 +128,8 @@ export function OptionsApp() {
     chrome.tabs?.create?.({ url: "chrome://extensions/shortcuts" });
   };
 
-  const storagePct = storage && storage.quota
-    ? Math.min(100, Math.round((storage.usage / storage.quota) * 100))
-    : 0;
+  const storagePct =
+    storage && storage.quota ? Math.min(100, Math.round((storage.usage / storage.quota) * 100)) : 0;
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -143,7 +144,10 @@ export function OptionsApp() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
-        <Section title="Appearance" description="Choose how Memlace looks in the popup, side panel, and this page.">
+        <Section
+          title="Appearance"
+          description="Choose how Memlace looks in the popup, side panel, and this page."
+        >
           <div className="flex gap-2">
             {(["light", "dark", "system"] as const).map((t) => (
               <Button
@@ -157,14 +161,19 @@ export function OptionsApp() {
           </div>
         </Section>
 
-        <Section title="Default provider" description="Used when a captured memory has no known source.">
+        <Section
+          title="Default provider"
+          description="Used when a captured memory has no known source."
+        >
           <select
             value={settings.defaultProvider}
             onChange={(e) => updateSettings({ defaultProvider: e.target.value as ProviderId })}
             className="h-9 rounded-lg border border-border bg-surface px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
           >
             {PROVIDERS.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
             ))}
           </select>
         </Section>
@@ -215,25 +224,35 @@ export function OptionsApp() {
           <AISettingsPanel />
         </Section>
 
-
-        <Section title="Keyboard shortcuts" description="Trigger Memlace anywhere without leaving the page.">
+        <Section
+          title="Keyboard shortcuts"
+          description="Trigger Memlace anywhere without leaving the page."
+        >
           <dl className="grid grid-cols-[1fr_auto] gap-y-2 gap-x-6 text-sm max-w-md">
             <dt className="text-muted-foreground">Open Memlace</dt>
-            <dd><Kbd>{settings.shortcutOpenPopup}</Kbd></dd>
+            <dd>
+              <Kbd>{settings.shortcutOpenPopup}</Kbd>
+            </dd>
             <dt className="text-muted-foreground">Save selection</dt>
-            <dd><Kbd>{settings.shortcutCapture}</Kbd></dd>
+            <dd>
+              <Kbd>{settings.shortcutCapture}</Kbd>
+            </dd>
           </dl>
           <div className="mt-3">
             <Button variant="secondary" onClick={openShortcuts}>
               Customize shortcuts
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">
-              Opens <code>chrome://extensions/shortcuts</code> where you can rebind or clear any command.
+              Opens <code>chrome://extensions/shortcuts</code> where you can rebind or clear any
+              command.
             </p>
           </div>
         </Section>
 
-        <Section title="Storage" description="Everything stays on this device — nothing is ever uploaded.">
+        <Section
+          title="Storage"
+          description="Everything stays on this device — nothing is ever uploaded."
+        >
           <div className="grid grid-cols-3 gap-3 text-sm sm:grid-cols-5">
             <Stat label="Projects" value={stats?.projects ?? "—"} />
             <Stat label="Memories" value={stats?.memories ?? "—"} />
@@ -245,7 +264,9 @@ export function OptionsApp() {
             <div className="mt-4">
               <div className="flex justify-between text-[11px] text-muted-foreground">
                 <span>Used {formatBytes(storage.usage)}</span>
-                <span>of {formatBytes(storage.quota)} ({storagePct}%)</span>
+                <span>
+                  of {formatBytes(storage.quota)} ({storagePct}%)
+                </span>
               </div>
               <div
                 className="mt-1 h-2 rounded-full bg-muted overflow-hidden"
@@ -268,8 +289,12 @@ export function OptionsApp() {
           description="Move projects, memories, and saved chats between devices as a single JSON file."
         >
           <div className="flex flex-wrap gap-2">
-            <Button variant="primary" onClick={doExport}>Export data</Button>
-            <Button variant="secondary" onClick={doImport}>Import data</Button>
+            <Button variant="primary" onClick={doExport}>
+              Export data
+            </Button>
+            <Button variant="secondary" onClick={doImport}>
+              Import data
+            </Button>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3 text-xs text-muted-foreground sm:grid-cols-4">
             <BackupStat label="Projects" value={stats?.projects ?? "—"} />
@@ -290,14 +315,19 @@ export function OptionsApp() {
             Also restore settings from the imported file
           </label>
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Duplicate chats are matched by provider and conversation id — nothing is overwritten unless it's newer.
+            Duplicate chats are matched by provider and conversation id — nothing is overwritten
+            unless it's newer.
           </p>
         </Section>
 
         <Section title="Danger zone" description="These actions can't be undone.">
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={doResetSettings}>Reset settings</Button>
-            <Button variant="danger" onClick={clearAll}>Delete all data</Button>
+            <Button variant="secondary" onClick={doResetSettings}>
+              Reset settings
+            </Button>
+            <Button variant="danger" onClick={clearAll}>
+              Delete all data
+            </Button>
           </div>
         </Section>
 
@@ -310,8 +340,14 @@ export function OptionsApp() {
 }
 
 function Section({
-  title, description, children,
-}: { title: string; description?: string; children: ReactNode }) {
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-2xl border border-border bg-surface p-5">
       <header className="mb-4">
@@ -340,7 +376,6 @@ function BackupStat({ label, value }: { label: string; value: number | string })
     </div>
   );
 }
-
 
 function Toggle({
   label,

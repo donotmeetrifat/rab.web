@@ -10,9 +10,12 @@ import { collectPieStats } from "@/pie";
 import type { PieStats } from "@/pie/types";
 import { readLiveEventDiag, subscribeLiveEvents, type LiveEventDiag } from "@/core/liveEvents";
 import { auditSummary, type AuditSummary } from "@/core/SaveAuditor";
-import { readHealthReport, runHealthCheck, type HealthReport as HealthProbeReport } from "@/core/HealthCheck";
+import {
+  readHealthReport,
+  runHealthCheck,
+  type HealthReport as HealthProbeReport,
+} from "@/core/HealthCheck";
 import { runMemoryHealth, type HealthReport as MemoryReport } from "@/services/memoryHealth";
-
 
 type Stats = {
   memories: number;
@@ -41,12 +44,22 @@ function fmtBytes(n: number | null): string {
 
 async function collect(): Promise<Stats> {
   const [
-    memories, projects, tags, conversations, messages,
-    knowledge, entities, aiSummaries, aiEmbeddings,
+    memories,
+    projects,
+    tags,
+    conversations,
+    messages,
+    knowledge,
+    entities,
+    aiSummaries,
+    aiEmbeddings,
   ] = await Promise.all([
     db.memories.count(),
     db.projects.count(),
-    db.memories.orderBy("tags").uniqueKeys().then((keys) => keys.length),
+    db.memories
+      .orderBy("tags")
+      .uniqueKeys()
+      .then((keys) => keys.length),
     db.conversations.count(),
     db.convMessages.count(),
     db.knowledge.count(),
@@ -63,12 +76,22 @@ async function collect(): Promise<Stats> {
       bytesUsed = est.usage ?? null;
       bytesQuota = est.quota ?? null;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   const ai = await loadAISettings();
   return {
-    memories, projects, tags, conversations, messages,
-    knowledge, entities, aiSummaries, aiEmbeddings,
-    bytesUsed, bytesQuota,
+    memories,
+    projects,
+    tags,
+    conversations,
+    messages,
+    knowledge,
+    entities,
+    aiSummaries,
+    aiEmbeddings,
+    bytesUsed,
+    bytesQuota,
     aiEnabled: ai.enabled,
     aiProvider: ai.provider ?? "none",
     dbVersion: (db as unknown as { verno: number }).verno,
@@ -92,7 +115,9 @@ export function Diagnostics() {
     setAudit(auditSummary());
     setHealth(readHealthReport());
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+  }, []);
   useEffect(() => {
     const unsub = subscribeLiveEvents(() => {
       setLive(readLiveEventDiag());
@@ -103,9 +128,11 @@ export function Diagnostics() {
       setAudit(auditSummary());
       setHealth(readHealthReport());
     }, 2000);
-    return () => { unsub(); window.clearInterval(id); };
+    return () => {
+      unsub();
+      window.clearInterval(id);
+    };
   }, []);
-
 
   const backup = async () => {
     setBusy(true);
@@ -121,7 +148,9 @@ export function Diagnostics() {
       toast.success("Backup ready", "Store the file somewhere safe.");
     } catch (err) {
       toast.error("Backup failed", err instanceof Error ? err.message : undefined);
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   };
 
   const restore = async () => {
@@ -143,7 +172,9 @@ export function Diagnostics() {
         refresh();
       } catch (err) {
         toast.error("Restore failed", err instanceof Error ? err.message : "Invalid backup file.");
-      } finally { setBusy(false); }
+      } finally {
+        setBusy(false);
+      }
     };
     input.click();
   };
@@ -181,7 +212,8 @@ export function Diagnostics() {
       <div>
         <h2 className="text-lg font-semibold">Diagnostics</h2>
         <p className="text-xs text-muted-foreground mt-1">
-          Local-only. Nothing here is sent anywhere — copy the report yourself if you want to share it.
+          Local-only. Nothing here is sent anywhere — copy the report yourself if you want to share
+          it.
         </p>
       </div>
 
@@ -193,17 +225,28 @@ export function Diagnostics() {
           </p>
         </header>
         <dl className="divide-y divide-border">
-          {([
-            ["Last event", live.lastEvent ?? "—"],
-            ["Last event at", live.lastEventAt ? new Date(live.lastEventAt).toLocaleTimeString() : "—"],
-            ["Last save (conversation)", live.lastConversationId ?? "—"],
-            ["Last provider", live.lastProvider ?? "—"],
-            ["Last refresh at", live.lastRefreshAt ? new Date(live.lastRefreshAt).toLocaleTimeString() : "—"],
-            ["Last broadcast at", live.lastBroadcastAt ? new Date(live.lastBroadcastAt).toLocaleTimeString() : "—"],
-            ["Cache invalidations", live.cacheInvalidations],
-            ["Events received", live.eventCount],
-            ["Current subscribers", live.subscribers],
-          ] as Array<[string, string | number]>).map(([k, v]) => (
+          {(
+            [
+              ["Last event", live.lastEvent ?? "—"],
+              [
+                "Last event at",
+                live.lastEventAt ? new Date(live.lastEventAt).toLocaleTimeString() : "—",
+              ],
+              ["Last save (conversation)", live.lastConversationId ?? "—"],
+              ["Last provider", live.lastProvider ?? "—"],
+              [
+                "Last refresh at",
+                live.lastRefreshAt ? new Date(live.lastRefreshAt).toLocaleTimeString() : "—",
+              ],
+              [
+                "Last broadcast at",
+                live.lastBroadcastAt ? new Date(live.lastBroadcastAt).toLocaleTimeString() : "—",
+              ],
+              ["Cache invalidations", live.cacheInvalidations],
+              ["Events received", live.eventCount],
+              ["Current subscribers", live.subscribers],
+            ] as Array<[string, string | number]>
+          ).map(([k, v]) => (
             <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
               <dt className="text-muted-foreground">{k}</dt>
               <dd className="font-medium text-foreground tabular-nums">{v}</dd>
@@ -217,7 +260,8 @@ export function Diagnostics() {
           <div>
             <h3 className="text-sm font-semibold">Save Auditor</h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              Every save gets an audit record. Successful ones self-clear; failures stay for inspection.
+              Every save gets an audit record. Successful ones self-clear; failures stay for
+              inspection.
             </p>
           </div>
           <span className="text-[11px] font-medium text-foreground tabular-nums">
@@ -225,19 +269,21 @@ export function Diagnostics() {
           </span>
         </header>
         <dl className="divide-y divide-border">
-          {([
-            ["Records tracked", audit.total],
-            ["Pending", audit.pending],
-            ["Succeeded", audit.ok],
-            ["Failed", audit.failed],
-            ["Integrity warnings", audit.integrity],
-            ["Success rate", `${(audit.successRate * 100).toFixed(1)}%`],
-            ["Integrity score", `${(audit.integrityScore * 100).toFixed(1)}%`],
-            ["Avg save duration", `${audit.avgDurationMs} ms`],
-            ["Max save duration", `${audit.maxDurationMs} ms`],
-            ["Avg broadcast latency", `${audit.avgBroadcastMs} ms`],
-            ["Avg UI refresh latency", `${audit.avgUiRefreshMs} ms`],
-          ] as Array<[string, string | number]>).map(([k, v]) => (
+          {(
+            [
+              ["Records tracked", audit.total],
+              ["Pending", audit.pending],
+              ["Succeeded", audit.ok],
+              ["Failed", audit.failed],
+              ["Integrity warnings", audit.integrity],
+              ["Success rate", `${(audit.successRate * 100).toFixed(1)}%`],
+              ["Integrity score", `${(audit.integrityScore * 100).toFixed(1)}%`],
+              ["Avg save duration", `${audit.avgDurationMs} ms`],
+              ["Max save duration", `${audit.maxDurationMs} ms`],
+              ["Avg broadcast latency", `${audit.avgBroadcastMs} ms`],
+              ["Avg UI refresh latency", `${audit.avgUiRefreshMs} ms`],
+            ] as Array<[string, string | number]>
+          ).map(([k, v]) => (
             <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
               <dt className="text-muted-foreground">{k}</dt>
               <dd className="font-medium text-foreground tabular-nums">{v}</dd>
@@ -251,7 +297,10 @@ export function Diagnostics() {
               .filter((r) => r.status !== "ok")
               .slice(0, 6)
               .map((r) => (
-                <div key={`${r.provider}|${r.conversationId}`} className="text-[11px] text-muted-foreground truncate">
+                <div
+                  key={`${r.provider}|${r.conversationId}`}
+                  className="text-[11px] text-muted-foreground truncate"
+                >
                   <span className="uppercase tracking-wide mr-2">{r.status}</span>
                   {r.provider} · {r.conversationId.slice(0, 12)}… {r.error ? `— ${r.error}` : ""}
                 </div>
@@ -268,10 +317,7 @@ export function Diagnostics() {
               Lightweight probe every 60 s. Never interrupts you.
             </p>
           </div>
-          <Button
-            variant="ghost"
-            onClick={async () => setHealth(await runHealthCheck())}
-          >
+          <Button variant="ghost" onClick={async () => setHealth(await runHealthCheck())}>
             Run now
           </Button>
         </header>
@@ -282,15 +328,21 @@ export function Diagnostics() {
             health.probes.map((p) => (
               <div key={p.key} className="flex items-center justify-between px-4 py-2 text-xs">
                 <dt className="text-muted-foreground">{p.key}</dt>
-                <dd className={`font-medium tabular-nums ${p.ok ? "text-foreground" : "text-red-600"}`}>
-                  {p.ok ? "OK" : "FAIL"}{p.detail ? ` · ${p.detail}` : ""}{p.ms ? ` · ${p.ms}ms` : ""}
+                <dd
+                  className={`font-medium tabular-nums ${p.ok ? "text-foreground" : "text-red-600"}`}
+                >
+                  {p.ok ? "OK" : "FAIL"}
+                  {p.detail ? ` · ${p.detail}` : ""}
+                  {p.ms ? ` · ${p.ms}ms` : ""}
                 </dd>
               </div>
             ))
           )}
           <div className="flex items-center justify-between px-4 py-2 text-xs">
             <dt className="text-muted-foreground">Runs / failures</dt>
-            <dd className="font-medium text-foreground tabular-nums">{health.runs} / {health.failures}</dd>
+            <dd className="font-medium text-foreground tabular-nums">
+              {health.runs} / {health.failures}
+            </dd>
           </div>
         </dl>
       </section>
@@ -303,10 +355,7 @@ export function Diagnostics() {
               Repairs orphans, duplicates and invalid links in place.
             </p>
           </div>
-          <Button
-            variant="ghost"
-            onClick={async () => setMemRepair(await runMemoryHealth())}
-          >
+          <Button variant="ghost" onClick={async () => setMemRepair(await runMemoryHealth())}>
             Repair now
           </Button>
         </header>
@@ -321,9 +370,6 @@ export function Diagnostics() {
           </dl>
         )}
       </section>
-
-
-
 
       <section className="rounded-lg border border-border bg-surface">
         <dl className="divide-y divide-border">
@@ -345,17 +391,19 @@ export function Diagnostics() {
             </p>
           </header>
           <dl className="divide-y divide-border">
-            {([
-              ["Preferences learned", pie.preferences],
-              ["Decisions tracked", pie.decisions],
-              ["Goals", pie.goals],
-              ["Vocabulary shortcuts", pie.vocabulary],
-              ["Connections", pie.relationships],
-              ["Confident topics", pie.confident],
-              ["Most-used AI", pie.topProvider ?? "—"],
-              ["Top language", pie.topLanguage ?? "—"],
-              ["Top framework", pie.topFramework ?? "—"],
-            ] as Array<[string, string | number]>).map(([k, v]) => (
+            {(
+              [
+                ["Preferences learned", pie.preferences],
+                ["Decisions tracked", pie.decisions],
+                ["Goals", pie.goals],
+                ["Vocabulary shortcuts", pie.vocabulary],
+                ["Connections", pie.relationships],
+                ["Confident topics", pie.confident],
+                ["Most-used AI", pie.topProvider ?? "—"],
+                ["Top language", pie.topLanguage ?? "—"],
+                ["Top framework", pie.topFramework ?? "—"],
+              ] as Array<[string, string | number]>
+            ).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between px-4 py-2 text-xs">
                 <dt className="text-muted-foreground">{k}</dt>
                 <dd className="font-medium text-foreground tabular-nums">{v}</dd>
@@ -365,17 +413,25 @@ export function Diagnostics() {
         </section>
       )}
 
-
       <section className="space-y-2">
         <h3 className="text-sm font-semibold">Backup</h3>
         <p className="text-xs text-muted-foreground">
-          One-click full export and restore. Restore validates the file before applying and skips duplicates.
+          One-click full export and restore. Restore validates the file before applying and skips
+          duplicates.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="primary" onClick={backup} disabled={busy}>Download full backup</Button>
-          <Button variant="secondary" onClick={restore} disabled={busy}>Restore from file</Button>
-          <Button variant="ghost" onClick={copyReport}>Copy diagnostics</Button>
-          <Button variant="ghost" onClick={refresh}>Refresh</Button>
+          <Button variant="primary" onClick={backup} disabled={busy}>
+            Download full backup
+          </Button>
+          <Button variant="secondary" onClick={restore} disabled={busy}>
+            Restore from file
+          </Button>
+          <Button variant="ghost" onClick={copyReport}>
+            Copy diagnostics
+          </Button>
+          <Button variant="ghost" onClick={refresh}>
+            Refresh
+          </Button>
         </div>
       </section>
     </div>

@@ -15,17 +15,17 @@ rules in `vercel.json` and don't need CSP evaluation.
 
 ## Applied headers
 
-| Header | Value | Reason |
-| --- | --- | --- |
-| `Content-Security-Policy` | see below | Restricts script/style/connect origins |
-| `X-Content-Type-Options` | `nosniff` | Blocks MIME sniffing |
-| `X-Frame-Options` | `DENY` | Prevents framing (belt + `frame-ancestors`) |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Minimal referrer leakage |
-| `Permissions-Policy` | camera/mic/geo/payment/usb/FLoC disabled | Deny unused browser APIs |
-| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | 2y HSTS with preload |
-| `Cross-Origin-Opener-Policy` | `same-origin` | Isolates browsing context |
-| `Cross-Origin-Resource-Policy` | `same-origin` | Blocks cross-origin embedding |
-| `X-DNS-Prefetch-Control` | `off` | Disables implicit DNS prefetch |
+| Header                         | Value                                          | Reason                                      |
+| ------------------------------ | ---------------------------------------------- | ------------------------------------------- |
+| `Content-Security-Policy`      | see below                                      | Restricts script/style/connect origins      |
+| `X-Content-Type-Options`       | `nosniff`                                      | Blocks MIME sniffing                        |
+| `X-Frame-Options`              | `DENY`                                         | Prevents framing (belt + `frame-ancestors`) |
+| `Referrer-Policy`              | `strict-origin-when-cross-origin`              | Minimal referrer leakage                    |
+| `Permissions-Policy`           | camera/mic/geo/payment/usb/FLoC disabled       | Deny unused browser APIs                    |
+| `Strict-Transport-Security`    | `max-age=63072000; includeSubDomains; preload` | 2y HSTS with preload                        |
+| `Cross-Origin-Opener-Policy`   | `same-origin`                                  | Isolates browsing context                   |
+| `Cross-Origin-Resource-Policy` | `same-origin`                                  | Blocks cross-origin embedding               |
+| `X-DNS-Prefetch-Control`       | `off`                                          | Disables implicit DNS prefetch              |
 
 ## CSP directives
 

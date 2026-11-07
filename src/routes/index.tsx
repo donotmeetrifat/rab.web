@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -9,6 +9,7 @@ import {
   Clock,
   Download,
   ExternalLink,
+  HelpCircle,
   Laptop,
   Maximize,
   Menu,
@@ -72,10 +73,14 @@ function BrandWordmark({
   textSize?: string;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2 sm:gap-2.5 leading-none select-none ${className}`}>
+    <span
+      className={`inline-flex items-center gap-2 sm:gap-2.5 leading-none select-none ${className}`}
+    >
       <img
         src="/railway-icon.png"
         alt="Railway Auto-Booker"
+        width={36}
+        height={36}
         className={`${iconSize} rounded-[8px] object-cover shrink-0 shadow-xs border border-primary/20`}
       />
       <span className={`font-bold tracking-tight text-foreground whitespace-nowrap ${textSize}`}>
@@ -504,22 +509,25 @@ function CleanVideoPlayer() {
     };
   }, []);
 
-  const seekToClientX = (clientX: number) => {
-    const video = videoRef.current;
-    const scrubBar = scrubBarRef.current;
-    if (!video || !scrubBar) return;
-    const rect = scrubBar.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    const clickPos = Math.max(0, Math.min(rect.width, clientX - rect.left));
-    const percentage = clickPos / rect.width;
-    const totalDuration =
-      video.duration && isFinite(video.duration) && video.duration > 0
-        ? video.duration
-        : duration;
-    const targetTime = Math.max(0, Math.min(totalDuration, percentage * totalDuration));
-    video.currentTime = targetTime;
-    setCurrentTime(targetTime);
-  };
+  const seekToClientX = useCallback(
+    (clientX: number) => {
+      const video = videoRef.current;
+      const scrubBar = scrubBarRef.current;
+      if (!video || !scrubBar) return;
+      const rect = scrubBar.getBoundingClientRect();
+      if (rect.width <= 0) return;
+      const clickPos = Math.max(0, Math.min(rect.width, clientX - rect.left));
+      const percentage = clickPos / rect.width;
+      const totalDuration =
+        video.duration && isFinite(video.duration) && video.duration > 0
+          ? video.duration
+          : duration;
+      const targetTime = Math.max(0, Math.min(totalDuration, percentage * totalDuration));
+      video.currentTime = targetTime;
+      setCurrentTime(targetTime);
+    },
+    [duration],
+  );
 
   const handleScrubMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -584,7 +592,7 @@ function CleanVideoPlayer() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, duration]);
+  }, [isDragging, seekToClientX]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement) return;
@@ -639,7 +647,7 @@ function CleanVideoPlayer() {
             src="/railway-demo.mp4"
             playsInline
             preload="metadata"
-            poster="/railway-thumbnail.png"
+            poster="/railway-thumbnail.webp"
             className="w-full h-full object-cover bg-black block cursor-pointer"
             onClick={togglePlay}
             onTimeUpdate={handleTimeUpdate}
@@ -657,8 +665,12 @@ function CleanVideoPlayer() {
           {/* Video Thumbnail Overlay (visible before first play) */}
           {!isPlaying && currentTime === 0 && !isEnded && (
             <img
-              src="/railway-thumbnail.png"
-              alt="Railway Auto-Booker Video Thumbnail"
+              src="/railway-thumbnail.webp"
+              alt="Railway Auto-Booker Video Demo Thumbnail"
+              width={1280}
+              height={720}
+              fetchPriority="high"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] select-none"
             />
           )}
@@ -851,6 +863,7 @@ function RailwayAutoBookerLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [installTab, setInstallTab] = useState<"pc" | "mobile">("pc");
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
+  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
   // Close download menu on click outside or escape key
@@ -879,6 +892,7 @@ function RailwayAutoBookerLandingPage() {
     { href: "#video-demo", label: "ভিডিও ডেমো" },
     { href: "#features", label: "ফিচারসমূহ" },
     { href: "#install", label: "ইনস্টলেশন গাইড" },
+    { href: "#faq", label: "FAQ" },
     { href: "#contact", label: "যোগাযোগ ও ক্রয়" },
   ];
 
@@ -892,7 +906,10 @@ function RailwayAutoBookerLandingPage() {
             aria-label="Railway Auto-Booker — হোম"
             className={"inline-flex items-center leading-none rounded-lg shrink-0 " + focusRing}
           >
-            <BrandWordmark iconSize="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" textSize="text-lg sm:text-xl md:text-2xl" />
+            <BrandWordmark
+              iconSize="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9"
+              textSize="text-lg sm:text-xl md:text-2xl"
+            />
           </a>
 
           {/* Desktop Nav */}
@@ -901,7 +918,9 @@ function RailwayAutoBookerLandingPage() {
               <a
                 key={l.href}
                 href={l.href}
-                className={"transition-colors hover:text-foreground font-medium text-[15px] " + focusRing}
+                className={
+                  "transition-colors hover:text-foreground font-medium text-[15px] " + focusRing
+                }
               >
                 {l.label}
               </a>
@@ -928,7 +947,11 @@ function RailwayAutoBookerLandingPage() {
               focusRing
             }
           >
-            {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            {menuOpen ? (
+              <X className="h-5 w-5" aria-hidden />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden />
+            )}
           </button>
         </div>
 
@@ -982,7 +1005,8 @@ function RailwayAutoBookerLandingPage() {
                 aria-hidden
               />
               <span className="tracking-tight text-emerald-800 dark:text-emerald-300 text-pretty text-left sm:text-center leading-relaxed">
-                eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন · সকাল ৮:০০ টার টিকিট নিশ্চিন্তে কাটুন
+                eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন · সকাল ৮:০০ টার টিকিট বুকিং
+                নিশ্চিন্তে করুন
               </span>
             </div>
 
@@ -997,7 +1021,9 @@ function RailwayAutoBookerLandingPage() {
 
             {/* Subheading */}
             <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-              সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার মুহূর্তে সার্ভার স্পিডে স্বয়ংক্রিয়ভাবে স্টেশন সার্চ, বগি ও সিট সিলেক্ট করে ওটিপি ও পেমেন্ট পেজে নিয়ে যায়। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই ব্যবহারযোগ্য!
+              সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার
+              মুহূর্তে সার্ভার স্পিডে স্বয়ংক্রিয়ভাবে স্টেশন সার্চ, বগি ও সিট সিলেক্ট করে ওটিপি ও
+              পেমেন্ট পেজে নিয়ে যায়। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই ব্যবহারযোগ্য!
             </p>
 
             {/* Action Buttons */}
@@ -1102,7 +1128,6 @@ function RailwayAutoBookerLandingPage() {
                 <span>ভিডিও ডেমো দেখুন</span>
               </a>
             </div>
-
           </div>
         </section>
 
@@ -1118,7 +1143,7 @@ function RailwayAutoBookerLandingPage() {
                 ভিডিওতে দেখুন কীভাবে কাজ করে
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                সকাল ৮:০০ টায় কীভাবে চোখের পলকে অটোমেটিকভাবে টিকিট কনফার্ম হয় তা সরাসরি দেখুন।
+                সকাল ৮:০০ টায় কীভাবে চোখের পলকে দ্রুততম অটো টিকিট বুকিং সম্পন্ন হয় তা সরাসরি দেখুন।
               </p>
             </div>
 
@@ -1128,7 +1153,10 @@ function RailwayAutoBookerLandingPage() {
         </section>
 
         {/* FEATURES SECTION */}
-        <section id="features" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
+        <section
+          id="features"
+          className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20"
+        >
           <div className="mb-10 max-w-2xl sm:mb-14">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary mb-3">
               <Zap className="h-3.5 w-3.5" />
@@ -1138,7 +1166,9 @@ function RailwayAutoBookerLandingPage() {
               ম্যানুয়ালি টিকিট কাটার চেয়ে অটো-বুকার কেন বেশি কার্যকর?
             </h2>
             <p className="mt-3 text-muted-foreground text-sm sm:text-base leading-relaxed">
-              সকাল ৮:০০ টায় টিকিট সার্ভার ওপেন হওয়ার মুহূর্তে ম্যানুয়ালি ক্লিক করতে করতে সিট শেষ হয়ে যায়। অটো-বুকার প্রতিটি ধাপ স্বয়ংক্রিয়ভাবে দ্রুত সম্পন্ন করে আপনার টিকিট পাওয়ার সুযোগ নিশ্চিত করে।
+              সকাল ৮:০০ টায় টিকিট সার্ভার ওপেন হওয়ার মুহূর্তে ম্যানুয়ালি ক্লিক করতে করতে সিট শেষ হয়ে
+              যায়। অটো-বুকার প্রতিটি ধাপ স্বয়ংক্রিয়ভাবে দ্রুত সম্পন্ন করে আপনার ট্রেনের টিকিট বুকিং
+              শতভাগ সহজ করে।
             </p>
           </div>
 
@@ -1153,18 +1183,111 @@ function RailwayAutoBookerLandingPage() {
                   <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
                     <IconComp className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <h3 className="text-base font-bold tracking-tight text-foreground">
-                    {f.title}
-                  </h3>
+                  <h3 className="text-base font-bold tracking-tight text-foreground">{f.title}</h3>
                   <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
                 </div>
               );
             })}
           </div>
+
+          {/* MANUAL VS AUTO-BOOKER COMPARATIVE BENCHMARK TABLE (AI Search & GEO Optimized) */}
+          <div className="mt-12 sm:mt-16 overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-[color:var(--surface)] shadow-xs">
+            <div className="border-b border-border bg-muted/40 px-5 py-4 sm:px-6 sm:py-5">
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <span className="text-primary font-bold">⚡</span>
+                <span>তুলনামূলক বিশ্লেষণ: সাধারণ ম্যানুয়াল বুকিং বনাম Railway Auto-Booker</span>
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+                সকাল ৮:০০ টার রাশ আওয়ার টিকিট বুকিংয়ে গতি, নির্ভুলতা ও সফলতার বাস্তব পরিসংখ্যান।
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse min-w-[560px]">
+                <thead>
+                  <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <th scope="col" className="px-5 py-3.5 sm:px-6">
+                      বৈশিষ্ট্য / প্যারামিটার
+                    </th>
+                    <th scope="col" className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      সাধারণ ম্যানুয়াল বুকিং
+                    </th>
+                    <th scope="col" className="px-5 py-3.5 sm:px-6 text-primary">
+                      Railway Auto-Booker
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border text-foreground">
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">
+                      প্রতিক্রিয়া গতি (Trigger Speed)
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      ২ থেকে ৫ সেকেন্ড (দেরি)
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-bold text-primary">
+                      ১৫ থেকে ৫০ মিলিসেকেন্ড (সুপারফাস্ট)
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">বগি ও সিট সিলেকশন</td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      ম্যানুয়ালি ক্লিক করে খুঁজতে হয়
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold text-emerald-700 dark:text-emerald-400">
+                      পছন্দ অনুযায়ী এক সারির সিট ইনস্ট্যান্ট অটো-লক
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">ফেইলসেফ ব্যাকআপ সিস্টেম</td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      সিট লক হলে আবার নতুন করে সার্চ
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold text-emerald-700 dark:text-emerald-400">
+                      তাৎক্ষণিক পরবর্তী খালি সিটে অটো-সুইচ
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">
+                      যাত্রীর তথ্য ও ওটিপি (OTP)
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      নাম ও ফোন নম্বর টাইপ করতে সময় অপচয়
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold text-emerald-700 dark:text-emerald-400">
+                      অটো প্যাসেঞ্জার ইনফো ও ডিরেক্ট ওটিপি পেজ জাম্প
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">
+                      অ্যাকাউন্ট ও ডাটা সিকিউরিটি
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      ঝুঁকিপূর্ণ স্ক্র্যাপার টুলে ডাটা লিক শঙ্কা
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold text-emerald-700 dark:text-emerald-400">
+                      ১০০% ক্লায়েন্ট-সাইড লোকাল ও অ্যান্টি-ব্যান ডিলে
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-muted/30 transition-colors">
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold">ডিভাইস কম্প্যাটিবিলিটি</td>
+                    <td className="px-5 py-3.5 sm:px-6 text-muted-foreground">
+                      মোবাইল অ্যাপে ভিড়ে স্লো হয়ে যায়
+                    </td>
+                    <td className="px-5 py-3.5 sm:px-6 font-semibold text-emerald-700 dark:text-emerald-400">
+                      কম্পিউটার (Chrome, Edge, Brave) ও মোবাইল (Kiwi)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         {/* SUBSCRIPTION PACKAGES / PRICING SECTION */}
-        <section id="pricing" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
+        <section
+          id="pricing"
+          className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20"
+        >
           <div className="mx-auto max-w-3xl text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
               <Sparkles className="h-3.5 w-3.5" />
@@ -1174,7 +1297,8 @@ function RailwayAutoBookerLandingPage() {
               BD Railway Auto-Booker এর সাবস্ক্রিপশন প্ল্যানসমূহ
             </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">
-              সব প্যাকেজেই সব ফিচার সমানভাবে অন্তর্ভুক্ত। শুধু আপনার প্রয়োজন অনুযায়ী মেয়াদের প্যাকেজটি বেছে নিন।
+              সব প্যাকেজেই সব ফিচার সমানভাবে অন্তর্ভুক্ত। শুধু আপনার প্রয়োজন অনুযায়ী মেয়াদের
+              প্যাকেজটি বেছে নিন।
             </p>
           </div>
 
@@ -1212,7 +1336,10 @@ function RailwayAutoBookerLandingPage() {
         </section>
 
         {/* INSTALLATION GUIDE SECTION */}
-        <section id="install" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
+        <section
+          id="install"
+          className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20"
+        >
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10 sm:mb-12">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary mb-3">
@@ -1223,7 +1350,8 @@ function RailwayAutoBookerLandingPage() {
                 মাত্র ২ মিনিটে এক্সটেনশনটি সেটআপ করে নিন
               </h2>
               <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                কম্পিউটারে গুগল ক্রোম ব্রাউজার অথবা অ্যান্ড্রয়েড মোবাইলে Kiwi Browser ব্যবহার করে সহজেই সেটআপ করতে পারবেন।
+                কম্পিউটারে গুগল ক্রোম ব্রাউজার অথবা অ্যান্ড্রয়েড মোবাইলে Kiwi Browser ব্যবহার করে
+                সহজেই সেটআপ করতে পারবেন।
               </p>
             </div>
 
@@ -1238,7 +1366,9 @@ function RailwayAutoBookerLandingPage() {
                     : "border border-border/80 bg-[color:var(--surface)] text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
               >
-                <Laptop className={`h-4 w-4 ${installTab === "pc" ? "text-white" : "text-primary"}`} />
+                <Laptop
+                  className={`h-4 w-4 ${installTab === "pc" ? "text-white" : "text-primary"}`}
+                />
                 <span>কম্পিউটার (Google Chrome, Edge, Brave, Opera)</span>
               </button>
 
@@ -1251,7 +1381,9 @@ function RailwayAutoBookerLandingPage() {
                     : "border border-border/80 bg-[color:var(--surface)] text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
               >
-                <Smartphone className={`h-4 w-4 ${installTab === "mobile" ? "text-white" : "text-primary"}`} />
+                <Smartphone
+                  className={`h-4 w-4 ${installTab === "mobile" ? "text-white" : "text-primary"}`}
+                />
                 <span>অ্যান্ড্রয়েড মোবাইল (Kiwi Browser)</span>
               </button>
             </div>
@@ -1264,7 +1396,11 @@ function RailwayAutoBookerLandingPage() {
                     📱
                   </span>
                   <p className="leading-relaxed">
-                    <strong>মোবাইল ব্যবহারকারীদের জন্য নির্দেশনা:</strong> মোবাইলে সাধারণ গুগল ক্রোম অ্যাপে এক্সটেনশন চলে না, তাই গুগল প্লে-স্টোর থেকে সম্পূর্ণ ফ্রি <strong>Kiwi Browser</strong> ব্যবহার করতে হবে। Kiwi Browser সরাসরি জিপ ফাইল সাপোর্ট করে, তাই <strong>ফাইল আনজিপ (Unzip) করার কোনো প্রয়োজন নেই</strong>—সরাসরি জিপ ফাইলটি ইমপোর্ট করলেই চলবে!
+                    <strong>মোবাইল ব্যবহারকারীদের জন্য নির্দেশনা:</strong> মোবাইলে সাধারণ গুগল ক্রোম
+                    অ্যাপে এক্সটেনশন চলে না, তাই গুগল প্লে-স্টোর থেকে সম্পূর্ণ ফ্রি{" "}
+                    <strong>Kiwi Browser</strong> ব্যবহার করতে হবে। Kiwi Browser সরাসরি জিপ ফাইল
+                    সাপোর্ট করে, তাই <strong>ফাইল আনজিপ (Unzip) করার কোনো প্রয়োজন নেই</strong>
+                    —সরাসরি জিপ ফাইলটি ইমপোর্ট করলেই চলবে!
                   </p>
                 </div>
                 <a
@@ -1284,7 +1420,9 @@ function RailwayAutoBookerLandingPage() {
                     💻
                   </span>
                   <p className="leading-relaxed">
-                    <strong>কম্পিউটার ব্যবহারকারীদের জন্য নির্দেশনা:</strong> Google Chrome, Microsoft Edge, Brave বা Opera ব্রাউজারে মাত্র ২ মিনিটে নিচের ৫টি সহজ ধাপ অনুসরণ করে এক্সটেনশনটি সেটআপ করে নিতে পারবেন:
+                    <strong>কম্পিউটার ব্যবহারকারীদের জন্য নির্দেশনা:</strong> Google Chrome,
+                    Microsoft Edge, Brave বা Opera ব্রাউজারে মাত্র ২ মিনিটে নিচের ৫টি সহজ ধাপ অনুসরণ
+                    করে এক্সটেনশনটি সেটআপ করে নিতে পারবেন:
                   </p>
                 </div>
                 <a
@@ -1328,8 +1466,89 @@ function RailwayAutoBookerLandingPage() {
           </div>
         </section>
 
+        {/* FAQ ACCORDION SECTION */}
+        <section id="faq" className="border-t border-border py-14 sm:py-16 md:py-20 scroll-mt-20">
+          <div className="mx-auto max-w-3xl">
+            <div className="text-center mb-10 sm:mb-12">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold text-primary mb-3">
+                <HelpCircle className="h-3.5 w-3.5" />
+                <span>সচরাচর জিজ্ঞাসা</span>
+              </div>
+              <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">
+                প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী (FAQ)
+              </h2>
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Railway Auto-Booker সম্পর্কে ব্যবহারকারীদের সাধারণ প্রশ্ন ও উত্তরসমূহ।
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  q: "Railway Auto-Booker কী এবং এটি কীভাবে কাজ করে?",
+                  a: "রেলওয়ে অটো-বুকার (Railway Auto-Booker) হলো বাংলাদেশ রেলওয়ের অফিশিয়াল ই-টিকিটিং ওয়েবসাইটের (eticket.railway.gov.bd) জন্য প্রস্তুতকৃত একটি হাই-স্পিড ব্রাউজার এক্সটেনশন। এটি সকাল ৮:০০ টা (পূর্বাঞ্চল) ও দুপুর ২:০০ টায় (পশ্চিমাঞ্চল) টিকিট ছাড়ার মুহূর্তে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত টাইমিংয়ে সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে ট্রেনের বগি, পছন্দের খালি সিট সিলেক্ট ও ওটিপি পেজে রিডাইরেক্ট করে। কম্পিউটার (Chrome, Edge, Brave) এবং অ্যান্ড্রয়েড মোবাইল (Kiwi Browser) উভয়েই এটি ১০০% ক্লায়েন্ট-সাইড লোকাল ও নিরাপদে কাজ করে।",
+                },
+                {
+                  q: "Railway Auto-Booker কি আসলেই সকাল ৮:০০ টায় টিকিট কাটতে পারে?",
+                  a: "হ্যাঁ, সম্পূর্ণ কার্যকর! এটি বাংলাদেশ রেলওয়ে সার্ভার ঘড়ির সাথে মিলি-সেকেন্ড নিখুঁতভাবে সিঙ্ক হয়ে ঠিক সকাল ৮:০০:০০ এবং দুপুর ২:০০:০০ টায় মিলি-সেকেন্ডে অটোমেটিক ট্রেনের বগি, সিট সিলেক্ট ও ওটিপি পেজে নিয়ে যায়। সাধারণ মানুষের ক্লিক করার চেয়ে এটি ৫০ গুণ দ্রুত কাজ করে।",
+                },
+                {
+                  q: "অ্যান্ড্রয়েড মোবাইল ফোনে কীভাবে এক্সটেনশনটি ব্যবহার করব?",
+                  a: "গুগল প্লে-স্টোর থেকে Kiwi Browser ইনস্টল করুন। এরপর আমাদের দেওয়া জিপ ফাইলটি আনজিপ করে Kiwi ব্রাউজারের Extensions মেনু থেকে 'Developer Mode' অন করে 'Load unpacked'-এর মাধ্যমে এক্সটেনশনটি লোড করুন। মোবাইলেও এটি পিসির মতো সমান গতিতে কাজ করে।",
+                },
+                {
+                  q: "আমার বাংলাদেশ রেলওয়ে অ্যাকাউন্ট কি ব্যান হওয়ার কোনো ঝুঁকি আছে?",
+                  a: "না, সম্পূর্ণ নিরাপদ। এক্সটেনশনে হিউম্যানাইজড টাইম ডিলে ও স্মার্ট অ্যান্টি-ব্যান অ্যালগরিদম যুক্ত রয়েছে যা মানুষের সাধারণ ব্রাউজিং প্যাটার্ন বজায় রাখে। তাছাড়া এটি কোনো স্ক্র্যাপার নয়—সম্পূর্ণ লোকালভাবে আপনার নিজস্ব ব্রাউজারের ভেতরে কাজ করে।",
+                },
+                {
+                  q: "পেমেন্ট করার পর লাইসেন্স কি কতক্ষণের মধ্যে পাব?",
+                  a: "বিকাশ বা নগদে পেমেন্ট সম্পন্ন করার পর আমাদের হোয়াটসঅ্যাপ বা ফেসবুক মেসেঞ্জারে ট্রানজেকশন আইডি পাঠালে তাৎক্ষণিকভাবে (১ থেকে ৫ মিনিটের মধ্যে) লাইসেন্স কি এবং ডাউনলোড লিঙ্ক প্রদান করা হয়।",
+                },
+                {
+                  q: "আমার পছন্দের বগি বা সিট খালি না থাকলে কি টিকিট মিস হবে?",
+                  a: "না! এক্সটেনশনটিতে স্মার্ট ফেইলসেফ ব্যাকআপ অপশন রয়েছে। আপনার পছন্দের নির্দিষ্ট সিট না পেলে এটি তাৎক্ষণিকভাবে উক্ত ক্লাসের অন্য যেকোনো খালি সিট স্বয়ংক্রিয়ভাবে লক করে নেয়, যাতে টিকিট পাওয়ার সুযোগ শতভাগ নিশ্চিত থাকে।",
+                },
+                {
+                  q: "এক লাইসেন্স দিয়ে কয়টি ডিভাইসে চালানো যাবে?",
+                  a: "প্রতিটি লাইসেন্স কি একটি অনুমোদিত ডিভাইসে সক্রিয় করার জন্য বরাদ্দ। তবে ডিভাইস পরিবর্তন বা উইন্ডোজ রিলোড দিলে আমাদের সাপোর্টে যোগাযোগ করলে তাৎক্ষণিক মাইগ্রেশন সহায়তা দেওয়া হয়।",
+                },
+              ].map((item, idx) => {
+                const isOpen = faqOpenIndex === idx;
+                return (
+                  <div
+                    key={idx}
+                    className="rounded-2xl border border-border bg-[color:var(--surface)] transition-all duration-200 overflow-hidden"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setFaqOpenIndex(isOpen ? null : idx)}
+                      aria-expanded={isOpen}
+                      className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-bold text-sm sm:text-base text-foreground transition-colors hover:text-primary gap-4 cursor-pointer select-none"
+                    >
+                      <span>{item.q}</span>
+                      <ChevronDown
+                        className={`h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground ${
+                          isOpen ? "rotate-180 text-primary" : ""
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0 text-xs sm:text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-3">
+                        {item.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* DEDICATED CONTACT & PURCHASE SECTION */}
-        <section id="contact" className="border-t border-border py-12 sm:py-16 md:py-20 scroll-mt-20">
+        <section
+          id="contact"
+          className="border-t border-border py-12 sm:py-16 md:py-20 scroll-mt-20"
+        >
           <div className="rounded-3xl border border-primary/30 bg-gradient-to-b from-primary/10 via-[color:var(--surface)] to-background p-6 sm:p-10 md:p-14 text-center max-w-4xl mx-auto shadow-md">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-3.5 py-1 text-xs font-bold text-primary">
               <MessageCircle className="h-4 w-4 shrink-0" />
@@ -1340,7 +1559,9 @@ function RailwayAutoBookerLandingPage() {
               আপনার ট্রেনের টিকিট এখনই সহজে ও দ্রুত কনফার্ম করুন
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-              পছন্দের প্যাকেজটি নিতে বা যেকোনো তথ্যের জন্য সরাসরি আমাদের হোয়াটসঅ্যাপ বা ফেসবুক মেসেঞ্জারে যোগাযোগ করুন। পেমেন্ট সম্পন্ন করার পর সাথে সাথে লাইসেন্স কি ও সেটআপ ফাইল প্রদান করা হবে।
+              পছন্দের প্যাকেজটি নিতে বা যেকোনো তথ্যের জন্য সরাসরি আমাদের হোয়াটসঅ্যাপ বা ফেসবুক
+              মেসেঞ্জারে যোগাযোগ করুন। পেমেন্ট সম্পন্ন করার পর সাথে সাথে লাইসেন্স কি ও সেটআপ ফাইল
+              প্রদান করা হবে।
             </p>
 
             {/* Highly Polished WhatsApp and Facebook Buttons */}
@@ -1378,10 +1599,21 @@ function RailwayAutoBookerLandingPage() {
               <span>ডিসক্লেইমার / Disclaimer</span>
             </h4>
             <ol className="space-y-2 text-xs sm:text-sm text-muted-foreground leading-relaxed list-decimal list-inside">
-              <li>এই এক্সটেনশনটি ব্যবহারকারীদের টিকিট খোঁজা ও সিট নির্বাচন প্রক্রিয়া দ্রুততর করার জন্য তৈরি একটি সহায়ক টুল।</li>
-              <li>টিকিটের প্রাপ্যতা সম্পূর্ণভাবে বাংলাদেশ রেলওয়ের (eticket.railway.gov.bd) অফিশিয়াল সার্ভারের ওপর নির্ভরশীল।</li>
-              <li>পেমেন্ট সম্পন্ন করা এবং মোবাইল ওটিপি (OTP) সাবমিট করার দায়িত্ব ব্যবহারকারীর নিজস্ব।</li>
-              <li>এই সফটওয়্যারটি বাংলাদেশ রেলওয়ের কোনো অফিশিয়াল সেবা নয়, এটি একটি স্বাধীন অটোমেশন অ্যাসিস্ট্যান্ট টুল।</li>
+              <li>
+                এই এক্সটেনশনটি ব্যবহারকারীদের টিকিট খোঁজা ও সিট নির্বাচন প্রক্রিয়া দ্রুততর করার জন্য
+                তৈরি একটি সহায়ক টুল।
+              </li>
+              <li>
+                টিকিটের প্রাপ্যতা সম্পূর্ণভাবে বাংলাদেশ রেলওয়ের (eticket.railway.gov.bd) অফিশিয়াল
+                সার্ভারের ওপর নির্ভরশীল।
+              </li>
+              <li>
+                পেমেন্ট সম্পন্ন করা এবং মোবাইল ওটিপি (OTP) সাবমিট করার দায়িত্ব ব্যবহারকারীর নিজস্ব।
+              </li>
+              <li>
+                এই সফটওয়্যারটি বাংলাদেশ রেলওয়ের কোনো অফিশিয়াল সেবা নয়, এটি একটি স্বাধীন অটোমেশন
+                অ্যাসিস্ট্যান্ট টুল।
+              </li>
             </ol>
           </div>
         </section>
@@ -1395,13 +1627,37 @@ function RailwayAutoBookerLandingPage() {
               <img
                 src="/railway-icon.png"
                 alt="Railway Auto-Booker"
+                width={24}
+                height={24}
                 className="h-6 w-6 rounded-md object-cover shrink-0"
               />
-              <span className="font-bold text-foreground text-sm whitespace-nowrap">Railway Auto-Booker</span>
-              <span className="text-xs text-muted-foreground">· সুপারফাস্ট রেলওয়ে টিকিট অটোমেশন</span>
+              <span className="font-bold text-foreground text-sm whitespace-nowrap">
+                Railway Auto-Booker
+              </span>
+              <span className="text-xs text-muted-foreground">
+                · সুপারফাস্ট রেলওয়ে টিকিট অটোমেশন
+              </span>
             </div>
 
             <div className="flex items-center gap-4 sm:gap-5 text-xs font-semibold justify-center sm:justify-end flex-wrap">
+              <Link
+                to="/privacy"
+                className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              >
+                প্রাইভেসি পলিসি
+              </Link>
+              <Link
+                to="/terms"
+                className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              >
+                শর্তাবলী ও ডিসক্লেইমার
+              </Link>
+              <a
+                href="#faq"
+                className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+              >
+                FAQ
+              </a>
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
@@ -1487,9 +1743,7 @@ function BanglaPricingCard({
 
         {/* Benefits list (Same across all plans as requested) */}
         <div className="mt-5 border-t border-border/80 pt-4">
-          <p className="text-xs font-bold text-muted-foreground mb-2.5">
-            সকল সুবিধা অন্তর্ভুক্ত:
-          </p>
+          <p className="text-xs font-bold text-muted-foreground mb-2.5">সকল সুবিধা অন্তর্ভুক্ত:</p>
           <ul className="space-y-2 text-xs">
             {SHARED_BENEFITS.map((feat) => (
               <li key={feat} className="flex items-start gap-2 text-foreground/90 leading-snug">

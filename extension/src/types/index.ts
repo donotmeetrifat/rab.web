@@ -1,12 +1,5 @@
 export type ProviderId =
-  | "chatgpt"
-  | "claude"
-  | "gemini"
-  | "aistudio"
-  | "perplexity"
-  | "copilot"
-  | "deepseek"
-  | "other";
+  "chatgpt" | "claude" | "gemini" | "aistudio" | "perplexity" | "copilot" | "deepseek" | "other";
 
 export type ProjectIcon =
   | "folder"
@@ -55,13 +48,7 @@ export interface TagMeta {
   count: number;
 }
 
-export type SortKey =
-  | "newest"
-  | "oldest"
-  | "alphabetical"
-  | "provider"
-  | "pinned"
-  | "favorites";
+export type SortKey = "newest" | "oldest" | "alphabetical" | "provider" | "pinned" | "favorites";
 
 export interface MemoryFilters {
   view: "recent" | "favorites" | "pinned" | "archived" | "trash" | "projects";
@@ -134,7 +121,6 @@ export interface ExportPayload {
   convMessages?: StoredConvMessage[];
   settings?: Partial<Settings>;
 }
-
 
 // Structural type only — full CapturedConversation lives in providers/base/types
 // and is imported by both content script and background worker. Kept loose here
@@ -212,7 +198,4 @@ export interface SaveConversationResult {
 /** @deprecated Alias for SaveConversationResult — kept only for older callers. */
 export type SaveConversationAck = SaveConversationResult;
 
-export type RuntimeResponse =
-  | { ok: true; data?: unknown }
-  | { ok: false; error: string };
-
+export type RuntimeResponse = { ok: true; data?: unknown } | { ok: false; error: string };

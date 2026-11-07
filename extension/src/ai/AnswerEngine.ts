@@ -17,17 +17,10 @@ import { extractDecisions } from "@/context/DecisionExtractor";
 import type { ExtractedDecision } from "@/context/types";
 import { allProjectMappings } from "@/services/projectDetection";
 import type { KnowledgeRecord } from "@/knowledge/types";
-import type {
-  Memory,
-  Project,
-  ProviderId,
-  StoredConversation,
-  StoredConvMessage,
-} from "@/types";
+import type { Memory, Project, ProviderId, StoredConversation, StoredConvMessage } from "@/types";
 
 type ProjectMappingEntry = { projectId: string | null; reason: string; ts: number };
 type ProjectMappings = Record<string, ProjectMappingEntry>;
-
 
 /* ------------------------------------------------------------------ *
  * Types
@@ -122,9 +115,12 @@ export function invalidateAnswers(): void {
  * Intent detection
  * ------------------------------------------------------------------ */
 
-const RX_CODE = /\b(code|snippet|schema|hook|hooks|middleware|api\s+route|route\s+handler|function|component|regex|import|useeffect|usestate|sql|migration|query)\b/i;
-const RX_WHEN = /\b(when|what\s+day|what\s+date|deploy(ed)?|shipp?ed|released|launched|completed|finished)\b/i;
-const RX_WHO = /\b(which\s+ai|who\s+suggested|who\s+recommended|claude|chatgpt|gpt|gemini|perplexity|copilot|deepseek|aistudio)\b/i;
+const RX_CODE =
+  /\b(code|snippet|schema|hook|hooks|middleware|api\s+route|route\s+handler|function|component|regex|import|useeffect|usestate|sql|migration|query)\b/i;
+const RX_WHEN =
+  /\b(when|what\s+day|what\s+date|deploy(ed)?|shipp?ed|released|launched|completed|finished)\b/i;
+const RX_WHO =
+  /\b(which\s+ai|who\s+suggested|who\s+recommended|claude|chatgpt|gpt|gemini|perplexity|copilot|deepseek|aistudio)\b/i;
 const RX_PROJECT = /\b(project|projects|workspace)\b/i;
 const RX_BROWSE = /^(show|list|find)\s+(every|all|my)\b/i;
 
@@ -138,10 +134,71 @@ function detectIntent(q: string): AnswerIntent {
 }
 
 const STOP = new Set([
-  "the","a","an","and","or","of","for","to","in","on","at","by","with","is","are","was","were","be","been","being",
-  "i","my","me","we","our","you","your","it","this","that","these","those","did","do","does","have","has","had",
-  "what","when","where","which","who","why","how","show","find","list","every","all","some","any","about",
-  "discussed","discussion","mentioning","mention","help","helped","solve","solved","build","built","use","using",
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "of",
+  "for",
+  "to",
+  "in",
+  "on",
+  "at",
+  "by",
+  "with",
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "i",
+  "my",
+  "me",
+  "we",
+  "our",
+  "you",
+  "your",
+  "it",
+  "this",
+  "that",
+  "these",
+  "those",
+  "did",
+  "do",
+  "does",
+  "have",
+  "has",
+  "had",
+  "what",
+  "when",
+  "where",
+  "which",
+  "who",
+  "why",
+  "how",
+  "show",
+  "find",
+  "list",
+  "every",
+  "all",
+  "some",
+  "any",
+  "about",
+  "discussed",
+  "discussion",
+  "mentioning",
+  "mention",
+  "help",
+  "helped",
+  "solve",
+  "solved",
+  "build",
+  "built",
+  "use",
+  "using",
 ]);
 
 function keywords(q: string): string[] {
@@ -248,10 +305,7 @@ function buildFollowUps(
  * Core
  * ------------------------------------------------------------------ */
 
-export async function answerQuestion(
-  question: string,
-  opts: AnswerOptions = {},
-): Promise<Answer> {
+export async function answerQuestion(question: string, opts: AnswerOptions = {}): Promise<Answer> {
   const q = question.trim();
   if (!q) throw new Error("Empty question");
   const scope = opts.respectScope === false ? undefined : opts.scopedToProjectId;
@@ -278,11 +332,13 @@ export async function answerQuestion(
   // 3. Load conversations + knowledge in parallel.
   const [conversations, knowledgeHits, allProjects] = await Promise.all([
     convIds.length
-      ? db.conversations.bulkGet(convIds).then((rows) =>
-          rows.filter((r): r is StoredConversation => !!r),
-        )
+      ? db.conversations
+          .bulkGet(convIds)
+          .then((rows) => rows.filter((r): r is StoredConversation => !!r))
       : Promise.resolve<StoredConversation[]>([]),
-    searchKnowledge(q).catch(() => [] as ReturnType<typeof searchKnowledge> extends Promise<infer R> ? R : never),
+    searchKnowledge(q).catch(
+      () => [] as ReturnType<typeof searchKnowledge> extends Promise<infer R> ? R : never,
+    ),
     db.projects.toArray().catch(() => [] as Project[]),
   ]);
 
@@ -304,9 +360,7 @@ export async function answerQuestion(
     const pid = mappings[c.id]?.projectId;
     if (pid) projectHits.set(pid, (projectHits.get(pid) ?? 0) + 1);
   }
-  const primaryProjectId =
-    scope ??
-    [...projectHits.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const primaryProjectId = scope ?? [...projectHits.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
   const primaryProject = allProjects.find((p) => p.id === primaryProjectId);
 
   // Also match by project *name* — natural language often names them.
@@ -322,9 +376,7 @@ export async function answerQuestion(
         (scope ? m.projectId === scope : true) &&
         (entities.length === 0 ||
           entities.some(
-            (e) =>
-              m.title.toLowerCase().includes(e) ||
-              m.content.toLowerCase().includes(e),
+            (e) => m.title.toLowerCase().includes(e) || m.content.toLowerCase().includes(e),
           )),
     )
     .limit(20)
@@ -372,9 +424,7 @@ export async function answerQuestion(
     const found = extractDecisions(cid, msgs);
     // Filter by query relevance when the user asked about a topic.
     const relevant = entities.length
-      ? found.filter((d) =>
-          entities.some((e) => d.statement.toLowerCase().includes(e)),
-        )
+      ? found.filter((d) => entities.some((e) => d.statement.toLowerCase().includes(e)))
       : found;
     decisions.push(...relevant);
   }
@@ -398,16 +448,9 @@ export async function answerQuestion(
     .map(([t]) => t);
 
   // 12. Confidence.
-  const evidence =
-    filteredConvs.length + decisions.length + codeSnippets.length + memories.length;
+  const evidence = filteredConvs.length + decisions.length + codeSnippets.length + memories.length;
   const confidence: Answer["confidence"] =
-    evidence === 0
-      ? "none"
-      : evidence < 3
-        ? "low"
-        : evidence < 8
-          ? "medium"
-          : "high";
+    evidence === 0 ? "none" : evidence < 3 ? "low" : evidence < 8 ? "medium" : "high";
 
   // 13. Synthesize headline + detail — always source-backed templates.
   let headline = "";
@@ -609,7 +652,12 @@ export async function loadExplorer(): Promise<ExplorerFacets> {
   const recent = conversations
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .slice(0, 8)
-    .map((c) => ({ id: c.id, title: c.title || "Untitled", provider: c.provider, ts: c.updatedAt }));
+    .map((c) => ({
+      id: c.id,
+      title: c.title || "Untitled",
+      provider: c.provider,
+      ts: c.updatedAt,
+    }));
 
   return {
     projects: projects
@@ -633,5 +681,7 @@ export async function conversationsForTechnology(name: string): Promise<StoredCo
   const rows = await listConversationsForTechnology(name);
   if (!rows.length) return [];
   const convs = await db.conversations.bulkGet(rows.map((r) => r.conversationId));
-  return convs.filter((c): c is StoredConversation => !!c).sort((a, b) => b.updatedAt - a.updatedAt);
+  return convs
+    .filter((c): c is StoredConversation => !!c)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 }

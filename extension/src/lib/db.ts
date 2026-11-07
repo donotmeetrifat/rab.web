@@ -1,21 +1,12 @@
 import Dexie, { type Table } from "dexie";
-import type {
-  Memory,
-  Project,
-  StoredConversation,
-  StoredConvMessage,
-} from "@/types";
+import type { Memory, Project, StoredConversation, StoredConvMessage } from "@/types";
 import type {
   KnowledgeRecord,
   KnowledgeEntityRow,
   KnowledgeKeywordRow,
   KnowledgeRelationship,
 } from "@/knowledge/types";
-import type {
-  AIConversationSummary,
-  AIEmbeddingRow,
-  AIPromptCacheRow,
-} from "@/ai/types";
+import type { AIConversationSummary, AIEmbeddingRow, AIPromptCacheRow } from "@/ai/types";
 import type {
   PiePreferenceRow,
   PieDecisionRow,
@@ -52,8 +43,7 @@ class MemlaceDB extends Dexie {
 
     this.version(1).stores({
       projects: "id, name, pinned, archived, updatedAt",
-      memories:
-        "id, projectId, provider, favorite, trashed, createdAt, updatedAt, *tags",
+      memories: "id, projectId, provider, favorite, trashed, createdAt, updatedAt, *tags",
     });
 
     this.version(2)
@@ -196,18 +186,30 @@ function _dbgOn(): boolean {
   try {
     const w = globalThis as unknown as { memlaceDebug?: boolean };
     if (w.memlaceDebug) return true;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   try {
     if (typeof localStorage !== "undefined" && localStorage.getItem("memlaceDebug") === "1")
       return true;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return false;
 }
-function _dlog(...args: unknown[]) { if (_dbgOn()) console.log("[Memlace][db]", ...args); }
+function _dlog(...args: unknown[]) {
+  if (_dbgOn()) console.log("[Memlace][db]", ...args);
+}
 
-db.on("ready", () => { _dlog("db.open() ready", { name: db.name, version: db.verno }); });
-db.on("versionchange", (e) => { _dlog("versionchange", e); });
-db.on("blocked", () => { _dlog("db blocked (another tab holds an older version)"); });
+db.on("ready", () => {
+  _dlog("db.open() ready", { name: db.name, version: db.verno });
+});
+db.on("versionchange", (e) => {
+  _dlog("versionchange", e);
+});
+db.on("blocked", () => {
+  _dlog("db blocked (another tab holds an older version)");
+});
 // Dexie transaction lifecycle is observed through the DBCore middleware
 // below (start / complete / abort / error). Dexie's public `db.on` does
 // not expose a "txcommitted" event — subscribing to it throws at import
@@ -223,11 +225,17 @@ try {
           _dlog("transaction start", { stores, mode });
           const tx = down.transaction(stores, mode);
           try {
-            const anyTx = tx as unknown as { addEventListener?: (t: string, cb: (ev?: unknown) => void) => void };
+            const anyTx = tx as unknown as {
+              addEventListener?: (t: string, cb: (ev?: unknown) => void) => void;
+            };
             anyTx.addEventListener?.("abort", () => _dlog("transaction abort", { stores, mode }));
             anyTx.addEventListener?.("complete", () => _dlog("transaction end", { stores, mode }));
-            anyTx.addEventListener?.("error", (ev) => _dlog("transaction error", { stores, mode, ev }));
-          } catch { /* ignore listener attach failure */ }
+            anyTx.addEventListener?.("error", (ev) =>
+              _dlog("transaction error", { stores, mode, ev }),
+            );
+          } catch {
+            /* ignore listener attach failure */
+          }
           return tx;
         },
       };

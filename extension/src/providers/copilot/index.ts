@@ -55,16 +55,24 @@ export class CopilotAdapter extends BaseChatAdapter {
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
       const attachments = Array.from(node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'))
         .slice(0, 12)
         .map((a) => ({ kind: "link" as const, url: a.href, name: extractText(a) }));
 
-      const id = node.getAttribute("data-message-id")
-        ?? `${role}:${idx}:${hashString(markdown || content)}`;
+      const id =
+        node.getAttribute("data-message-id") ?? `${role}:${idx}:${hashString(markdown || content)}`;
 
       messages.push({
-        id, role, content, markdown, images, attachments, order: idx, metadata: {},
+        id,
+        role,
+        content,
+        markdown,
+        images,
+        attachments,
+        order: idx,
+        metadata: {},
       });
     });
     return messages;

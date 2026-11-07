@@ -16,8 +16,12 @@ import type { ProviderId } from "@/types";
 export class MyAdapter extends BaseChatAdapter {
   id: ProviderId = "myprovider";
   hostPatterns = ["myprovider.com"];
-  detectConversation(): boolean { /* … */ return true; }
-  capture() { /* return CapturedConversation */ }
+  detectConversation(): boolean {
+    /* … */ return true;
+  }
+  capture() {
+    /* return CapturedConversation */
+  }
 }
 ```
 

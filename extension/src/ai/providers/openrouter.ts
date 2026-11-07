@@ -10,11 +10,35 @@ import {
 } from "./_shared";
 
 const MODELS: AIModelInfo[] = [
-  { id: "openai/gpt-4o-mini", label: "GPT-4o mini", context: 128000, inputPer1M: 0.15, outputPer1M: 0.6 },
+  {
+    id: "openai/gpt-4o-mini",
+    label: "GPT-4o mini",
+    context: 128000,
+    inputPer1M: 0.15,
+    outputPer1M: 0.6,
+  },
   { id: "openai/gpt-4o", label: "GPT-4o", context: 128000, inputPer1M: 2.5, outputPer1M: 10 },
-  { id: "anthropic/claude-3.5-sonnet", label: "Claude 3.5 Sonnet", context: 200000, inputPer1M: 3, outputPer1M: 15 },
-  { id: "google/gemini-2.0-flash-001", label: "Gemini 2.0 Flash", context: 1_000_000, inputPer1M: 0.1, outputPer1M: 0.4 },
-  { id: "meta-llama/llama-3.3-70b-instruct", label: "Llama 3.3 70B", context: 128000, inputPer1M: 0.13, outputPer1M: 0.4 },
+  {
+    id: "anthropic/claude-3.5-sonnet",
+    label: "Claude 3.5 Sonnet",
+    context: 200000,
+    inputPer1M: 3,
+    outputPer1M: 15,
+  },
+  {
+    id: "google/gemini-2.0-flash-001",
+    label: "Gemini 2.0 Flash",
+    context: 1_000_000,
+    inputPer1M: 0.1,
+    outputPer1M: 0.4,
+  },
+  {
+    id: "meta-llama/llama-3.3-70b-instruct",
+    label: "Llama 3.3 70B",
+    context: 128000,
+    inputPer1M: 0.13,
+    outputPer1M: 0.4,
+  },
 ];
 
 const BASE = "https://openrouter.ai/api/v1";

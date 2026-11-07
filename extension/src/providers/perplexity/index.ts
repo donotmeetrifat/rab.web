@@ -54,22 +54,29 @@ export class PerplexityAdapter extends BaseChatAdapter {
       if (!markdown && !content) return;
 
       const images = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-        .map((img) => img.src).filter((s) => s && !s.startsWith("data:"));
+        .map((img) => img.src)
+        .filter((s) => s && !s.startsWith("data:"));
 
       // Perplexity's power is its citations — capture them as attachments.
-      const attachments = Array.from(
-        node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'),
-      ).slice(0, 16).map((a) => ({
-        kind: "link" as const,
-        url: a.href,
-        name: extractText(a).slice(0, 120) || a.href,
-      }));
+      const attachments = Array.from(node.querySelectorAll<HTMLAnchorElement>('a[href^="http"]'))
+        .slice(0, 16)
+        .map((a) => ({
+          kind: "link" as const,
+          url: a.href,
+          name: extractText(a).slice(0, 120) || a.href,
+        }));
 
-      const id = node.getAttribute("id")
-        ?? `${role}:${idx}:${hashString(markdown || content)}`;
+      const id = node.getAttribute("id") ?? `${role}:${idx}:${hashString(markdown || content)}`;
 
       messages.push({
-        id, role, content, markdown, images, attachments, order: idx, metadata: {},
+        id,
+        role,
+        content,
+        markdown,
+        images,
+        attachments,
+        order: idx,
+        metadata: {},
       });
     });
     return messages;

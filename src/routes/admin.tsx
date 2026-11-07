@@ -25,6 +25,12 @@ import {
 import type { VisitorStats } from "@/lib/server-analytics";
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { name: "robots", content: "noindex, nofollow" },
+      { title: "Admin Portal — Railway Auto-Booker" },
+    ],
+  }),
   component: AdminAnalyticsPage,
 });
 
@@ -32,9 +38,7 @@ const TOKEN_STORAGE_KEY = "rab_admin_token";
 
 function toBengaliNumber(num: number): string {
   const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return num
-    .toString()
-    .replace(/\d/g, (digit) => bengaliDigits[parseInt(digit, 10)]);
+  return num.toString().replace(/\d/g, (digit) => bengaliDigits[parseInt(digit, 10)]);
 }
 
 function AdminAnalyticsPage() {
@@ -235,11 +239,7 @@ function AdminAnalyticsPage() {
                     className="absolute right-3 text-muted-foreground hover:text-foreground transition-colors p-1"
                     aria-label={showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখুন"}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -263,7 +263,9 @@ function AdminAnalyticsPage() {
             {/* Security Guarantee Note */}
             <div className="mt-6 pt-5 border-t border-border/60 text-center">
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                🔒 <strong>এনক্রিপ্টেড ও সম্পূর্ণ নিরাপদ:</strong> পাসওয়ার্ডটি সার্ভার-সাইডে ক্রিপ্টোগ্রাফিকভাবে যাচাই করা হয়। সঠিক পাসওয়ার্ড ছাড়া কোনো ভিজিটর ডেটা সার্ভার থেকে প্রদান করা হয় না।
+                🔒 <strong>এনক্রিপ্টেড ও সম্পূর্ণ নিরাপদ:</strong> পাসওয়ার্ডটি সার্ভার-সাইডে
+                ক্রিপ্টোগ্রাফিকভাবে যাচাই করা হয়। সঠিক পাসওয়ার্ড ছাড়া কোনো ভিজিটর ডেটা সার্ভার থেকে
+                প্রদান করা হয় না।
               </p>
             </div>
           </div>
@@ -290,6 +292,8 @@ function AdminAnalyticsPage() {
               <img
                 src="/railway-icon.png"
                 alt="Railway Auto-Booker"
+                width={32}
+                height={32}
                 className="h-8 w-8 rounded-lg object-cover border border-primary/20 shadow-xs"
               />
               <span className="font-bold text-base sm:text-lg tracking-tight text-foreground">
@@ -318,9 +322,7 @@ function AdminAnalyticsPage() {
               title="নতুন ভিজিটর ডেটা রিফ্রেশ করুন"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 text-primary ${
-                  isLoadingStats ? "animate-spin" : ""
-                }`}
+                className={`h-3.5 w-3.5 text-primary ${isLoadingStats ? "animate-spin" : ""}`}
               />
               <span className="hidden sm:inline">রিফ্রেশ</span>
             </button>
@@ -372,9 +374,7 @@ function AdminAnalyticsPage() {
           {/* Card 1: Total Unique Visitors */}
           <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-emerald-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between text-muted-foreground mb-3">
-              <span className="text-xs sm:text-sm font-bold text-foreground">
-                ইউনিক ভিজিটর
-              </span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">ইউনিক ভিজিটর</span>
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <Users className="h-4 w-4" />
               </div>
@@ -382,17 +382,13 @@ function AdminAnalyticsPage() {
             <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
               {stats ? toBengaliNumber(stats.uniqueVisitors) : "০"}
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              মোট ভিন্ন ভিন্ন প্রকৃত মানুষ
-            </p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">মোট ভিন্ন ভিন্ন প্রকৃত মানুষ</p>
           </div>
 
           {/* Card 2: Total Pageviews */}
           <div className="rounded-2xl border border-border bg-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between text-muted-foreground mb-3">
-              <span className="text-xs sm:text-sm font-bold text-foreground">
-                মোট পেজভিউ
-              </span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">মোট পেজভিউ</span>
               <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
                 <PageviewsIcon className="h-4 w-4" />
               </div>
@@ -408,9 +404,7 @@ function AdminAnalyticsPage() {
           {/* Card 3: Today's Unique Visitors */}
           <div className="rounded-2xl border border-border bg-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between text-muted-foreground mb-3">
-              <span className="text-xs sm:text-sm font-bold text-foreground">
-                আজকের ভিজিটর
-              </span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">আজকের ভিজিটর</span>
               <div className="h-8 w-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-600">
                 <Calendar className="h-4 w-4" />
               </div>
@@ -418,17 +412,13 @@ function AdminAnalyticsPage() {
             <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
               {stats ? toBengaliNumber(stats.todayUnique) : "০"}
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              আজকে আসা নতুন ইউনিক ভিজিটর
-            </p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">আজকে আসা নতুন ইউনিক ভিজিটর</p>
           </div>
 
           {/* Card 4: Today's Pageviews */}
           <div className="rounded-2xl border border-border bg-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between text-muted-foreground mb-3">
-              <span className="text-xs sm:text-sm font-bold text-foreground">
-                আজকের পেজভিউ
-              </span>
+              <span className="text-xs sm:text-sm font-bold text-foreground">আজকের পেজভিউ</span>
               <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
                 <Activity className="h-4 w-4" />
               </div>
@@ -436,9 +426,7 @@ function AdminAnalyticsPage() {
             <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
               {stats ? toBengaliNumber(stats.todayVisits) : "০"}
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              আজকে সর্বমোট দেখা হয়েছে
-            </p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">আজকে সর্বমোট দেখা হয়েছে</p>
           </div>
         </div>
 
@@ -476,9 +464,7 @@ function AdminAnalyticsPage() {
             {/* Card 2: PC Downloads */}
             <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
               <div className="flex items-center justify-between text-muted-foreground mb-3">
-                <span className="text-xs sm:text-sm font-bold text-foreground">
-                  কম্পিউটার (PC)
-                </span>
+                <span className="text-xs sm:text-sm font-bold text-foreground">কম্পিউটার (PC)</span>
                 <div className="h-8 w-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-500">
                   <Laptop className="h-4 w-4" />
                 </div>
@@ -504,17 +490,13 @@ function AdminAnalyticsPage() {
               <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
                 {stats?.downloads ? toBengaliNumber(stats.downloads.android || 0) : "০"}
               </div>
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
-                কিউই ব্রাউজার জিপ ডাউনলোড
-              </p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">কিউই ব্রাউজার জিপ ডাউনলোড</p>
             </div>
 
             {/* Card 4: Today's Downloads */}
             <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-[color:var(--surface)] to-[color:var(--surface)] p-4 sm:p-5 shadow-xs relative overflow-hidden">
               <div className="flex items-center justify-between text-muted-foreground mb-3">
-                <span className="text-xs sm:text-sm font-bold text-foreground">
-                  আজকের ডাউনলোড
-                </span>
+                <span className="text-xs sm:text-sm font-bold text-foreground">আজকের ডাউনলোড</span>
                 <div className="h-8 w-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-500">
                   <Calendar className="h-4 w-4" />
                 </div>
@@ -522,9 +504,7 @@ function AdminAnalyticsPage() {
               <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans">
                 {stats?.downloads ? toBengaliNumber(stats.downloads.today || 0) : "০"}
               </div>
-              <p className="mt-1.5 text-[11px] text-muted-foreground">
-                আজকে হওয়া নতুন ডাউনলোড
-              </p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">আজকে হওয়া নতুন ডাউনলোড</p>
             </div>
           </div>
         </div>
@@ -557,10 +537,7 @@ function AdminAnalyticsPage() {
                       style={{
                         width: `${
                           stats.totalVisits > 0
-                            ? Math.round(
-                                ((stats.devices.mobile || 0) / stats.totalVisits) *
-                                  100,
-                              )
+                            ? Math.round(((stats.devices.mobile || 0) / stats.totalVisits) * 100)
                             : 0
                         }%`,
                       }}
@@ -585,10 +562,7 @@ function AdminAnalyticsPage() {
                       style={{
                         width: `${
                           stats.totalVisits > 0
-                            ? Math.round(
-                                ((stats.devices.desktop || 0) / stats.totalVisits) *
-                                  100,
-                              )
+                            ? Math.round(((stats.devices.desktop || 0) / stats.totalVisits) * 100)
                             : 0
                         }%`,
                       }}
@@ -613,10 +587,7 @@ function AdminAnalyticsPage() {
                       style={{
                         width: `${
                           stats.totalVisits > 0
-                            ? Math.round(
-                                ((stats.devices.tablet || 0) / stats.totalVisits) *
-                                  100,
-                              )
+                            ? Math.round(((stats.devices.tablet || 0) / stats.totalVisits) * 100)
                             : 0
                         }%`,
                       }}
@@ -674,9 +645,7 @@ function AdminAnalyticsPage() {
                       key={city}
                       className="flex items-center justify-between text-xs py-1 border-b border-border/50 last:border-0"
                     >
-                      <span className="font-medium text-foreground">
-                        📍 {city}
-                      </span>
+                      <span className="font-medium text-foreground">📍 {city}</span>
                       <span className="font-bold text-foreground font-mono">
                         {toBengaliNumber(count)}
                       </span>
@@ -702,7 +671,8 @@ function AdminAnalyticsPage() {
                 </span>
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                কোনো ডামি বা ফেক ডেটা নয় — প্রতিটি ভিজিট ও এক্সটেনশন ডাউনলোড হওয়া মাত্রই স্বয়ংক্রিয়ভাবে রেকর্ড হয়
+                কোনো ডামি বা ফেক ডেটা নয় — প্রতিটি ভিজিট ও এক্সটেনশন ডাউনলোড হওয়া মাত্রই
+                স্বয়ংক্রিয়ভাবে রেকর্ড হয়
               </p>
             </div>
           </div>
@@ -766,7 +736,10 @@ function AdminAnalyticsPage() {
           ) : (
             <div className="rounded-xl border border-dashed border-border p-8 text-center text-muted-foreground text-xs sm:text-sm">
               <Users className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-              <p>এখনো কোনো ভিজিট সম্পন্ন হয়নি। নতুন কোনো ভিজিটর ওয়েবসাইট ভিজিট করলে সাথে সাথে এখানে যোগ হবে।</p>
+              <p>
+                এখনো কোনো ভিজিট সম্পন্ন হয়নি। নতুন কোনো ভিজিটর ওয়েবসাইট ভিজিট করলে সাথে সাথে এখানে
+                যোগ হবে।
+              </p>
             </div>
           )}
         </div>

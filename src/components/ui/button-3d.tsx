@@ -16,9 +16,9 @@ function cx(...parts: Array<string | undefined | false | null>) {
 }
 
 /** Shared visual + interaction classes for the premium blue 3D CTA. */
-export function button3dClass(size: Size = "md", className?: string) {
+export const button3dClass = (size: Size = "md", className?: string) => {
   return cx(base, sizeClasses[size], className);
-}
+};
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: Size;

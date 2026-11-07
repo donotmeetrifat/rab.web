@@ -84,4 +84,3 @@ export async function allProjectMappings(): Promise<
 > {
   return readMap();
 }
-

@@ -100,9 +100,7 @@ export function AskMemlacePanel({
       const ans = await answerQuestion(q, {
         scopedToProjectId: scopedProjectId ?? undefined,
       });
-      setTurns((t) =>
-        t.map((x) => (x.id === id ? { ...x, answer: ans, pending: false } : x)),
-      );
+      setTurns((t) => t.map((x) => (x.id === id ? { ...x, answer: ans, pending: false } : x)));
 
       // 2. Optional enrichment — only when the user opted in.
       if (aiOn && enrichOn && ans.confidence !== "none") {
@@ -116,22 +114,16 @@ export function AskMemlacePanel({
             runner: ({ signal }) => askMemlace(q, { signal }),
           });
           setTurns((t) =>
-            t.map((x) =>
-              x.id === id ? { ...x, enrichment: enriched, enriching: false } : x,
-            ),
+            t.map((x) => (x.id === id ? { ...x, enrichment: enriched, enriching: false } : x)),
           );
         } catch (err) {
-          setTurns((t) =>
-            t.map((x) => (x.id === id ? { ...x, enriching: false } : x)),
-          );
+          setTurns((t) => t.map((x) => (x.id === id ? { ...x, enriching: false } : x)));
           void err;
         }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setTurns((t) =>
-        t.map((x) => (x.id === id ? { ...x, error: msg, pending: false } : x)),
-      );
+      setTurns((t) => t.map((x) => (x.id === id ? { ...x, error: msg, pending: false } : x)));
     }
   };
 
@@ -209,7 +201,9 @@ export function AskMemlacePanel({
               </ul>
             </section>
 
-            {explorer && <MemoryExplorer facets={explorer} onOpenProject={onOpenProject} onAsk={ask} />}
+            {explorer && (
+              <MemoryExplorer facets={explorer} onOpenProject={onOpenProject} onAsk={ask} />
+            )}
           </div>
         )}
 
@@ -318,9 +312,7 @@ function AnswerCard({
             {answer.headline}
           </h3>
           {answer.detail && (
-            <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-              {answer.detail}
-            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{answer.detail}</p>
           )}
         </div>
       </header>
@@ -379,9 +371,7 @@ function AnswerCard({
         <div className="px-3 pb-2">
           <button
             type="button"
-            onClick={() =>
-              onOpenConversation?.(answer.latestActivity!.conversationId)
-            }
+            onClick={() => onOpenConversation?.(answer.latestActivity!.conversationId)}
             className="w-full flex items-center gap-2 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[11px] hover:bg-muted"
           >
             <Clock className="h-3 w-3 text-muted-foreground" />
@@ -404,8 +394,7 @@ function AnswerCard({
         <div className="mx-3 mb-2 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-2">
           <div className="text-[10px] uppercase tracking-widest text-primary/80 mb-1 flex items-center justify-between gap-2">
             <span>
-              AI refinement · {providerLabel(enrichment.provider)} ·{" "}
-              {enrichment.model}
+              AI refinement · {providerLabel(enrichment.provider)} · {enrichment.model}
             </span>
             <span>{enrichment.cached ? "cached" : formatCost(enrichment.costUSD)}</span>
           </div>
@@ -468,8 +457,8 @@ function AnswerCard({
             <ChevronRight
               className={`h-3 w-3 transition-transform ${showSources ? "rotate-90" : ""}`}
             />
-            {answer.sources.length}{" "}
-            {answer.sources.length === 1 ? "source" : "sources"} · click to open
+            {answer.sources.length} {answer.sources.length === 1 ? "source" : "sources"} · click to
+            open
           </summary>
           <ul className="px-1 pb-2">
             {answer.sources.map((s) => (
@@ -514,8 +503,7 @@ function SourceRow({
 
   const handle = () => {
     if (s.kind === "conversation") onOpenConversation?.(s.id);
-    else if (s.kind === "code")
-      onOpenConversation?.(s.id.split("#")[0]);
+    else if (s.kind === "code") onOpenConversation?.(s.id.split("#")[0]);
     else if (s.kind === "project") onOpenProject?.(s.id);
   };
 
@@ -546,7 +534,6 @@ function ProviderTag({ id }: { id: string }) {
   if (!meta) return null;
   return <span className="text-[10px] text-muted-foreground">{meta.name}</span>;
 }
-
 
 /* ------------------------------------------------------------------ *
  * Memory Explorer — cheap facet cloud rendered on the empty state.

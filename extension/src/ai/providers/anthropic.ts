@@ -10,9 +10,27 @@ import {
 } from "./_shared";
 
 const MODELS: AIModelInfo[] = [
-  { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku", context: 200000, inputPer1M: 0.8, outputPer1M: 4 },
-  { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet", context: 200000, inputPer1M: 3, outputPer1M: 15 },
-  { id: "claude-3-opus-latest", label: "Claude 3 Opus", context: 200000, inputPer1M: 15, outputPer1M: 75 },
+  {
+    id: "claude-3-5-haiku-latest",
+    label: "Claude 3.5 Haiku",
+    context: 200000,
+    inputPer1M: 0.8,
+    outputPer1M: 4,
+  },
+  {
+    id: "claude-3-5-sonnet-latest",
+    label: "Claude 3.5 Sonnet",
+    context: 200000,
+    inputPer1M: 3,
+    outputPer1M: 15,
+  },
+  {
+    id: "claude-3-opus-latest",
+    label: "Claude 3 Opus",
+    context: 200000,
+    inputPer1M: 15,
+    outputPer1M: 75,
+  },
 ];
 
 const BASE = "https://api.anthropic.com/v1";
@@ -57,12 +75,15 @@ export function createAnthropic(cfg: ProviderConfig): AIProvider {
         .filter((c) => c.type === "text")
         .map((c) => c.text ?? "")
         .join("");
-      const inputTokens = data.usage?.input_tokens ?? estimateTokens(req.prompt + (req.system ?? ""));
+      const inputTokens =
+        data.usage?.input_tokens ?? estimateTokens(req.prompt + (req.system ?? ""));
       const outputTokens = data.usage?.output_tokens ?? estimateTokens(text);
       return buildGenerateResult("anthropic", model, text, { inputTokens, outputTokens });
     },
     async embed() {
-      throw new ProviderError("Anthropic has no embeddings API — pick another provider for semantic search");
+      throw new ProviderError(
+        "Anthropic has no embeddings API — pick another provider for semantic search",
+      );
     },
     async validateKey() {
       if (!cfg.apiKey) return { ok: false, error: "No API key set" };

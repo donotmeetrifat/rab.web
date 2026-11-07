@@ -10,13 +10,13 @@ RC1 is compatible with all internal beta builds. On first run after upgrade:
 
 ## Dexie schema versions
 
-| Dexie ver | Introduced | Adds |
-| --- | --- | --- |
-| v1 | Alpha | `memories`, `projects`, `tags` |
-| v2 | Alpha | `conversations`, `messages` |
-| v3 | Beta | Backup/import indices, `settings` |
-| v4 | Phase 7 | `knowledgeItems`, `entities`, `entityLinks` |
-| v5 | Phase 8 | `aiSummaries`, `aiEmbeddings`, `aiSessions` |
+| Dexie ver | Introduced | Adds                                        |
+| --------- | ---------- | ------------------------------------------- |
+| v1        | Alpha      | `memories`, `projects`, `tags`              |
+| v2        | Alpha      | `conversations`, `messages`                 |
+| v3        | Beta       | Backup/import indices, `settings`           |
+| v4        | Phase 7    | `knowledgeItems`, `entities`, `entityLinks` |
+| v5        | Phase 8    | `aiSummaries`, `aiEmbeddings`, `aiSessions` |
 
 All migrations are additive and non-destructive. Downgrade is **not** supported: opening an older extension against a newer DB will refuse to start and prompt the user to update.
 

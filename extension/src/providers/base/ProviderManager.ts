@@ -87,7 +87,10 @@ export class ProviderManager {
     "indexing",
   ]);
 
-  constructor(adapters: ProviderAdapter[], private events: ManagerEvents) {
+  constructor(
+    adapters: ProviderAdapter[],
+    private events: ManagerEvents,
+  ) {
     this.adapters = adapters;
   }
 
@@ -199,12 +202,16 @@ export class ProviderManager {
       // Coalesce: remember that content changed while we were busy so we
       // can re-arm the quiet window once the in-flight save resolves.
       this.pendingRearm = true;
-      traceStateFlow("EARLY EXIT: save already in flight (pending re-arm)", "ProviderManager.snapshot", {
-        conversationId: this.lastConversationId,
-        provider: this.active.id,
-        currentWatchState: this.watchState,
-        previousWatchState: this.watchState,
-      });
+      traceStateFlow(
+        "EARLY EXIT: save already in flight (pending re-arm)",
+        "ProviderManager.snapshot",
+        {
+          conversationId: this.lastConversationId,
+          provider: this.active.id,
+          currentWatchState: this.watchState,
+          previousWatchState: this.watchState,
+        },
+      );
       return;
     }
 
@@ -253,10 +260,11 @@ export class ProviderManager {
     this.lastConversationId = convo.conversationId;
 
     const hash = hashConversation(convo);
-    console.debug(
-      "[Memlace] conversation detected",
-      { provider: convo.provider, messages: convo.messages.length, hash: hash.slice(0, 8) },
-    );
+    console.debug("[Memlace] conversation detected", {
+      provider: convo.provider,
+      messages: convo.messages.length,
+      hash: hash.slice(0, 8),
+    });
 
     if (hash === this.lastHash) {
       // No new content — flash "No changes" briefly, then return to watch.
@@ -328,7 +336,15 @@ export class ProviderManager {
       const outcome = (await Promise.race([
         savePromise,
         new Promise((resolve) =>
-          setTimeout(() => resolve({ ok: false, stage: "timeout", error: new Error("save timed out after 10s") } as const), 10_000),
+          setTimeout(
+            () =>
+              resolve({
+                ok: false,
+                stage: "timeout",
+                error: new Error("save timed out after 10s"),
+              } as const),
+            10_000,
+          ),
         ),
       ])) as Awaited<ReturnType<ManagerEvents["onConversationChanged"]>>;
       traceStateFlow("onConversationChanged() returned", "ProviderManager.snapshot", {
@@ -339,12 +355,16 @@ export class ProviderManager {
         detail: outcome,
       });
       if (!outcome.ok) {
-        traceStateFlow(`THROW: save outcome failed at ${outcome.stage}`, "ProviderManager.snapshot", {
-          conversationId: convo.conversationId,
-          provider: convo.provider,
-          currentWatchState: this.watchState,
-          previousWatchState: this.watchState,
-        });
+        traceStateFlow(
+          `THROW: save outcome failed at ${outcome.stage}`,
+          "ProviderManager.snapshot",
+          {
+            conversationId: convo.conversationId,
+            provider: convo.provider,
+            currentWatchState: this.watchState,
+            previousWatchState: this.watchState,
+          },
+        );
         throw new Error(`stage:${outcome.stage}`);
       }
       // DB has committed. Downstream engines (knowledge, project, PIE,
@@ -458,13 +478,17 @@ export class ProviderManager {
       console.warn(
         `[Memlace] watch-state watchdog: '${state}' exceeded ${ProviderManager.TRANSIENT_STATE_TIMEOUT_MS}ms — forcing 'error'`,
       );
-      traceStateFlow("WATCHDOG: transient state exceeded ceiling", "ProviderManager.armStateWatchdog", {
-        conversationId: this.lastConversationId,
-        provider: this.active?.id,
-        currentWatchState: state,
-        previousWatchState: state,
-        detail: { ceilingMs: ProviderManager.TRANSIENT_STATE_TIMEOUT_MS },
-      });
+      traceStateFlow(
+        "WATCHDOG: transient state exceeded ceiling",
+        "ProviderManager.armStateWatchdog",
+        {
+          conversationId: this.lastConversationId,
+          provider: this.active?.id,
+          currentWatchState: state,
+          previousWatchState: state,
+          detail: { ceilingMs: ProviderManager.TRANSIENT_STATE_TIMEOUT_MS },
+        },
+      );
       // Release the in-flight guard so the next mutation cycle can proceed.
       this.savingInFlight = false;
       this.setWatchState("error");

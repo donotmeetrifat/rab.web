@@ -13,7 +13,8 @@ import { db } from "@/lib/db";
 import type { StoredConversation, StoredConvMessage } from "@/types";
 import type { PieVocabularyRow } from "./types";
 
-const PAREN_RE = /\b([A-Z]{2,6}|[A-Z][A-Za-z]+ (?:Layer|Engine|Box|Manager|Kit|System))\s*[(\[]([^)\]]{3,60})[)\]]/g;
+const PAREN_RE =
+  /\b([A-Z]{2,6}|[A-Z][A-Za-z]+ (?:Layer|Engine|Box|Manager|Kit|System))\s*[([]([^)\]]{3,60})[)\]]/g;
 
 function normaliseShort(s: string): string {
   return s.trim().toLowerCase();

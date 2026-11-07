@@ -19,8 +19,7 @@ const sizes: Record<Size, string> = {
 const variants: Record<Variant, string> = {
   primary:
     "text-white shadow-[0_1px_0_rgb(255_255_255/0.3)_inset,0_1px_2px_rgb(30_58_138/0.35),0_6px_16px_-6px_rgb(37_99_235/0.5)] bg-[linear-gradient(180deg,#2f7bff_0%,#2563eb_55%,#1d4ed8_100%)] hover:brightness-105 active:brightness-95 active:scale-[0.985]",
-  secondary:
-    "bg-surface text-foreground border border-border hover:bg-muted",
+  secondary: "bg-surface text-foreground border border-border hover:bg-muted",
   ghost: "text-foreground/80 hover:bg-muted hover:text-foreground",
   danger:
     "text-white bg-[linear-gradient(180deg,#ef4444_0%,#dc2626_100%)] hover:brightness-105 active:brightness-95",

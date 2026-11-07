@@ -24,9 +24,14 @@ registerHandler("listProviders", async () => {
 registerHandler("listConversations", async () => {
   const { listConversations } = await import("@/services/conversations");
   const rows = await listConversations();
-  return { conversations: rows.map((r) => ({
-    id: r.id, title: r.title, provider: r.provider, updatedAt: r.updatedAt,
-  })) };
+  return {
+    conversations: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      provider: r.provider,
+      updatedAt: r.updatedAt,
+    })),
+  };
 });
 
 registerHandler("search", async (params) => {

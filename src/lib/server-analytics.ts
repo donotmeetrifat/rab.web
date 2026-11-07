@@ -54,15 +54,10 @@ const BLOB_TOKEN =
   "vercel_blob_rw_ZXs6kFFDCYo9D2Hd_LK59S3Asy8nb2c6mdlsPWB5QdlheAl";
 
 const AUTH_SECRET =
-  process.env.ADMIN_JWT_SECRET ||
-  "rab-super-secret-hmac-key-2026-bangladesh-railway-auto-booker";
+  process.env.ADMIN_JWT_SECRET || "rab-super-secret-hmac-key-2026-bangladesh-railway-auto-booker";
 
 // In-memory rate limiting for failed login attempts
 const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
-
-// In-memory rolling set of visitor hashes seen today to deduplicate unique visits
-const seenToday = new Set<string>();
-let lastSeenDay = "";
 
 function getBstDate(): string {
   const now = new Date();
@@ -267,11 +262,7 @@ export async function createSessionToken(): Promise<string> {
   const base64Payload = btoa(payloadStr);
 
   const key = await getCryptoKey();
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(base64Payload),
-  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(base64Payload));
   const base64Sig = btoa(String.fromCharCode(...new Uint8Array(signature)));
 
   return `${base64Payload}.${base64Sig}`;
@@ -361,7 +352,7 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
       // Anonymous identifier for uniqueness without logging raw IP
       const visitorFingerprint = `${today}_${body.vid || clientIp}_${browser}_${device}`;
       const isUniqueToday = !stats.seenFingerprints.includes(visitorFingerprint);
-      
+
       if (isUniqueToday) {
         stats.seenFingerprints.push(visitorFingerprint);
         if (stats.seenFingerprints.length > 2500) {
@@ -465,11 +456,18 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
 
       // Update daily stats
       if (!stats.dailyStats[today]) {
-        stats.dailyStats[today] = { visits: 0, unique: 0, downloads: 0, pcDownloads: 0, androidDownloads: 0 };
+        stats.dailyStats[today] = {
+          visits: 0,
+          unique: 0,
+          downloads: 0,
+          pcDownloads: 0,
+          androidDownloads: 0,
+        };
       }
       stats.dailyStats[today].downloads = (stats.dailyStats[today].downloads || 0) + 1;
       if (downloadType === "android") {
-        stats.dailyStats[today].androidDownloads = (stats.dailyStats[today].androidDownloads || 0) + 1;
+        stats.dailyStats[today].androidDownloads =
+          (stats.dailyStats[today].androidDownloads || 0) + 1;
       } else {
         stats.dailyStats[today].pcDownloads = (stats.dailyStats[today].pcDownloads || 0) + 1;
       }
@@ -487,7 +485,10 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
         os,
         country: countryKey,
         city: decodedCity,
-        path: downloadType === "android" ? "/downloads/Railway-Auto-Booker-Android.zip" : "/downloads/Railway-Auto-Booker-PC.zip",
+        path:
+          downloadType === "android"
+            ? "/downloads/Railway-Auto-Booker-Android.zip"
+            : "/downloads/Railway-Auto-Booker-PC.zip",
         isUnique: false,
         eventType: downloadType === "android" ? "download_android" : "download_pc",
       });
@@ -544,11 +545,18 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
       }
 
       if (!stats.dailyStats[today]) {
-        stats.dailyStats[today] = { visits: 0, unique: 0, downloads: 0, pcDownloads: 0, androidDownloads: 0 };
+        stats.dailyStats[today] = {
+          visits: 0,
+          unique: 0,
+          downloads: 0,
+          pcDownloads: 0,
+          androidDownloads: 0,
+        };
       }
       stats.dailyStats[today].downloads = (stats.dailyStats[today].downloads || 0) + 1;
       if (downloadType === "android") {
-        stats.dailyStats[today].androidDownloads = (stats.dailyStats[today].androidDownloads || 0) + 1;
+        stats.dailyStats[today].androidDownloads =
+          (stats.dailyStats[today].androidDownloads || 0) + 1;
       } else {
         stats.dailyStats[today].pcDownloads = (stats.dailyStats[today].pcDownloads || 0) + 1;
       }
@@ -589,8 +597,7 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
   // 2. /api/admin-auth — Password Authentication
   if (url.pathname === "/api/admin-auth" && request.method === "POST") {
     try {
-      const clientIp =
-        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+      const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
       // Rate limiting: 5 failed attempts = 15 min lock
       const attempt = failedLoginAttempts.get(clientIp);
@@ -645,7 +652,10 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
   }
 
   // 3. /api/admin-stats — Protected Analytics Data (Requires valid Token or Password)
-  if (url.pathname === "/api/admin-stats" && (request.method === "GET" || request.method === "POST")) {
+  if (
+    url.pathname === "/api/admin-stats" &&
+    (request.method === "GET" || request.method === "POST")
+  ) {
     try {
       // Check Authorization Header (Bearer token)
       const authHeader = request.headers.get("authorization");

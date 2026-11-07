@@ -1,0 +1,65 @@
+# Railway Auto-Booker
+
+> High-speed browser extension for automated Bangladesh Railway (eticket.railway.gov.bd) ticket booking during morning rush hours.
+
+## Overview & Definition
+Railway Auto-Booker is a browser extension compatible with Desktop (Google Chrome, Microsoft Edge, Brave, Opera) and Android Mobile (Kiwi Browser). It automates the entire train ticket purchase sequence on eticket.railway.gov.bd at 8:00 AM (Eastern Zone tickets) and 2:00 PM (Western Zone tickets) with millisecond server synchronization.
+
+## Key Capabilities
+- **Millisecond Auto-Trigger:** Synchronizes precisely with Bangladesh Railway server time to initiate route search the moment tickets release (15ms - 50ms trigger speed).
+- **Automated Coach & Seat Selection:** Selects preferred classes (Snigdha, S_CHAIR, AC), bogies, and seat ranges without manual human clicking delay.
+- **Fail-safe Backup:** Automatically switches to alternative available seats if primary choice is locked by another passenger.
+- **Passenger Form Auto-Fill:** Automatically inputs passenger names, age, and phone number, jumping instantly to OTP verification.
+- **Local & Private:** 100% client-side execution within the user's browser. No passwords, credentials, or OTPs are sent to external servers.
+- **Anti-Ban Architecture:** Incorporates humanized timing delays preventing IP rate-limits.
+
+## Comparison: Manual Booking vs. Railway Auto-Booker
+| Parameter | Manual Human Booking | Railway Auto-Booker |
+|---|---|---|
+| Trigger Speed | 2 to 5 seconds delay | 15 to 50 milliseconds |
+| Coach & Seat Pick | Manual search and clicks | Instant automatic seat lock |
+| Fail-safe Backup | Search from scratch if seat locked | Instant auto-switch to next available seat |
+| Passenger Form & OTP | Manual typing delay | Auto-fill & direct OTP redirect |
+| Account & Data Privacy | Risk with untrusted third-party scrapers | 100% local client-side & anti-ban delays |
+| Platform Support | Browser-only | Desktop (Chrome/Edge/Brave) & Mobile (Kiwi) |
+
+## Subscription Plans & Pricing (BDT)
+- **3 Days Trial Pass:** ৳79
+- **7 Days Round-Trip Pass:** ৳149
+- **15 Days Short-Term Pass:** ৳199
+- **Standard Plan (30 Days / 1 Month):** ৳249 (Most Popular)
+- **Popular Plan (90 Days / 3 Months):** ৳599 (Save ৳150)
+- **Extended Plan (180 Days / 6 Months):** ৳999 (Save ৳500)
+- **VIP Annual Pass (365 Days / 1 Year):** ৳1,799
+
+## How to Install
+### Desktop (PC)
+1. Download `Railway-Auto-Booker-PC.zip`.
+2. Extract the archive.
+3. Open `chrome://extensions` in Chromium browsers (Chrome, Edge, Brave).
+4. Turn on "Developer mode" in the top-right corner.
+5. Click "Load unpacked" and select the unzipped directory.
+6. Pin the extension and paste your activation license key.
+
+### Android Mobile
+1. Install free "Kiwi Browser" from Google Play Store.
+2. Download `Railway-Auto-Booker-Android.zip` (no unzipping needed).
+3. In Kiwi Browser, open 3-dots menu > Extensions.
+4. Turn on "Developer mode" and tap "+(from .zip / .crx / .user.js)".
+5. Select the downloaded `.zip` file directly to install.
+6. Open the extension from Kiwi's menu and activate your license key.
+
+## Frequently Asked Questions (FAQ)
+- **Q: What is Railway Auto-Booker and how does it work?**
+  A: Railway Auto-Booker is a browser extension for eticket.railway.gov.bd that automates ticket booking at 8:00 AM and 2:00 PM. It syncs with the railway server clock to instantly select coaches and available seats within milliseconds.
+- **Q: Can it really book tickets at 8:00 AM rush hour?**
+  A: Yes, it triggers within milliseconds of ticket release, operating up to 50x faster than manual human clicking.
+- **Q: Is my Bangladesh Railway account safe?**
+  A: Yes, 100% safe. It runs purely client-side inside your browser with humanized random delays to avoid server rate-limits.
+- **Q: What if my preferred seat is taken?**
+  A: The intelligent fail-safe mechanism immediately locks the next best available seat in your selected travel class.
+
+## Official Contact & Support
+- **Website:** https://railwayautobooker.vercel.app/
+- **WhatsApp Support:** https://wa.me/meetrifat.ai
+- **Facebook:** https://www.facebook.com/meetrifat

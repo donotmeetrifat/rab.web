@@ -28,10 +28,7 @@ import { enqueue } from "./Queue";
 import { onConversationSaved, onConversationDeleted } from "@/knowledge/engine";
 import { detectProjectFor } from "@/services/projectDetection";
 import { onConversationLearned } from "@/pie";
-import {
-  updateGraphForConversation,
-  removeConversationFromGraph,
-} from "@/graph";
+import { updateGraphForConversation, removeConversationFromGraph } from "@/graph";
 import { getSettings } from "@/ai/AIManager";
 import { aiQueue } from "@/ai/AIQueue";
 import { enrichConversation } from "@/ai/MemoryEngine";
@@ -45,8 +42,7 @@ interface PipelineStat {
 const pipelineStats = new Map<string, PipelineStat>();
 
 function record(step: string, started: number, ok: boolean) {
-  const cur =
-    pipelineStats.get(step) ?? { step, ok: 0, err: 0, lastMs: 0 };
+  const cur = pipelineStats.get(step) ?? { step, ok: 0, err: 0, lastMs: 0 };
   cur.lastMs = Math.round(performance.now() - started);
   if (ok) cur.ok++;
   else cur.err++;

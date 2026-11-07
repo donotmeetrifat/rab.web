@@ -16,10 +16,7 @@ import {
   Wrench,
 } from "lucide-react";
 import type { StoredConversation, StoredConvMessage } from "@/types";
-import {
-  deleteConversation,
-  getConversationMessages,
-} from "@/services/conversations";
+import { deleteConversation, getConversationMessages } from "@/services/conversations";
 import { ProviderBadge } from "./ProviderBadge";
 import { ContinueButton } from "./ContinueButton";
 import { Skeleton } from "@/components/Skeleton";
@@ -63,10 +60,7 @@ function formatConversationText(
     .filter(Boolean)
     .join("\n");
   const body = messages
-    .map(
-      (m) =>
-        `\n---\n\n## ${ROLE_LABEL[m.role] ?? m.role}\n\n${m.markdown || m.content}`,
-    )
+    .map((m) => `\n---\n\n## ${ROLE_LABEL[m.role] ?? m.role}\n\n${m.markdown || m.content}`)
     .join("");
   return `${header}\n${body}\n`;
 }
@@ -82,8 +76,8 @@ const MarkdownBody = memo(function MarkdownBody({ source }: { source: string }) 
             <a {...p} target="_blank" rel="noreferrer" className="text-primary hover:underline" />
           ),
           img: ({ node: _n, ...p }) => (
-            // eslint-disable-next-line jsx-a11y/alt-text
             <img
+              alt=""
               {...p}
               loading="lazy"
               className="my-2 rounded-md border border-border max-w-full h-auto"
@@ -189,8 +183,7 @@ const MessageCard = memo(function MessageCard({ m }: { m: StoredConvMessage }) {
               rel="noreferrer"
               className="block overflow-hidden rounded-md border border-border"
             >
-              {/* eslint-disable-next-line jsx-a11y/alt-text */}
-              <img src={src} loading="lazy" className="w-full h-auto object-cover" />
+              <img src={src} alt="" loading="lazy" className="w-full h-auto object-cover" />
             </a>
           ))}
         </div>

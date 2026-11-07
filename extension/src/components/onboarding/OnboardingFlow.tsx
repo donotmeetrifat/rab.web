@@ -21,15 +21,7 @@ import { Logo } from "@/components/Logo";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
 
-const PROVIDERS = [
-  "ChatGPT",
-  "Claude",
-  "Gemini",
-  "DeepSeek",
-  "Perplexity",
-  "Copilot",
-  "AI Studio",
-];
+const PROVIDERS = ["ChatGPT", "Claude", "Gemini", "DeepSeek", "Perplexity", "Copilot", "AI Studio"];
 
 export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -83,8 +75,8 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
 
   if (!open) return null;
 
-  const next = () => setStep((s) => (Math.min(5, s + 1) as Step));
-  const prev = () => setStep((s) => (Math.max(0, s - 1) as Step));
+  const next = () => setStep((s) => Math.min(5, s + 1) as Step);
+  const prev = () => setStep((s) => Math.max(0, s - 1) as Step);
 
   return (
     <div
@@ -123,9 +115,8 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
               </div>
               <h2 className="text-lg font-semibold">Welcome to Memlace</h2>
               <p className="text-sm text-muted-foreground">
-                A place for your AI memory. Save conversations across every
-                assistant, search them instantly, and pick up where you left off
-                — in any AI.
+                A place for your AI memory. Save conversations across every assistant, search them
+                instantly, and pick up where you left off — in any AI.
               </p>
               <div className="mt-2 grid place-items-center">
                 <div className="h-24 w-24 rounded-2xl bg-primary/10 grid place-items-center">
@@ -139,8 +130,8 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
             <div className="space-y-4">
               <h2 className="text-base font-semibold">Works everywhere</h2>
               <p className="text-xs text-muted-foreground">
-                Memlace captures conversations from every major AI. Your chats
-                stay on this device unless you turn on optional AI features.
+                Memlace captures conversations from every major AI. Your chats stay on this device
+                unless you turn on optional AI features.
               </p>
               <ul className="grid grid-cols-2 gap-1.5">
                 {PROVIDERS.map((p) => (
@@ -181,8 +172,8 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
                       <Wifi className="h-3.5 w-3.5" /> Offline only
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      100% local. No API keys, no network requests. Save, search
-                      and organize on your device.
+                      100% local. No API keys, no network requests. Save, search and organize on
+                      your device.
                     </p>
                   </div>
                 </label>
@@ -207,8 +198,8 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
                       <Cpu className="h-3.5 w-3.5" /> Connect your own AI
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Bring your OpenAI, Claude, Gemini, OpenRouter or local
-                      Ollama key for summaries, tags and semantic search.
+                      Bring your OpenAI, Claude, Gemini, OpenRouter or local Ollama key for
+                      summaries, tags and semantic search.
                     </p>
                   </div>
                 </label>
@@ -230,14 +221,13 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
                     className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
                   >
                     <span className="text-xs text-muted-foreground">{label}</span>
-                    <kbd className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px]">
-                      {k}
-                    </kbd>
+                    <kbd className="rounded-md bg-muted px-2 py-0.5 font-mono text-[11px]">{k}</kbd>
                   </li>
                 ))}
               </ul>
               <p className="text-[11px] text-muted-foreground">
-                You can change shortcuts in <span className="font-medium">chrome://extensions/shortcuts</span>.
+                You can change shortcuts in{" "}
+                <span className="font-medium">chrome://extensions/shortcuts</span>.
               </p>
             </div>
           )}
@@ -272,20 +262,15 @@ export function OnboardingFlow({ onDone }: { onDone?: () => void }) {
               </div>
               <h2 className="text-lg font-semibold">You're ready</h2>
               <p className="text-sm text-muted-foreground">
-                Open any AI, look for the “Save to Memlace” pill in the composer,
-                and your chat lands here instantly.
+                Open any AI, look for the “Save to Memlace” pill in the composer, and your chat
+                lands here instantly.
               </p>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-3 bg-background/50">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={prev}
-            disabled={step === 0}
-          >
+          <Button variant="ghost" size="sm" onClick={prev} disabled={step === 0}>
             <ArrowLeft className="h-3.5 w-3.5" /> Back
           </Button>
           {step < 5 ? (

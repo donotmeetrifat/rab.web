@@ -77,14 +77,20 @@ interface Actions {
   // projects
   addProject: (input: CreateProjectInput) => Promise<Project>;
   renameProject: (id: string, name: string) => Promise<void>;
-  updateProject: (id: string, patch: { name?: string; color?: string; icon?: ProjectIcon }) => Promise<void>;
+  updateProject: (
+    id: string,
+    patch: { name?: string; color?: string; icon?: ProjectIcon },
+  ) => Promise<void>;
   togglePinProject: (id: string) => Promise<void>;
   toggleFavoriteProject: (id: string) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
 
   // memories
   addMemory: (input: CreateMemoryInput) => Promise<Memory>;
-  editMemory: (id: string, patch: Partial<Pick<Memory, "title" | "content" | "tags" | "projectId" | "provider">>) => Promise<void>;
+  editMemory: (
+    id: string,
+    patch: Partial<Pick<Memory, "title" | "content" | "tags" | "projectId" | "provider">>,
+  ) => Promise<void>;
   duplicateMemory: (id: string) => Promise<Memory | null>;
   moveMemories: (ids: string[], projectId: string | null) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
@@ -280,7 +286,11 @@ export const useMemlace = create<State & Actions>((set, get) => ({
 
   toggleSelected: (id) => {
     const next = new Set(get().selection);
-    next.has(id) ? next.delete(id) : next.add(id);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
     set({ selection: next });
   },
   clearSelection: () => set({ selection: new Set() }),

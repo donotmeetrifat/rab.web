@@ -2,13 +2,7 @@ import { MessagesSquare } from "lucide-react";
 import { Empty } from "@/components/Empty";
 import type { ReactNode } from "react";
 
-export function ConversationEmptyState({
-  query,
-  action,
-}: {
-  query?: string;
-  action?: ReactNode;
-}) {
+export function ConversationEmptyState({ query, action }: { query?: string; action?: ReactNode }) {
   if (query) {
     return (
       <Empty

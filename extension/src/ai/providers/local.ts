@@ -13,7 +13,14 @@ import {
 const DEFAULT_MODELS: AIModelInfo[] = [
   { id: "llama3.2", label: "Llama 3.2 (local)", context: 128000, inputPer1M: 0, outputPer1M: 0 },
   { id: "qwen2.5", label: "Qwen 2.5 (local)", context: 32000, inputPer1M: 0, outputPer1M: 0 },
-  { id: "nomic-embed-text", label: "nomic-embed-text (local)", context: 8192, inputPer1M: 0, outputPer1M: 0, supportsEmbeddings: true },
+  {
+    id: "nomic-embed-text",
+    label: "nomic-embed-text (local)",
+    context: 8192,
+    inputPer1M: 0,
+    outputPer1M: 0,
+    supportsEmbeddings: true,
+  },
 ];
 
 const DEFAULT_BASE = "http://localhost:11434";
@@ -36,7 +43,9 @@ export function createOllama(cfg: ProviderConfig): AIProvider {
       const input = Array.isArray(req.input) ? req.input : [req.input];
       const vectors: number[][] = [];
       for (const text of input) {
-        interface Resp { embedding: number[] }
+        interface Resp {
+          embedding: number[];
+        }
         const data = await httpJson<Resp>(`${base}/api/embeddings`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -63,7 +72,8 @@ export function createOllama(cfg: ProviderConfig): AIProvider {
 export function createLMStudio(cfg: ProviderConfig): AIProvider {
   const base = (cfg.baseUrl?.trim() || "http://localhost:1234/v1").replace(/\/$/, "");
   const openai = {
-    generate: (req: Parameters<AIProvider["generate"]>[0]) => openaiChat(base, null, req, cfg.chatModel),
+    generate: (req: Parameters<AIProvider["generate"]>[0]) =>
+      openaiChat(base, null, req, cfg.chatModel),
   };
   return {
     id: "lmstudio",
@@ -78,7 +88,9 @@ export function createLMStudio(cfg: ProviderConfig): AIProvider {
     async embed(req) {
       const model = req.model ?? cfg.embeddingModel;
       const input = Array.isArray(req.input) ? req.input : [req.input];
-      interface Resp { data?: { embedding: number[]; index: number }[] }
+      interface Resp {
+        data?: { embedding: number[]; index: number }[];
+      }
       const data = await httpJson<Resp>(`${base}/embeddings`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -135,7 +147,9 @@ export function createCustom(cfg: ProviderConfig): AIProvider {
       const input = Array.isArray(req.input) ? req.input : [req.input];
       const headers: Record<string, string> = { "content-type": "application/json" };
       if (cfg.apiKey) headers.authorization = `Bearer ${cfg.apiKey}`;
-      interface Resp { data?: { embedding: number[]; index: number }[] }
+      interface Resp {
+        data?: { embedding: number[]; index: number }[];
+      }
       const data = await httpJson<Resp>(`${base}/embeddings`, {
         method: "POST",
         headers,

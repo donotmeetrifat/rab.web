@@ -7,16 +7,16 @@
 
 ## 1. Vercel compatibility
 
-| Check | Status |
-| --- | :-: |
-| `bun install` succeeds | ✅ |
-| `bun run build` succeeds | ✅ |
-| TypeScript strict passes (`tsgo --noEmit`) | ✅ |
-| No SSR/hydration warnings | ✅ (single `<html>` shell in `__root.tsx`, `HeadContent` + `Scripts` wired) |
-| No browser-only APIs at module top-level | ✅ (download uses `useCallback` + event handler) |
-| No missing assets | ✅ (all imports resolve; Lovable assets externalised via `.asset.json`) |
-| No broken routes | ✅ (only `/` public route) |
-| No secrets in bundle | ✅ (no `.env*`, no API keys) |
+| Check                                      |                                   Status                                    |
+| ------------------------------------------ | :-------------------------------------------------------------------------: |
+| `bun install` succeeds                     |                                     ✅                                      |
+| `bun run build` succeeds                   |                                     ✅                                      |
+| TypeScript strict passes (`tsgo --noEmit`) |                                     ✅                                      |
+| No SSR/hydration warnings                  | ✅ (single `<html>` shell in `__root.tsx`, `HeadContent` + `Scripts` wired) |
+| No browser-only APIs at module top-level   |              ✅ (download uses `useCallback` + event handler)               |
+| No missing assets                          |   ✅ (all imports resolve; Lovable assets externalised via `.asset.json`)   |
+| No broken routes                           |                         ✅ (only `/` public route)                          |
+| No secrets in bundle                       |                        ✅ (no `.env*`, no API keys)                         |
 
 **Runtime preset.** The project uses TanStack Start's bundled Nitro. Nitro auto-detects Vercel from `VERCEL=1` at build time — no config change required. If you deploy from CI outside Vercel and want a Vercel target explicitly, set `NITRO_PRESET=vercel` in the environment. Do **not** modify `vite.config.ts` — the Lovable-managed config warns against it.
 
@@ -26,12 +26,12 @@
 
 Verified headers (per `vercel.json`):
 
-| Header | Value |
-| --- | --- |
-| `Content-Type` | `application/zip` |
-| `Content-Disposition` | `attachment; filename="Memlace-Chrome-Extension-v1.0.0.zip"` |
-| `Cache-Control` | `public, max-age=31536000, immutable` |
-| `X-Content-Type-Options` | `nosniff` |
+| Header                   | Value                                                        |
+| ------------------------ | ------------------------------------------------------------ |
+| `Content-Type`           | `application/zip`                                            |
+| `Content-Disposition`    | `attachment; filename="Memlace-Chrome-Extension-v1.0.0.zip"` |
+| `Cache-Control`          | `public, max-age=31536000, immutable`                        |
+| `X-Content-Type-Options` | `nosniff`                                                    |
 
 - HTTP 200 direct, no redirects (verified locally with `curl -I http://localhost:8080/memlace-extension.zip`).
 - Content-Length is served automatically by Vercel edge.
@@ -46,6 +46,7 @@ Located in `src/routes/index.tsx`. The button uses a root-relative URL constant 
 - Production custom domains
 
 On click:
+
 1. Fetches the ZIP with a 30 s `AbortController` timeout and `cache: "no-store"`.
 2. Wraps the response in a `Blob`, creates an `<a>` with `download="Memlace-Chrome-Extension-v1.0.0.zip"`, appends → clicks → removes.
 3. `URL.revokeObjectURL` on a 1 s delay (Safari-safe).
@@ -53,27 +54,28 @@ On click:
 
 Failure handling:
 
-| Case | User feedback |
-| --- | --- |
-| `HTTP 404` | `toast.error("Download failed", "Extension file not found. Please try again later.")` |
-| `HTTP 5xx` | `toast.error("Download failed", "Download failed (HTTP 500).")` |
-| Network error (`TypeError`) | `toast.error("Download failed", "Network error. Check your connection and try again.")` |
+| Case                         | User feedback                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `HTTP 404`                   | `toast.error("Download failed", "Extension file not found. Please try again later.")`        |
+| `HTTP 5xx`                   | `toast.error("Download failed", "Download failed (HTTP 500).")`                              |
+| Network error (`TypeError`)  | `toast.error("Download failed", "Network error. Check your connection and try again.")`      |
 | Timeout (`AbortError`, 30 s) | `toast.error("Download failed", "Download timed out. Check your connection and try again.")` |
-| Success | `toast.success("Download started", "Memlace-Chrome-Extension-v1.0.0.zip")` |
+| Success                      | `toast.success("Download started", "Memlace-Chrome-Extension-v1.0.0.zip")`                   |
 
 Concurrency safety:
+
 - `if (state === "loading") return;` short-circuits double-clicks.
 - `disabled={state === "loading"}` prevents pointer events on the button.
 - Label swaps to `"Preparing…"` while in-flight.
 
 ## 4. Cache headers (`vercel.json`)
 
-| Route | Cache-Control |
-| --- | --- |
-| `/memlace-extension.zip` | `public, max-age=31536000, immutable` |
-| `/assets/*` (hashed Vite output) | `public, max-age=31536000, immutable` |
+| Route                                                               | Cache-Control                           |
+| ------------------------------------------------------------------- | --------------------------------------- |
+| `/memlace-extension.zip`                                            | `public, max-age=31536000, immutable`   |
+| `/assets/*` (hashed Vite output)                                    | `public, max-age=31536000, immutable`   |
 | `/favicon.png` `/robots.txt` `/sitemap.xml` `/manifest.webmanifest` | `public, max-age=3600, must-revalidate` |
-| HTML (default) | Vercel default (revalidated per deploy) |
+| HTML (default)                                                      | Vercel default (revalidated per deploy) |
 
 Global security headers on `/(.*)`:
 
@@ -89,17 +91,17 @@ CSP is intentionally omitted: TanStack Start's SSR + hydration relies on Vite-em
 
 Verified in `src/routes/__root.tsx` and `src/routes/index.tsx`:
 
-| Item | Status |
-| --- | :-: |
-| `<title>` | ✅ Memlace-specific |
-| `<meta name="description">` | ✅ |
-| `og:title` / `og:description` / `og:type` | ✅ (root; `og:type=website`) |
-| `twitter:card` | ✅ `summary_large_image` |
-| Favicon (`/favicon.png`) | ✅ 200 |
-| Apple touch icon | ✅ |
-| `robots.txt` | ✅ present in `/public` |
-| Canonical / `og:image` | ⚠️ omitted — no absolute domain configured yet. Add when a production URL is assigned. |
-| Sitemap / structured data | ⚠️ single-page site — not required for v1. |
+| Item                                      |                                         Status                                         |
+| ----------------------------------------- | :------------------------------------------------------------------------------------: |
+| `<title>`                                 |                                  ✅ Memlace-specific                                   |
+| `<meta name="description">`               |                                           ✅                                           |
+| `og:title` / `og:description` / `og:type` |                              ✅ (root; `og:type=website`)                              |
+| `twitter:card`                            |                                ✅ `summary_large_image`                                |
+| Favicon (`/favicon.png`)                  |                                         ✅ 200                                         |
+| Apple touch icon                          |                                           ✅                                           |
+| `robots.txt`                              |                                ✅ present in `/public`                                 |
+| Canonical / `og:image`                    | ⚠️ omitted — no absolute domain configured yet. Add when a production URL is assigned. |
+| Sitemap / structured data                 |                       ⚠️ single-page site — not required for v1.                       |
 
 ## 6. PWA / manifest
 

@@ -58,14 +58,7 @@ export interface ProviderAdapter {
  *   error      — save failed; still monitoring
  */
 export type WatchState =
-  | "watching"
-  | "extracting"
-  | "sending"
-  | "saving"
-  | "indexing"
-  | "synced"
-  | "skipped"
-  | "error";
+  "watching" | "extracting" | "sending" | "saving" | "indexing" | "synced" | "skipped" | "error";
 
 export interface IndicatorHandlers {
   /** Adapter reads the current state via this getter on mount. */

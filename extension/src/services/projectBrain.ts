@@ -11,35 +11,19 @@
  * `conversations.ts` when anything upstream changes.
  */
 import { db } from "@/lib/db";
-import type {
-  KnowledgeCodeBlock,
-  KnowledgeLink,
-  KnowledgeRecord,
-} from "@/knowledge/types";
-import type {
-  Memory,
-  Project,
-  StoredConversation,
-  StoredConvMessage,
-} from "@/types";
+import type { KnowledgeCodeBlock, KnowledgeLink, KnowledgeRecord } from "@/knowledge/types";
+import type { Memory, Project, StoredConversation, StoredConvMessage } from "@/types";
 import { extractDecisions } from "@/context/DecisionExtractor";
 import { detectGoals } from "@/context/GoalDetector";
 import type { DetectedGoal, ExtractedDecision } from "@/context/types";
-import {
-  allProjectMappings,
-  conversationsForProject,
-} from "@/services/projectDetection";
+import { allProjectMappings, conversationsForProject } from "@/services/projectDetection";
 
 /* ------------------------------------------------------------------ *
  * Types
  * ------------------------------------------------------------------ */
 
 export type ProjectHealth =
-  | "planning"
-  | "in-progress"
-  | "testing"
-  | "ready-to-deploy"
-  | "maintaining";
+  "planning" | "in-progress" | "testing" | "ready-to-deploy" | "maintaining";
 
 export interface ProjectBrain {
   project: Project;
@@ -183,9 +167,7 @@ async function build(project: Project): Promise<ProjectBrain> {
 
   const convIds = Array.from(new Set(detectedIds));
   const conversations = convIds.length
-    ? (await db.conversations.bulkGet(convIds)).filter(
-        (c): c is StoredConversation => !!c,
-      )
+    ? (await db.conversations.bulkGet(convIds)).filter((c): c is StoredConversation => !!c)
     : [];
   conversations.sort((a, b) => b.updatedAt - a.updatedAt);
 
@@ -216,10 +198,7 @@ async function build(project: Project): Promise<ProjectBrain> {
   //    messages so we don't scan the whole corpus.
   const recentIds = conversations.slice(0, 20).map((c) => c.id);
   const messages: StoredConvMessage[] = recentIds.length
-    ? await db.convMessages
-        .where("conversationId")
-        .anyOf(recentIds)
-        .toArray()
+    ? await db.convMessages.where("conversationId").anyOf(recentIds).toArray()
     : [];
   const byConv = new Map<string, StoredConvMessage[]>();
   for (const m of messages) {

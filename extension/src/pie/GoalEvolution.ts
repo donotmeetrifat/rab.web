@@ -9,12 +9,16 @@ import type { PieGoalRow } from "./types";
 
 const GOAL_PATTERNS = [
   /\b(?:i(?:'m| am)|we(?:'re| are))\s+(?:trying to|working on|building|shipping|planning to)\s+([^\n.!?]{4,80})/gi,
-  /\b(?:goal|objective|deliverable)\s*[:\-]\s*([^\n.!?]{4,80})/gi,
+  /\b(?:goal|objective|deliverable)\s*[:-]\s*([^\n.!?]{4,80})/gi,
 ];
 const COMPLETION = /\b(shipped|launched|released|done|completed|finished|deployed)\b/i;
 
 function normalise(g: string): string {
-  return g.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  return g
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function overlap(a: string, b: string): number {
@@ -22,7 +26,9 @@ function overlap(a: string, b: string): number {
   const sb = new Set(b.split(" ").filter((w) => w.length > 2));
   if (!sa.size || !sb.size) return 0;
   let common = 0;
-  sa.forEach((w) => { if (sb.has(w)) common += 1; });
+  sa.forEach((w) => {
+    if (sb.has(w)) common += 1;
+  });
   return common / Math.min(sa.size, sb.size);
 }
 
@@ -60,7 +66,9 @@ export async function updateGoalsFor(
     if (match) {
       const last = match.chain[match.chain.length - 1];
       if (!last || last.label !== label) {
-        match.chain = [...match.chain, { label, at: now, conversationId: conversation.id }].slice(-16);
+        match.chain = [...match.chain, { label, at: now, conversationId: conversation.id }].slice(
+          -16,
+        );
       }
       match.status = done ? "completed" : match.status;
       match.updatedAt = now;

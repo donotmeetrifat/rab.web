@@ -29,7 +29,10 @@ async function edgesTouching(type: GraphNodeType, key: string): Promise<GraphEdg
   for (const e of [...asA, ...asB]) {
     if (seen.has(e.id)) continue;
     const matches = (e.a === k && e.aType === type) || (e.b === k && e.bType === type);
-    if (matches) { seen.add(e.id); out.push(e); }
+    if (matches) {
+      seen.add(e.id);
+      out.push(e);
+    }
   }
   return out;
 }
@@ -40,9 +43,7 @@ export async function neighbours(
   opts: { rel?: GraphRelation | GraphRelation[]; limit?: number } = {},
 ): Promise<GraphNeighbour[]> {
   const edges = await edgesTouching(type, key);
-  const rels = opts.rel
-    ? new Set(Array.isArray(opts.rel) ? opts.rel : [opts.rel])
-    : null;
+  const rels = opts.rel ? new Set(Array.isArray(opts.rel) ? opts.rel : [opts.rel]) : null;
   const now = Date.now();
   const k = key.toLowerCase();
   const results: GraphNeighbour[] = [];
@@ -76,7 +77,8 @@ export async function expand(
   const depth = Math.max(1, Math.min(3, opts.depth ?? 2));
   const scores = new Map<string, number>();
   let frontier: Array<{ type: GraphNodeType; key: string; w: number }> = seeds.map((s) => ({
-    ...s, w: 1,
+    ...s,
+    w: 1,
   }));
   for (let d = 0; d < depth; d++) {
     const next: typeof frontier = [];
@@ -95,9 +97,7 @@ export async function expand(
     if (!frontier.length) break;
   }
   if (typeof opts.limit === "number") {
-    const trimmed = new Map(
-      [...scores].sort((a, b) => b[1] - a[1]).slice(0, opts.limit),
-    );
+    const trimmed = new Map([...scores].sort((a, b) => b[1] - a[1]).slice(0, opts.limit));
     return trimmed;
   }
   return scores;

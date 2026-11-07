@@ -122,7 +122,11 @@ export async function dispatchSaveConversation(msg: SaveMessage): Promise<Runtim
   const key = keyOf(msg);
   const c = msg.payload.conversation as { provider?: string; conversationId?: string };
   if (c?.provider && c?.conversationId) {
-    try { auditStart(c.provider, c.conversationId, msg.payload.hash); } catch { /* noop */ }
+    try {
+      auditStart(c.provider, c.conversationId, msg.payload.hash);
+    } catch {
+      /* noop */
+    }
   }
   pending.set(key, msg); // newest snapshot wins
   diag.queueLength = pending.size;
@@ -147,7 +151,6 @@ export async function dispatchSaveConversation(msg: SaveMessage): Promise<Runtim
       },
     };
   }
-
 
   inFlight.add(key);
   diag.activeSaves = inFlight.size;

@@ -51,9 +51,12 @@ export function renderPreamble(ctx: EvolvedContext): string {
     const items = ctx.activeDecisions.map((d) => `${d.topic}=${d.current}`).join(", ");
     lines.push(`Active stack decisions: ${items}`);
   }
-  if (ctx.preferredLanguages.length) lines.push(`Preferred languages: ${ctx.preferredLanguages.join(", ")}`);
-  if (ctx.preferredFrameworks.length) lines.push(`Preferred frameworks: ${ctx.preferredFrameworks.join(", ")}`);
-  if (ctx.preferredResponseFormat) lines.push(`Preferred answer style: ${ctx.preferredResponseFormat}`);
+  if (ctx.preferredLanguages.length)
+    lines.push(`Preferred languages: ${ctx.preferredLanguages.join(", ")}`);
+  if (ctx.preferredFrameworks.length)
+    lines.push(`Preferred frameworks: ${ctx.preferredFrameworks.join(", ")}`);
+  if (ctx.preferredResponseFormat)
+    lines.push(`Preferred answer style: ${ctx.preferredResponseFormat}`);
   if (ctx.preferredStyle) lines.push(`Coding style: ${ctx.preferredStyle}`);
   return lines.length ? `# Personal context\n${lines.map((l) => `- ${l}`).join("\n")}` : "";
 }
