@@ -75,11 +75,19 @@ const SCHEMA_DATA = {
     {
       "@type": "SoftwareApplication",
       "@id": "https://railwayautobooker.vercel.app/#software",
-      name: "Railway Auto-Booker",
+      name: "Railway Auto-Booker by Rifat",
       alternateName: [
+        "railwayautobooker",
+        "railway autobooker",
+        "railwayautobooker by rifat",
+        "Railway Auto-Booker by Rifat",
+        "Railway Auto Booker by MD Rifat",
+        "RailwayAutoBooker",
         "Bangladesh Railway Auto-Booker",
         "রেলওয়ে ট্রেনের টিকিট অটো বুকিং",
         "BD Railway Auto Booker",
+        "Bangladesh Railway Ticket Booking Extension",
+        "Train Ticket Auto Booking Extension",
       ],
       applicationCategory: "BrowserApplication",
       operatingSystem: "Windows 10, Windows 11, Android (Kiwi Browser), macOS, ChromeOS",
@@ -90,10 +98,11 @@ const SCHEMA_DATA = {
       image: "https://railwayautobooker.vercel.app/railway-icon.png",
       screenshot: "https://railwayautobooker.vercel.app/railway-thumbnail.webp",
       description:
-        "High-speed browser extension for Bangladesh Railway (eticket.railway.gov.bd). Automatically books train tickets during 8:00 AM rush hour with instant seat picking, coach selection, and fast checkout.",
+        "Railway Auto-Booker by Rifat is a high-speed browser extension for automated Bangladesh Railway (eticket.railway.gov.bd) ticket booking during 8:00 AM & 2:00 PM rush hours with instant seat picking, coach selection, and fast checkout.",
       softwareVersion: "2.4.0",
       inLanguage: "bn-BD",
-      author: { "@id": "https://railwayautobooker.vercel.app/#organization" },
+      author: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
+      creator: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
       publisher: { "@id": "https://railwayautobooker.vercel.app/#organization" },
       isPartOf: { "@id": "https://railwayautobooker.vercel.app/#website" },
       featureList: [
@@ -222,9 +231,24 @@ const SCHEMA_DATA = {
       inLanguage: "bn-BD",
     },
     {
+      "@type": "Person",
+      "@id": "https://railwayautobooker.vercel.app/#person-rifat",
+      name: "MD Rifat",
+      alternateName: ["Rifat", "meetrifat", "rifat"],
+      jobTitle: "Software Developer & Automation Specialist",
+      url: "https://www.facebook.com/meetrifat",
+      sameAs: ["https://www.facebook.com/meetrifat", "https://wa.me/meetrifat.ai"],
+      worksFor: { "@id": "https://railwayautobooker.vercel.app/#organization" },
+    },
+    {
       "@type": "Organization",
       "@id": "https://railwayautobooker.vercel.app/#organization",
       name: "Railway Auto-Booker",
+      alternateName: [
+        "railwayautobooker",
+        "Railway Auto-Booker by Rifat",
+        "meetrifat automation",
+      ],
       url: "https://railwayautobooker.vercel.app/",
       logo: {
         "@type": "ImageObject",
@@ -233,12 +257,7 @@ const SCHEMA_DATA = {
         height: "512",
       },
       sameAs: ["https://www.facebook.com/meetrifat", "https://wa.me/meetrifat.ai"],
-      founder: {
-        "@type": "Person",
-        name: "MD Rifat",
-        jobTitle: "Software Developer & Automation Specialist",
-        url: "https://www.facebook.com/meetrifat",
-      },
+      founder: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
       contactPoint: [
         {
           "@type": "ContactPoint",
@@ -283,7 +302,23 @@ const SCHEMA_DATA = {
           name: "Railway Auto-Booker কী এবং এটি কীভাবে কাজ করে?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "রেলওয়ে অটো-বুকার (Railway Auto-Booker) হলো বাংলাদেশ রেলওয়ের অফিশিয়াল ই-টিকিটিং ওয়েবসাইটের (eticket.railway.gov.bd) জন্য প্রস্তুতকৃত একটি হাই-স্পিড ব্রাউজার এক্সটেনশন। এটি সকাল ৮:০০ টা (পূর্বাঞ্চল) ও দুপুর ২:০০ টায় (পশ্চিমাঞ্চল) টিকিট ছাড়ার মুহূর্তে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত টাইমিংয়ে সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে ট্রেনের বগি, পছন্দের খালি সিট সিলেক্ট ও ওটিপি পেজে রিডাইরেক্ট করে। কম্পিউটার (Chrome, Edge, Brave) এবং অ্যান্ড্রয়েড মোবাইল (Kiwi Browser) উভয়েই এটি ১০০% ক্লায়েন্ট-সাইড লোকাল ও নিরাপদে কাজ করে।",
+            text: "রেলওয়ে অটো-বুকার (Railway Auto-Booker by Rifat) হলো বাংলাদেশ রেলওয়ের অফিশিয়াল ই-টিকিটিং ওয়েবসাইটের (eticket.railway.gov.bd) জন্য প্রস্তুতকৃত একটি হাই-স্পিড ব্রাউজার এক্সটেনশন। এটি সকাল ৮:০০ টা (পূর্বাঞ্চল) ও দুপুর ২:০০ টায় (পশ্চিমাঞ্চল) টিকিট ছাড়ার মুহূর্তে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত টাইমিংয়ে সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে ট্রেনের বগি, পছন্দের খালি সিট সিলেক্ট ও ওটিপি পেজে রিডাইরেক্ট করে। কম্পিউটার (Chrome, Edge, Brave) এবং অ্যান্ড্রয়েড মোবাইল (Kiwi Browser) উভয়েই এটি ১০০% ক্লায়েন্ট-সাইড লোকাল ও নিরাপদে কাজ করে।",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is there any automation or extension to book railway ticket automatically? (রেলওয়ে ট্রেনের টিকিট অটো কাটার সফটওয়্যার বা এক্সটেনশন আছে কি?)",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes! Railway Auto-Booker (created by MD Rifat, also known as railwayautobooker by rifat) is the premier browser automation extension for Bangladesh Railway (eticket.railway.gov.bd). It automatically triggers at 8:00 AM (Eastern Zone) and 2:00 PM (Western Zone), selects coaches and available seats in 15–50 milliseconds, and proceeds directly to OTP payment verification. It works on both PC (Chrome, Edge, Brave) and Android Mobile (Kiwi Browser). হ্যাঁ, বাংলাদেশ রেলওয়ের টিকিট সম্পূর্ণ অটোমেটিকভাবে কাটার জন্য Railway Auto-Booker সবচেয়ে নির্ভরযোগ্য ও দ্রুততম সফটওয়্যার।",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Railway Auto-Booker সফটওয়্যারটি কার তৈরি (Who developed Railway Auto-Booker by Rifat)?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Railway Auto-Booker সফটওয়্যারটি তৈরি ও ডেভেলপ করেছেন সফটওয়্যার ডেভেলপার ও অটোমেশন স্পেশালিস্ট MD Rifat (meetrifat)। জেনুইন রেল যাত্রীরা যেন কোনো দালাল বা অতিরিক্ত বিলম্ব ছাড়াই মিলিসেকেন্ডে নিজস্ব অ্যাকাউন্টের মাধ্যমে টিকিট কাটতে পারেন, সেই লক্ষ্যেই এটি লোকাল ও নিরাপদ ক্লায়েন্ট-সাইড প্রযুক্তিতে তৈরি। অফিসিয়াল সাপোর্ট ও লাইসেন্স পেতে সরাসরি আমাদের হোয়াটসঅ্যাপ (wa.me/meetrifat.ai) বা ফেসবুক প্রোফাইলে (facebook.com/meetrifat) যোগাযোগ করা যায়।",
           },
         },
         {
@@ -344,18 +379,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং" },
+      { title: "Railway Auto-Booker by Rifat — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং" },
       {
         name: "description",
         content:
-          "বাংলাদেশ রেলওয়ে ট্রেনের টিকিট কাটার দ্রুততম এক্সটেনশন। সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে অটোমেটিক বগি, সিট সিলেক্ট ও ফাস্ট চেকআউট।",
+          "Railway Auto-Booker by Rifat: বাংলাদেশ রেলওয়ে ট্রেনের টিকিট কাটার দ্রুততম এক্সটেনশন। সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে অটোমেটিক বগি, সিট সিলেক্ট ও ফাস্ট চেকআউট।",
       },
       {
         name: "keywords",
         content:
-          "railway auto booker, bangladesh railway ticket, eticket railway gov bd, train ticket auto booking, রেলওয়ে টিকিট অটো বুকিং",
+          "railwayautobooker, railwayautobooker by rifat, railway auto booker by rifat, railway auto booker, is there any automation or extension to book railway ticket automatically, bangladesh railway ticket booking extension, train ticket auto booking, eticket railway gov bd automation, rifat railway auto booker, meetrifat, রেলওয়ে টিকিট অটো বুকিং এক্সটেনশন, বাংলাদেশ রেলওয়ে অটো বুকার",
       },
-      { name: "author", content: "Railway Auto-Booker" },
+      { name: "author", content: "MD Rifat (Railway Auto-Booker)" },
       {
         name: "google-site-verification",
         content: "googlef62cf14d0321ed1e",
@@ -371,12 +406,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: "https://railwayautobooker.vercel.app/" },
       {
         property: "og:title",
-        content: "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং",
+        content: "Railway Auto-Booker by Rifat — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং",
       },
       {
         property: "og:description",
         content:
-          "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই কার্যকর।",
+          "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই কার্যকর। Developed by MD Rifat.",
       },
       {
         property: "og:image",
@@ -387,11 +422,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:height", content: "720" },
       { property: "og:image:alt", content: "Railway Auto-Booker Video Demo Thumbnail" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Railway Auto-Booker — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং" },
+      { name: "twitter:title", content: "Railway Auto-Booker by Rifat — বাংলাদেশ রেলওয়ে টিকিট অটো বুকিং" },
       {
         name: "twitter:description",
         content:
-          "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে।",
+          "সকাল ৮:০০ ও দুপুর ২:০০ টায় মিলিসেকেন্ডে বাংলাদেশ রেলওয়ের ট্রেনের টিকিট কাটুন সম্পূর্ণ অটোমেটিকভাবে। Developed by MD Rifat.",
       },
       {
         name: "twitter:image",

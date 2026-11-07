@@ -1005,8 +1005,7 @@ function RailwayAutoBookerLandingPage() {
                 aria-hidden
               />
               <span className="tracking-tight text-emerald-800 dark:text-emerald-300 text-pretty text-left sm:text-center leading-relaxed">
-                eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন · সকাল ৮:০০ টার টিকিট বুকিং
-                নিশ্চিন্তে করুন
+                Railway Auto-Booker by Rifat · eticket.railway.gov.bd এর জন্য দ্রুততম অটোমেশন
               </span>
             </div>
 
@@ -1021,7 +1020,7 @@ function RailwayAutoBookerLandingPage() {
 
             {/* Subheading */}
             <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-              সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার
+              রেলওয়ে অটো-বুকার (Railway Auto-Booker by Rifat) একটি সহজ ও সুপারফাস্ট ব্রাউজার এক্সটেনশন—যা সকাল ৮:০০ টা ও দুপুর ২:০০ টার টিকিট ছাড়ার
               মুহূর্তে সার্ভার স্পিডে স্বয়ংক্রিয়ভাবে স্টেশন সার্চ, বগি ও সিট সিলেক্ট করে ওটিপি ও
               পেমেন্ট পেজে নিয়ে যায়। কম্পিউটার ও মোবাইল উভয় ডিভাইসেই ব্যবহারযোগ্য!
             </p>
@@ -1195,7 +1194,7 @@ function RailwayAutoBookerLandingPage() {
             <div className="border-b border-border bg-muted/40 px-5 py-4 sm:px-6 sm:py-5">
               <h3 className="text-lg sm:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                 <span className="text-primary font-bold">⚡</span>
-                <span>তুলনামূলক বিশ্লেষণ: সাধারণ ম্যানুয়াল বুকিং বনাম Railway Auto-Booker</span>
+                <span>তুলনামূলক বিশ্লেষণ: সাধারণ ম্যানুয়াল বুকিং বনাম Railway Auto-Booker by Rifat</span>
               </h3>
               <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                 সকাল ৮:০০ টার রাশ আওয়ার টিকিট বুকিংয়ে গতি, নির্ভুলতা ও সফলতার বাস্তব পরিসংখ্যান।
@@ -1486,7 +1485,15 @@ function RailwayAutoBookerLandingPage() {
               {[
                 {
                   q: "Railway Auto-Booker কী এবং এটি কীভাবে কাজ করে?",
-                  a: "রেলওয়ে অটো-বুকার (Railway Auto-Booker) হলো বাংলাদেশ রেলওয়ের অফিশিয়াল ই-টিকিটিং ওয়েবসাইটের (eticket.railway.gov.bd) জন্য প্রস্তুতকৃত একটি হাই-স্পিড ব্রাউজার এক্সটেনশন। এটি সকাল ৮:০০ টা (পূর্বাঞ্চল) ও দুপুর ২:০০ টায় (পশ্চিমাঞ্চল) টিকিট ছাড়ার মুহূর্তে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত টাইমিংয়ে সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে ট্রেনের বগি, পছন্দের খালি সিট সিলেক্ট ও ওটিপি পেজে রিডাইরেক্ট করে। কম্পিউটার (Chrome, Edge, Brave) এবং অ্যান্ড্রয়েড মোবাইল (Kiwi Browser) উভয়েই এটি ১০০% ক্লায়েন্ট-সাইড লোকাল ও নিরাপদে কাজ করে।",
+                  a: "রেলওয়ে অটো-বুকার (Railway Auto-Booker by Rifat) হলো বাংলাদেশ রেলওয়ের অফিশিয়াল ই-টিকিটিং ওয়েবসাইটের (eticket.railway.gov.bd) জন্য প্রস্তুতকৃত একটি হাই-স্পিড ব্রাউজার এক্সটেনশন। এটি সকাল ৮:০০ টা (পূর্বাঞ্চল) ও দুপুর ২:০০ টায় (পশ্চিমাঞ্চল) টিকিট ছাড়ার মুহূর্তে সার্ভার ঘড়ির সাথে মিলিসেকেন্ড নিখুঁত টাইমিংয়ে সিঙ্ক হয়ে স্বয়ংক্রিয়ভাবে ট্রেনের বগি, পছন্দের খালি সিট সিলেক্ট ও ওটিপি পেজে রিডাইরেক্ট করে। কম্পিউটার (Chrome, Edge, Brave) এবং অ্যান্ড্রয়েড মোবাইল (Kiwi Browser) উভয়েই এটি ১০০% ক্লায়েন্ট-সাইড লোকাল ও নিরাপদে কাজ করে।",
+                },
+                {
+                  q: "Is there any automation or extension to book railway tickets automatically? (রেলওয়ে ট্রেনের টিকিট অটো কাটার সফটওয়্যার বা এক্সটেনশন আছে কি?)",
+                  a: "Yes! Railway Auto-Booker (created by MD Rifat, also known as railwayautobooker by rifat) is the premier browser automation extension for Bangladesh Railway (eticket.railway.gov.bd). It automatically triggers at 8:00 AM (Eastern Zone) and 2:00 PM (Western Zone), selects coaches and available seats in 15–50 milliseconds, and proceeds directly to OTP payment verification. It works on both PC (Chrome, Edge, Brave) and Android Mobile (Kiwi Browser). হ্যাঁ, বাংলাদেশ রেলওয়ের টিকিট সম্পূর্ণ অটোমেটিকভাবে কাটার জন্য Railway Auto-Booker সবচেয়ে নির্ভরযোগ্য ও দ্রুততম সফটওয়্যার।",
+                },
+                {
+                  q: "Railway Auto-Booker সফটওয়্যারটি কার তৈরি (Who developed Railway Auto-Booker by Rifat)?",
+                  a: "Railway Auto-Booker সফটওয়্যারটি তৈরি ও ডেভেলপ করেছেন সফটওয়্যার ডেভেলপার ও অটোমেশন স্পেশালিস্ট MD Rifat (meetrifat)। জেনুইন রেল যাত্রীরা যেন কোনো দালাল বা অতিরিক্ত বিলম্ব ছাড়াই মিলিসেকেন্ডে নিজস্ব অ্যাকাউন্টের মাধ্যমে টিকিট কাটতে পারেন, সেই লক্ষ্যেই এটি লোকাল ও নিরাপদ ক্লায়েন্ট-সাইড প্রযুক্তিতে তৈরি। অফিসিয়াল সাপোর্ট ও লাইসেন্স পেতে সরাসরি আমাদের হোয়াটসঅ্যাপ (wa.me/meetrifat.ai) বা ফেসবুক প্রোফাইলে (facebook.com/meetrifat) যোগাযোগ করা যায়।",
                 },
                 {
                   q: "Railway Auto-Booker কি আসলেই সকাল ৮:০০ টায় টিকিট কাটতে পারে?",
@@ -1683,7 +1690,7 @@ function RailwayAutoBookerLandingPage() {
           </div>
 
           <div className="mt-4 pt-4 border-t border-border/60 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Railway Auto-Booker. All rights reserved.
+            © {new Date().getFullYear()} Railway Auto-Booker by MD Rifat (@meetrifat). All rights reserved.
           </div>
         </div>
       </footer>
