@@ -49,12 +49,35 @@ export interface VisitorStats {
 }
 
 const BLOB_PATH = "analytics/stats.json";
-const BLOB_TOKEN =
-  process.env.BLOB_READ_WRITE_TOKEN ||
-  "vercel_blob_rw_ZXs6kFFDCYo9D2Hd_LK59S3Asy8nb2c6mdlsPWB5QdlheAl";
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 
-const AUTH_SECRET =
-  process.env.ADMIN_JWT_SECRET || "rab-super-secret-hmac-key-2026-bangladesh-railway-auto-booker";
+// Ephemeral cryptographic secret generated once per cold start if ADMIN_JWT_SECRET is unset
+const ephemeralRuntimeSecret =
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID() + "-" + crypto.randomUUID()
+    : "rab-sec-" + Math.random().toString(36).substring(2);
+
+function getAuthSecret(): string {
+  return (
+    process.env.ADMIN_JWT_SECRET ||
+    process.env.ADMIN_PASSWORD ||
+    ephemeralRuntimeSecret
+  );
+}
+
+// Constant-time string equality check to prevent timing attacks
+export function constantTimeEqual(a: string, b: string): boolean {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const enc = new TextEncoder();
+  const bufA = enc.encode(a);
+  const bufB = enc.encode(b);
+  if (bufA.byteLength !== bufB.byteLength) return false;
+  let diff = 0;
+  for (let i = 0; i < bufA.byteLength; i++) {
+    diff |= bufA[i] ^ bufB[i];
+  }
+  return diff === 0;
+}
 
 // In-memory rate limiting for failed login attempts
 const failedLoginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -156,6 +179,10 @@ export function parseUserAgent(ua: string): {
 // Private Blob read & write with zero CDN caching
 export async function getStats(): Promise<VisitorStats> {
   try {
+    if (!BLOB_TOKEN) {
+      return createEmptyStats();
+    }
+
     let parsed: VisitorStats | null = null;
 
     // First try: Read fresh blob directly using head + cache-busting fetch to bypass Vercel CDN cache
@@ -227,6 +254,7 @@ export async function getStats(): Promise<VisitorStats> {
 }
 
 export async function saveStats(stats: VisitorStats): Promise<void> {
+  if (!BLOB_TOKEN) return;
   stats.lastUpdated = new Date().toISOString();
   try {
     await put(BLOB_PATH, JSON.stringify(stats), {
@@ -245,7 +273,7 @@ async function getCryptoKey(): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   return await crypto.subtle.importKey(
     "raw",
-    encoder.encode(AUTH_SECRET),
+    encoder.encode(getAuthSecret()),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"],
@@ -614,9 +642,9 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
       }
 
       const body = (await request.json().catch(() => ({}))) as { password?: string };
-      const targetPassword = process.env.ADMIN_PASSWORD || "rbooker.web";
+      const targetPassword = process.env.ADMIN_PASSWORD;
 
-      if (!body.password || body.password !== targetPassword) {
+      if (!targetPassword || !body.password || !constantTimeEqual(body.password, targetPassword)) {
         const currentCount = (attempt?.count || 0) + 1;
         const lockedUntil = currentCount >= 5 ? now + 15 * 60 * 1000 : 0;
         failedLoginAttempts.set(clientIp, { count: currentCount, lockedUntil });
@@ -624,7 +652,9 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
         return new Response(
           JSON.stringify({
             ok: false,
-            error: "ভুল পাসওয়ার্ড! প্রবেশাধিকার নেই।",
+            error: !targetPassword
+              ? "সার্ভারে অ্যাডমিন পাসওয়ার্ড কনফিগার করা হয়নি।"
+              : "ভুল পাসওয়ার্ড! প্রবেশাধিকার নেই।",
             remainingAttempts: Math.max(0, 5 - currentCount),
           }),
           { status: 401, headers: { "content-type": "application/json" } },
@@ -660,14 +690,14 @@ export async function handleAnalyticsApi(request: Request): Promise<Response | n
       // Check Authorization Header (Bearer token)
       const authHeader = request.headers.get("authorization");
       const passwordHeader = request.headers.get("x-admin-password");
-      const targetPassword = process.env.ADMIN_PASSWORD || "rbooker.web";
+      const targetPassword = process.env.ADMIN_PASSWORD;
 
       let isAuthorized = false;
 
       if (authHeader && authHeader.startsWith("Bearer ")) {
         const token = authHeader.slice(7).trim();
         isAuthorized = await verifySessionToken(token);
-      } else if (passwordHeader && passwordHeader === targetPassword) {
+      } else if (passwordHeader && targetPassword && constantTimeEqual(passwordHeader, targetPassword)) {
         isAuthorized = true;
       }
 
