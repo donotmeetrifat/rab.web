@@ -144,7 +144,7 @@ function TermsOfServicePage() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} Railway Auto-Booker. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Railway Auto-Booker by Biplob Rahain Rifat (@meetrifat). All rights reserved.</span>
           <Link to="/privacy" className="hover:text-foreground underline">
             প্রাইভেসি পলিসি
           </Link>

@@ -5,7 +5,7 @@
 ## Brand & Entity Information
 - **Official Name:** Railway Auto-Booker
 - **Alternate Names & Keywords:** railwayautobooker, RailwayAutoBooker, railwayautobooker by rifat, Railway Auto-Booker by Rifat, Railway Auto Booker by Biplob Rahain Rifat, Railway Auto Booker by MD Rifat, biplob rahain rifat, rifat railway auto booker, Bangladesh Railway Ticket Booking Extension, train ticket auto booking
-- **Creator & Developer:** Biplob Rahain Rifat (CREATIVE TECHNOLOGIST | AI & WEB DEVELOPER, meetrifat)
+- **Owner, Creator & Developer:** Biplob Rahain Rifat (CREATIVE TECHNOLOGIST | AI & WEB DEVELOPER, meetrifat)
 - **Official Website:** https://railwayautobooker.vercel.app/
 - **Official Support WhatsApp:** https://wa.me/meetrifat.ai
 - **Official Facebook:** https://www.facebook.com/meetrifat

@@ -104,6 +104,7 @@ const SCHEMA_DATA = {
       inLanguage: "bn-BD",
       author: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
       creator: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
+      maintainer: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
       publisher: { "@id": "https://railwayautobooker.vercel.app/#organization" },
       isPartOf: { "@id": "https://railwayautobooker.vercel.app/#website" },
       featureList: [
@@ -237,6 +238,7 @@ const SCHEMA_DATA = {
       name: "Biplob Rahain Rifat",
       alternateName: ["Rifat", "meetrifat", "MD Rifat", "Biplob Rifat"],
       jobTitle: "CREATIVE TECHNOLOGIST | AI & WEB DEVELOPER",
+      description: "Owner & Lead Developer of Railway Auto-Booker",
       url: "https://www.facebook.com/meetrifat",
       sameAs: ["https://www.facebook.com/meetrifat", "https://wa.me/meetrifat.ai"],
       worksFor: { "@id": "https://railwayautobooker.vercel.app/#organization" },
@@ -259,6 +261,7 @@ const SCHEMA_DATA = {
       },
       sameAs: ["https://www.facebook.com/meetrifat", "https://wa.me/meetrifat.ai"],
       founder: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
+      owner: { "@id": "https://railwayautobooker.vercel.app/#person-rifat" },
       contactPoint: [
         {
           "@type": "ContactPoint",

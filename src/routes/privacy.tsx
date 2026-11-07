@@ -138,10 +138,9 @@ function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">৫. যোগাযোগ</h2>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">৫. সত্ত্বাধিকারী ও যোগাযোগ</h2>
             <p>
-              প্রাইভেসি সম্পর্কিত যেকোনো জিজ্ঞাসা বা সহায়তার জন্য সরাসরি আমাদের সাথে যোগাযোগ করতে
-              পারেন:
+              Railway Auto-Booker-এর সত্ত্বাধিকারী ও ডেভেলপার হলেন <strong>Biplob Rahain Rifat</strong> (CREATIVE TECHNOLOGIST | AI & WEB DEVELOPER)। প্রাইভেসি সম্পর্কিত যেকোনো জিজ্ঞাসা বা সহায়তার জন্য সরাসরি যোগাযোগ করতে পারেন:
             </p>
             <p className="font-semibold text-primary">
               WhatsApp:{" "}
@@ -168,7 +167,7 @@ function PrivacyPolicyPage() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} Railway Auto-Booker. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Railway Auto-Booker by Biplob Rahain Rifat (@meetrifat). All rights reserved.</span>
           <Link to="/terms" className="hover:text-foreground underline">
             টার্মস অব সার্ভিস
           </Link>
